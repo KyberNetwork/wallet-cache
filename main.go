@@ -29,7 +29,7 @@ func main() {
 	log.SetOutput(f)
 
 	persisterIns, _ := persister.NewPersister("ram")
-	fertcherIns, _ := fetcher.NewFetcher()
+	fertcherIns, err := fetcher.NewFetcher()
 	if err != nil {
 		log.Fatal(err)
 	}
