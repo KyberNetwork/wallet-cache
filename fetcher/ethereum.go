@@ -206,10 +206,10 @@ func (self *Ethereum) ReadRate(result string, sourceArr []string, destArr []stri
 }
 
 type LogData struct {
-	ActualDestAmount *big.Int       `json:"actualDestAmount"`
-	ActualSrcAmount  *big.Int       `json:"actualSrcAmount"`
-	Dest             common.Address `json:"dest"`
 	Source           common.Address `json:"source"`
+	Dest             common.Address `json:"dest"`
+	ActualSrcAmount  *big.Int       `json:"actualSrcAmount"`
+	ActualDestAmount *big.Int       `json:"actualDestAmount"`
 }
 
 func (self *Ethereum) ExactEventFromEtherscan(body *io.ReadCloser) (*[]ethereum.EventHistory, error) {
@@ -321,6 +321,7 @@ func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch s
 			log.Print(err)
 			return nil, err
 		}
+		//fmt.Print(listEvent[i].Data)
 		err = self.networkAbi.Unpack(&logData, "ExecuteTrade", data)
 		if err != nil {
 			log.Print(err)

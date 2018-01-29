@@ -32,10 +32,10 @@ func main() {
 	fertcherIns, _ := fetcher.NewFetcher()
 
 	//run fetch data
-	runFetchData(persistorIns, fetchRateUSD, fertcherIns, 5)
-	runFetchData(persistorIns, fetchBlockNumber, fertcherIns, 5)
-	runFetchData(persistorIns, fetchRate, fertcherIns, 3)
-	runFetchData(persistorIns, fetchEvent, fertcherIns, 3)
+	runFetchData(persistorIns, fetchRateUSD, fertcherIns, 60)
+	runFetchData(persistorIns, fetchBlockNumber, fertcherIns, 10)
+	runFetchData(persistorIns, fetchRate, fertcherIns, 10)
+	runFetchData(persistorIns, fetchEvent, fertcherIns, 30)
 
 	//run server
 	server := http.NewHTTPServer(":3002", persistorIns)
@@ -56,6 +56,7 @@ func main() {
 // }
 
 func runFetchData(persistor persistor.Persistor, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
+	fn(persistor, fertcherIns)
 	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
 	go func() {
