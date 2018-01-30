@@ -110,6 +110,7 @@ func fetchRate(persistor persistor.Persistor, fetcher *fetcher.Fetcher) {
 		return
 	}
 	persistor.SaveRate(rates)
+	persistor.SetNewRate(true)
 }
 
 func fetchEvent(persistor persistor.Persistor, fetcher *fetcher.Fetcher) {
@@ -122,6 +123,7 @@ func fetchEvent(persistor persistor.Persistor, fetcher *fetcher.Fetcher) {
 			return
 		}
 		persistor.SaveEvent(events)
+		persistor.SetNewEvents(true)
 	} else {
 		persistor.SetNewEvents(false)
 	}
