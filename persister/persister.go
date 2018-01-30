@@ -1,4 +1,4 @@
-package persistor
+package Persister
 
 import (
 	"io"
@@ -31,7 +31,7 @@ type RateUSD struct {
 	PriceUsd string `json:"price_usd"`
 }
 
-type Persistor interface {
+type Persister interface {
 	GetRate() *[]ethereum.Rate
 	GetEvent() []ethereum.EventHistory
 	GetLatestBlock() string
@@ -55,7 +55,7 @@ type Persistor interface {
 
 //var transactionPersistent = models.NewTransactionPersister()
 
-func NewPersistor(name string) (Persistor, error) {
-	persistor, err := NewRamPersistor()
-	return persistor, err
+func NewPersister(name string) (Persister, error) {
+	Persister, err := NewRamPersister()
+	return Persister, err
 }

@@ -1,4 +1,4 @@
-package persistor
+package Persister
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"github.com/KyberNetwork/server-go/ethereum"
 )
 
-type RamPersistor struct {
+type RamPersister struct {
 	mu          sync.RWMutex
 	rates       *[]ethereum.Rate
 	latestBlock string
@@ -23,7 +23,7 @@ type RamPersistor struct {
 	isNewEvent       bool
 }
 
-func NewRamPersistor() (*RamPersistor, error) {
+func NewRamPersister() (*RamPersister, error) {
 	var mu sync.RWMutex
 	rates := make([]ethereum.Rate, 0)
 	latestBlock := "0"
@@ -35,75 +35,75 @@ func NewRamPersistor() (*RamPersistor, error) {
 	isNewRateUsd := true
 	isNewEvent := true
 
-	persistor := &RamPersistor{
+	persister := &RamPersister{
 		mu, &rates, latestBlock, rateUSD, events, isNewRate, isNewLatestBlock, isNewRateUsd, isNewEvent,
 	}
-	return persistor, nil
+	return persister, nil
 }
 
-func (self *RamPersistor) GetRate() *[]ethereum.Rate {
+func (self *RamPersister) GetRate() *[]ethereum.Rate {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.rates
 }
 
-func (self *RamPersistor) GetEvent() []ethereum.EventHistory {
+func (self *RamPersister) GetEvent() []ethereum.EventHistory {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.events
 }
 
-func (self *RamPersistor) GetLatestBlock() string {
+func (self *RamPersister) GetLatestBlock() string {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.latestBlock
 }
 
-func (self *RamPersistor) GetRateUSD() []RateUSD {
+func (self *RamPersister) GetRateUSD() []RateUSD {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.rateUSD
 }
 
-func (self *RamPersistor) GetIsNewRate() bool {
+func (self *RamPersister) GetIsNewRate() bool {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.isNewRate
 }
 
-func (self *RamPersistor) GetIsNewLatestBlock() bool {
+func (self *RamPersister) GetIsNewLatestBlock() bool {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.isNewLatestBlock
 }
 
-func (self *RamPersistor) GetIsNewRateUSD() bool {
+func (self *RamPersister) GetIsNewRateUSD() bool {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.isNewRateUsd
 }
 
-func (self *RamPersistor) GetIsNewEvent() bool {
+func (self *RamPersister) GetIsNewEvent() bool {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.isNewEvent
 }
 
-func (self *RamPersistor) SaveRate(rates *[]ethereum.Rate) error {
+func (self *RamPersister) SaveRate(rates *[]ethereum.Rate) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.rates = rates
 	return nil
 }
 
-func (self *RamPersistor) SaveEvent(events *[]ethereum.EventHistory) error {
+func (self *RamPersister) SaveEvent(events *[]ethereum.EventHistory) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.events = *events
 	return nil
 }
 
-func (self *RamPersistor) SaveLatestBlock(blockNumber string) error {
+func (self *RamPersister) SaveLatestBlock(blockNumber string) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.latestBlock = blockNumber
@@ -111,7 +111,7 @@ func (self *RamPersistor) SaveLatestBlock(blockNumber string) error {
 	return nil
 }
 
-func (self *RamPersistor) SaveRateUSD(body []*io.ReadCloser) error {
+func (self *RamPersister) SaveRateUSD(body []*io.ReadCloser) error {
 	rates := make([]RateUSD, 0)
 	for _, item := range body {
 		rateItem := make([]RateUSD, 0)
@@ -134,25 +134,25 @@ func (self *RamPersistor) SaveRateUSD(body []*io.ReadCloser) error {
 	return nil
 }
 
-func (self *RamPersistor) SetNewRate(isNew bool) {
+func (self *RamPersister) SetNewRate(isNew bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewRate = isNew
 }
 
-func (self *RamPersistor) SetNewLatestBlock(isNew bool) {
+func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewLatestBlock = isNew
 }
 
-func (self *RamPersistor) SetNewRateUSD(isNew bool) {
+func (self *RamPersister) SetNewRateUSD(isNew bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewRateUsd = isNew
 }
 
-func (self *RamPersistor) SetNewEvents(isNew bool) {
+func (self *RamPersister) SetNewEvents(isNew bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewEvent = isNew
