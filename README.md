@@ -1,20 +1,20 @@
-Cached server for KYBER wallet
+# Cached server for KYBER wallet
 
-Build
+## Build
 
 docker build . -t cached
 
-Run
+## Run
 
 docker run -p 3001:3001 cached
 
 
-One command to build and run with docker-compose
+## One command to build and run with docker-compose
 
 docker-compose up
 
 
-Api:
+## Api:
  - /getRate
  - /getHistoryOneColumn
  - /getLatestBlock
