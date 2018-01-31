@@ -38,7 +38,7 @@ func main() {
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 
 	//run server
-	server := http.NewHTTPServer(":3002", persisterIns)
+	server := http.NewHTTPServer(":3001", persisterIns)
 	server.Run()
 
 	//init fetch data

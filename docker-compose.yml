@@ -1,0 +1,8 @@
+version: "3"
+services:
+  cached:
+    build: ./
+    image: cached
+    container_name: cached
+    ports:
+      - "3001:3001"

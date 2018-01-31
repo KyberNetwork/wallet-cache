@@ -2,11 +2,16 @@ Cached server for KYBER wallet
 
 Build
 
-docker build . -t kyber/server
+docker build . -t cached
 
 Run
 
-docker run -p 3002:3002 kyber/server
+docker run -p 3001:3001 cached
+
+
+One command to build and run with docker-compose
+
+docker-compose up
 
 
 Api:
