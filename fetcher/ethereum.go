@@ -67,8 +67,9 @@ func NewEthereum(nodeEndpoint string, network string, networkAbiStr string, trad
 	return ethereum, nil
 }
 
-func (self *Ethereum) ExactBlockNumber(body *io.ReadCloser) (string, error) {
-	b, err := ioutil.ReadAll(*body)
+func (self *Ethereum) ExactBlockNumber(body io.ReadCloser) (string, error) {
+	defer (body).Close()
+	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		return "", err
 	}
@@ -122,8 +123,9 @@ type RateWrapper struct {
 	SlippageRate []*big.Int `json:"slippageRate"`
 }
 
-func (self *Ethereum) ExactRateDataFromEtherscan(body *io.ReadCloser, sourceArr []string, destAddr []string) (*[]ethereum.Rate, error) {
-	b, err := ioutil.ReadAll(*body)
+func (self *Ethereum) ExactRateDataFromEtherscan(body io.ReadCloser, sourceArr []string, destAddr []string) (*[]ethereum.Rate, error) {
+	defer (body).Close()
+	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -212,8 +214,9 @@ type LogData struct {
 	ActualDestAmount *big.Int       `json:"actualDestAmount"`
 }
 
-func (self *Ethereum) ExactEventFromEtherscan(body *io.ReadCloser) (*[]ethereum.EventHistory, error) {
-	b, err := ioutil.ReadAll(*body)
+func (self *Ethereum) ExactEventFromEtherscan(body io.ReadCloser) (*[]ethereum.EventHistory, error) {
+	defer (body).Close()
+	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		log.Print(err)
 		return nil, err

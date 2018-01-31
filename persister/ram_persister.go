@@ -111,11 +111,12 @@ func (self *RamPersister) SaveLatestBlock(blockNumber string) error {
 	return nil
 }
 
-func (self *RamPersister) SaveRateUSD(body []*io.ReadCloser) error {
+func (self *RamPersister) SaveRateUSD(body []io.ReadCloser) error {
 	rates := make([]RateUSD, 0)
 	for _, item := range body {
 		rateItem := make([]RateUSD, 0)
-		b, err := ioutil.ReadAll(*item)
+		defer (item).Close()
+		b, err := ioutil.ReadAll(item)
 		if err != nil {
 			log.Print(err)
 			return err

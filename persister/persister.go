@@ -45,7 +45,7 @@ type Persister interface {
 	SaveRate(*[]ethereum.Rate) error
 	SaveEvent(*[]ethereum.EventHistory) error
 	SaveLatestBlock(string) error
-	SaveRateUSD([]*io.ReadCloser) error
+	SaveRateUSD([]io.ReadCloser) error
 
 	SetNewRate(bool)
 	SetNewLatestBlock(bool)

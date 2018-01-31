@@ -124,8 +124,8 @@ func NewFetcher() (*Fetcher, error) {
 	return fetcher, nil
 }
 
-func (self *Fetcher) GetRateUsd() ([]*io.ReadCloser, error) {
-	outPut := make([]*io.ReadCloser, 0)
+func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
+	outPut := make([]io.ReadCloser, 0)
 	for _, token := range self.info.tokens {
 		usdId := token.usdId
 		response, err := http.Get(self.info.apiUsd + usdId)
@@ -135,7 +135,7 @@ func (self *Fetcher) GetRateUsd() ([]*io.ReadCloser, error) {
 		if response.StatusCode != 200 {
 			return nil, errors.New("Status code is 200")
 		}
-		outPut = append(outPut, &response.Body)
+		outPut = append(outPut, response.Body)
 	}
 	return outPut, nil
 }
@@ -189,7 +189,7 @@ func (self *Fetcher) GetRate() (*[]ethereum.Rate, error) {
 	if response.StatusCode != 200 {
 		return nil, errors.New("Status code is 200")
 	}
-	rates, err := self.ethereum.ExactRateDataFromEtherscan(&response.Body, sourceSymbolArr, destSymbolArr)
+	rates, err := self.ethereum.ExactRateDataFromEtherscan(response.Body, sourceSymbolArr, destSymbolArr)
 	if err != nil {
 		log.Print(err)
 		//get rate from node
@@ -211,7 +211,7 @@ func (self *Fetcher) GetLatestBlock() (string, error) {
 		return "", err
 	}
 	//exact block number
-	blockNumber, err := self.ethereum.ExactBlockNumber(&response.Body)
+	blockNumber, err := self.ethereum.ExactBlockNumber(response.Body)
 	if err != nil {
 		log.Print(err)
 		//get from node
@@ -255,7 +255,7 @@ func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error
 	if response.StatusCode != 200 {
 		return nil, errors.New("Status code is 200")
 	}
-	events, err := self.ethereum.ExactEventFromEtherscan(&response.Body)
+	events, err := self.ethereum.ExactEventFromEtherscan(response.Body)
 	if err != nil {
 		log.Print(err)
 		return nil, err
