@@ -36,6 +36,7 @@ func main() {
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
+	//	runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns)
@@ -128,3 +129,14 @@ func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		persister.SetNewEvents(false)
 	}
 }
+
+// func fetchKyberEnable(persister persister.Persister, fetcher *fetcher.Fetcher) {
+// 	enable, err := fetcher.GetKyberEnable()
+// 	if err != nil {
+// 		log.Print(err)
+// 		persister.SetNewKyberEnable(false)
+// 		return
+// 	}
+// 	persister.SaveKyberEnable(enable)
+// 	persister.SetNewKyberEnable(true)
+// }
