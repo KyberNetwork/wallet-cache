@@ -30,13 +30,16 @@ func main() {
 
 	persisterIns, _ := persister.NewPersister("ram")
 	fertcherIns, _ := fetcher.NewFetcher()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//run fetch data
 	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 60)
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
-	//	runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
+	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns)
