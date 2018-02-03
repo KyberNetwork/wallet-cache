@@ -35,6 +35,11 @@ func main() {
 	}
 
 	//run fetch data
+	runFetchData(persisterIns, fetchKyberEnabled, fertcherIns, 10)
+	runFetchData(persisterIns, fetchMaxGasPrice, fertcherIns, 60)
+
+	runFetchData(persisterIns, fetchGasPrice, fertcherIns, 30)
+
 	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 60)
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
@@ -74,6 +79,36 @@ func runFetchData(persister persister.Persister, fn fetcherFunc, fertcherIns *fe
 			}
 		}
 	}()
+}
+
+func fetchGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	gasPrice, err := fetcher.GetGasPrice()
+	if err != nil {
+		log.Print(err)
+		persister.SetNewGasPrice(false)
+		return
+	}
+	persister.SaveGasPrice(gasPrice)
+}
+
+func fetchMaxGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	gasPrice, err := fetcher.GetMaxGasPrice()
+	if err != nil {
+		log.Print(err)
+		persister.SetNewMaxGasPrice(false)
+		return
+	}
+	persister.SaveMaxGasPrice(gasPrice)
+}
+
+func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	enabled, err := fetcher.CheckKyberEnable()
+	if err != nil {
+		log.Print(err)
+		persister.SetNewKyberEnabled(false)
+		return
+	}
+	persister.SaveKyberEnabled(enabled)
 }
 
 func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
