@@ -33,24 +33,39 @@ type RateUSD struct {
 
 type Persister interface {
 	GetRate() *[]ethereum.Rate
-	GetEvent() []ethereum.EventHistory
-	GetLatestBlock() string
-	GetRateUSD() []RateUSD
-
-	GetIsNewRate() bool
-	GetIsNewLatestBlock() bool
-	GetIsNewRateUSD() bool
-	GetIsNewEvent() bool
-
 	SaveRate(*[]ethereum.Rate) error
-	SaveEvent(*[]ethereum.EventHistory) error
-	SaveLatestBlock(string) error
-	SaveRateUSD([]io.ReadCloser) error
-
 	SetNewRate(bool)
-	SetNewLatestBlock(bool)
-	SetNewRateUSD(bool)
+	GetIsNewRate() bool
+
+	GetEvent() []ethereum.EventHistory
+	SaveEvent(*[]ethereum.EventHistory) error
+	GetIsNewEvent() bool
 	SetNewEvents(bool)
+
+	GetLatestBlock() string
+	GetIsNewLatestBlock() bool
+	SaveLatestBlock(string) error
+	SetNewLatestBlock(bool)
+
+	GetRateUSD() []RateUSD
+	GetIsNewRateUSD() bool
+	SaveRateUSD([]io.ReadCloser) error
+	SetNewRateUSD(bool)
+
+	SaveKyberEnabled(bool)
+	SetNewKyberEnabled(bool)
+	GetKyberEnabled() bool
+	GetNewKyberEnabled() bool
+
+	SetNewMaxGasPrice(bool)
+	SaveMaxGasPrice(string)
+	GetMaxGasPrice() string
+	GetNewMaxGasPrice() bool
+
+	SaveGasPrice(*ethereum.GasPrice)
+	SetNewGasPrice(bool)
+	GetGasPrice() *ethereum.GasPrice
+	GetNewGasPrice() bool
 }
 
 //var transactionPersistent = models.NewTransactionPersister()

@@ -5,6 +5,6 @@ services:
     image: cached
     container_name: cached
     env_file:
-      - common.env
+      - env_staging.env
     ports:
       - "3001:3001"
