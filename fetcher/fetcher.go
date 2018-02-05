@@ -30,7 +30,7 @@ type InfoData struct {
 	ApiUsd string           `json:"api_usd"`
 	Tokens map[string]Token `json:"tokens"`
 	//ServerLog ServerLog        `json:"server_logs"`
-	Connections []Connection `json:"connection"`
+	Connections []Connection `json:"connections"`
 
 	//NodeEndpoint string `json:"node_endpoint"`
 
@@ -76,6 +76,12 @@ func NewFetcher() (*Fetcher, error) {
 		break
 	case "production":
 		file, err = ioutil.ReadFile("env/production.json")
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
+	case "kovan":
+		file, err = ioutil.ReadFile("env/kovan.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err

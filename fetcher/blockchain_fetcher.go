@@ -111,29 +111,35 @@ func (self *BlockchainFetcher) GetTypeName() string {
 }
 
 func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	var gasPrice *big.Int
-	err := self.client.Call(&gasPrice, "eth_gasPrice", "latest")
+	var gasPriceHex *hexutil.Big
+	err := self.client.Call(&gasPriceHex, "eth_gasPrice")
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
+
+	gWei := big.NewFloat(1000000000)
+
+	gasPriceInt := (*big.Int)(gasPriceHex)
+	gasPriceFloat := new(big.Float).SetInt(gasPriceInt)
+	gasPrice := new(big.Float).Quo(gasPriceFloat, gWei)
 
 	var fast *big.Float
 	var standard *big.Float
 	var low *big.Float
 	var defaultGas *big.Float
 
-	maxGwei := big.NewInt(2000000000)
+	maxGwei := big.NewFloat(20)
 	if gasPrice.Cmp(maxGwei) == -1 {
-		standard = new(big.Float).SetInt(gasPrice)
-		defaultGas = new(big.Float).SetInt(gasPrice)
+		standard = gasPrice
+		defaultGas = gasPrice
 
 		low = new(big.Float).Mul(standard, big.NewFloat(0.7))
 		fast = new(big.Float).Mul(standard, big.NewFloat(1.3))
 	} else {
-		standard = new(big.Float).SetInt(maxGwei)
-		defaultGas = new(big.Float).SetInt(maxGwei)
-		low = new(big.Float).SetInt(maxGwei)
+		standard = maxGwei
+		defaultGas = maxGwei
+		low = maxGwei
 		fast = new(big.Float).Mul(standard, big.NewFloat(1.3))
 	}
 
