@@ -7,10 +7,10 @@ import (
 
 	"github.com/KyberNetwork/server-go/fetcher"
 	"github.com/KyberNetwork/server-go/http"
-	"github.com/KyberNetwork/server-go/persistor"
+	persister "github.com/KyberNetwork/server-go/persister"
 )
 
-type fetcherFunc func(persistor persistor.Persistor, fetcher *fetcher.Fetcher)
+type fetcherFunc func(persister persister.Persister, fetcher *fetcher.Fetcher)
 
 func main() {
 
@@ -28,17 +28,21 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
-	persistorIns, _ := persistor.NewPersistor("ram")
-	fertcherIns, _ := fetcher.NewFetcher()
+	persisterIns, _ := persister.NewPersister("ram")
+	fertcherIns, err := fetcher.NewFetcher()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//run fetch data
-	runFetchData(persistorIns, fetchRateUSD, fertcherIns, 5)
-	runFetchData(persistorIns, fetchBlockNumber, fertcherIns, 5)
-	runFetchData(persistorIns, fetchRate, fertcherIns, 3)
-	runFetchData(persistorIns, fetchEvent, fertcherIns, 3)
+	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 60)
+	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
+	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
+	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
+	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
 	//run server
-	server := http.NewHTTPServer(":3002", persistorIns)
+	server := http.NewHTTPServer(":3001", persisterIns)
 	server.Run()
 
 	//init fetch data
@@ -55,14 +59,15 @@ func main() {
 // 	log.SetOutput(f)
 // }
 
-func runFetchData(persistor persistor.Persistor, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
+func runFetchData(persister persister.Persister, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
+	fn(persister, fertcherIns)
 	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				fn(persistor, fertcherIns)
+				fn(persister, fertcherIns)
 			case <-quit:
 				ticker.Stop()
 				return
@@ -71,57 +76,70 @@ func runFetchData(persistor persistor.Persistor, fn fetcherFunc, fertcherIns *fe
 	}()
 }
 
-func fetchRateUSD(persistor persistor.Persistor, fetcher *fetcher.Fetcher) {
+func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	body, err := fetcher.GetRateUsd()
 	if err != nil {
 		log.Print(err)
-		persistor.SetNewRateUSD(false)
+		persister.SetNewRateUSD(false)
 		return
 	}
-	err = persistor.SaveRateUSD(body)
+	err = persister.SaveRateUSD(body)
 	if err != nil {
 		log.Print(err)
-		persistor.SetNewRateUSD(false)
+		persister.SetNewRateUSD(false)
 		return
 	}
 }
 
-func fetchBlockNumber(persistor persistor.Persistor, fetcher *fetcher.Fetcher) {
+func fetchBlockNumber(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	blockNum, err := fetcher.GetLatestBlock()
 	if err != nil {
 		log.Print(err)
-		persistor.SetNewLatestBlock(false)
+		persister.SetNewLatestBlock(false)
 		return
 	}
-	err = persistor.SaveLatestBlock(blockNum)
+	err = persister.SaveLatestBlock(blockNum)
 	if err != nil {
-		persistor.SetNewLatestBlock(false)
+		persister.SetNewLatestBlock(false)
 		log.Print(err)
 		return
 	}
 }
 
-func fetchRate(persistor persistor.Persistor, fetcher *fetcher.Fetcher) {
+func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	rates, err := fetcher.GetRate()
 	if err != nil {
 		log.Print(err)
-		persistor.SetNewRate(false)
+		persister.SetNewRate(false)
 		return
 	}
-	persistor.SaveRate(rates)
+	persister.SaveRate(rates)
+	persister.SetNewRate(true)
 }
 
-func fetchEvent(persistor persistor.Persistor, fetcher *fetcher.Fetcher) {
-	if persistor.GetIsNewLatestBlock() {
-		blockNum := persistor.GetLatestBlock()
+func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	if persister.GetIsNewLatestBlock() {
+		blockNum := persister.GetLatestBlock()
 		events, err := fetcher.GetEvents(blockNum)
 		if err != nil {
 			log.Print(err)
-			persistor.SetNewEvents(false)
+			persister.SetNewEvents(false)
 			return
 		}
-		persistor.SaveEvent(events)
+		persister.SaveEvent(events)
+		persister.SetNewEvents(true)
 	} else {
-		persistor.SetNewEvents(false)
+		persister.SetNewEvents(false)
 	}
 }
+
+// func fetchKyberEnable(persister persister.Persister, fetcher *fetcher.Fetcher) {
+// 	enable, err := fetcher.GetKyberEnable()
+// 	if err != nil {
+// 		log.Print(err)
+// 		persister.SetNewKyberEnable(false)
+// 		return
+// 	}
+// 	persister.SaveKyberEnable(enable)
+// 	persister.SetNewKyberEnable(true)
+// }

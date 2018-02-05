@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # Binaries for programs and plugins
 *.exe
 *.dll
@@ -13,7 +13,6 @@
 
 # Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/
-=======
+
 *.exe
 *.log
->>>>>>> init develop

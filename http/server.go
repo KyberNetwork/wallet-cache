@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/KyberNetwork/server-go/persistor"
+	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sentry"
@@ -11,13 +11,13 @@ import (
 )
 
 type HTTPServer struct {
-	persistor persistor.Persistor
+	persister persister.Persister
 	host      string
 	r         *gin.Engine
 }
 
 func (self *HTTPServer) GetRate(c *gin.Context) {
-	if !self.persistor.GetIsNewRate() {
+	if !self.persister.GetIsNewRate() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -25,7 +25,7 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 		return
 	}
 
-	rates := self.persistor.GetRate()
+	rates := self.persister.GetRate()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": rates},
@@ -34,7 +34,7 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetEvent(c *gin.Context) {
-	if !self.persistor.GetIsNewEvent() {
+	if !self.persister.GetIsNewEvent() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -42,7 +42,7 @@ func (self *HTTPServer) GetEvent(c *gin.Context) {
 		return
 	}
 
-	events := self.persistor.GetEvent()
+	events := self.persister.GetEvent()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": events},
@@ -50,14 +50,14 @@ func (self *HTTPServer) GetEvent(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
-	if !self.persistor.GetIsNewLatestBlock() {
+	if !self.persister.GetIsNewLatestBlock() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
 		)
 		return
 	}
-	blockNum := self.persistor.GetLatestBlock()
+	blockNum := self.persister.GetLatestBlock()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": blockNum},
@@ -65,7 +65,7 @@ func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetRateUSD(c *gin.Context) {
-	if !self.persistor.GetIsNewRateUSD() {
+	if !self.persister.GetIsNewRateUSD() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -73,7 +73,7 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 		return
 	}
 
-	rates := self.persistor.GetRateUSD()
+	rates := self.persister.GetRateUSD()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": rates},
@@ -99,12 +99,12 @@ func (self *HTTPServer) Run() {
 	self.r.Run(self.host)
 }
 
-func NewHTTPServer(host string, persistor persistor.Persistor) *HTTPServer {
+func NewHTTPServer(host string, persister persister.Persister) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
 	r.Use(cors.Default())
 
 	return &HTTPServer{
-		persistor, host, r,
+		persister, host, r,
 	}
 }

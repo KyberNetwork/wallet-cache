@@ -67,8 +67,9 @@ func NewEthereum(nodeEndpoint string, network string, networkAbiStr string, trad
 	return ethereum, nil
 }
 
-func (self *Ethereum) ExactBlockNumber(body *io.ReadCloser) (string, error) {
-	b, err := ioutil.ReadAll(*body)
+func (self *Ethereum) ExactBlockNumber(body io.ReadCloser) (string, error) {
+	defer (body).Close()
+	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		return "", err
 	}
@@ -122,8 +123,9 @@ type RateWrapper struct {
 	SlippageRate []*big.Int `json:"slippageRate"`
 }
 
-func (self *Ethereum) ExactRateDataFromEtherscan(body *io.ReadCloser, sourceArr []string, destAddr []string) (*[]ethereum.Rate, error) {
-	b, err := ioutil.ReadAll(*body)
+func (self *Ethereum) ExactRateDataFromEtherscan(body io.ReadCloser, sourceArr []string, destAddr []string) (*[]ethereum.Rate, error) {
+	defer (body).Close()
+	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -206,14 +208,15 @@ func (self *Ethereum) ReadRate(result string, sourceArr []string, destArr []stri
 }
 
 type LogData struct {
-	ActualDestAmount *big.Int       `json:"actualDestAmount"`
-	ActualSrcAmount  *big.Int       `json:"actualSrcAmount"`
-	Dest             common.Address `json:"dest"`
 	Source           common.Address `json:"source"`
+	Dest             common.Address `json:"dest"`
+	ActualSrcAmount  *big.Int       `json:"actualSrcAmount"`
+	ActualDestAmount *big.Int       `json:"actualDestAmount"`
 }
 
-func (self *Ethereum) ExactEventFromEtherscan(body *io.ReadCloser) (*[]ethereum.EventHistory, error) {
-	b, err := ioutil.ReadAll(*body)
+func (self *Ethereum) ExactEventFromEtherscan(body io.ReadCloser) (*[]ethereum.EventHistory, error) {
+	defer (body).Close()
+	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -321,6 +324,7 @@ func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch s
 			log.Print(err)
 			return nil, err
 		}
+		//fmt.Print(listEvent[i].Data)
 		err = self.networkAbi.Unpack(&logData, "ExecuteTrade", data)
 		if err != nil {
 			log.Print(err)
