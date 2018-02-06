@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"strconv"
@@ -206,6 +207,7 @@ func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch s
 				return nil, err
 			}
 			timestamp = timestampHex.String()
+			fmt.Println(timestamp)
 		} else {
 			timestamp, err = self.Gettimestamp(blockNumber.String(), latestBlock, self.averageBlockTime)
 			if err != nil {
@@ -246,16 +248,14 @@ func (self *Ethereum) Gettimestamp(block string, latestBlock string, averageBloc
 		log.Print(err)
 		return "", err
 	}
-	toBlock, err := strconv.ParseInt(block, 10, 64)
+	toBlock, err := strconv.ParseInt(latestBlock, 10, 64)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 	timeNow := time.Now().Unix()
-	timeStamp := timeNow - averageBlockTime*(toBlock-fromBlock)
+	timeStamp := timeNow - averageBlockTime*(toBlock-fromBlock)/1000
 
 	timeStampBig := big.NewInt(timeStamp)
-
 	return timeStampBig.String(), nil
-
 }
