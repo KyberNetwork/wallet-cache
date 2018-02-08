@@ -3,8 +3,6 @@
 FROM golang
 EXPOSE 3001
 
-ENV GIN_MODE=release
-
 RUN  mkdir -p /go/src \
   && mkdir -p /go/bin \
   && mkdir -p /go/pkg
