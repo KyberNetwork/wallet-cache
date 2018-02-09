@@ -1,10 +1,8 @@
 package fetcher
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
-	"io/ioutil"
+	"fmt"
 	"log"
 	"math/big"
 	"strconv"
@@ -15,38 +13,23 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/rpc"
 )
 
-type ResultEvent struct {
-	Result []ethereum.EventRaw `json:"result"`
-}
-
-type ResultRpc struct {
-	Result string `json:"result"`
-}
-
-type RateWapper struct {
-	ExpectedPrice []*big.Int
-	SlippagePrice []*big.Int
+type RateWrapper struct {
+	ExpectedRate []*big.Int `json:"expectedRate"`
+	SlippageRate []*big.Int `json:"slippageRate"`
 }
 
 type Ethereum struct {
-	nodeEndpoint string
-	network      string
-	networkAbi   abi.ABI
-	tradeTopic   string
-	wrapper      string
-	wrapperAbi   abi.ABI
-	client       *rpc.Client
+	network          string
+	networkAbi       abi.ABI
+	tradeTopic       string
+	wrapper          string
+	wrapperAbi       abi.ABI
+	averageBlockTime int64
 }
 
-func NewEthereum(nodeEndpoint string, network string, networkAbiStr string, tradeTopic string, wrapper string, wrapperAbiStr string) (*Ethereum, error) {
-	client, err := rpc.DialHTTP(nodeEndpoint)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
+func NewEthereum(network string, networkAbiStr string, tradeTopic string, wrapper string, wrapperAbiStr string, averageBlockTime int64) (*Ethereum, error) {
 
 	networkAbi, err := abi.JSON(strings.NewReader(networkAbiStr))
 	if err != nil {
@@ -61,37 +44,10 @@ func NewEthereum(nodeEndpoint string, network string, networkAbiStr string, trad
 	}
 
 	ethereum := &Ethereum{
-		nodeEndpoint, network, networkAbi, tradeTopic, wrapper, wrapperAbi, client,
+		network, networkAbi, tradeTopic, wrapper, wrapperAbi, averageBlockTime,
 	}
 
 	return ethereum, nil
-}
-
-func (self *Ethereum) ExactBlockNumber(body io.ReadCloser) (string, error) {
-	defer (body).Close()
-	b, err := ioutil.ReadAll(body)
-	if err != nil {
-		return "", err
-	}
-	blockNum := ResultRpc{}
-	err = json.Unmarshal(b, &blockNum)
-	if err != nil {
-		return "", err
-	}
-	num, err := hexutil.DecodeBig(blockNum.Result)
-	if err != nil {
-		return "", err
-	}
-	return num.String(), nil
-}
-
-func (self *Ethereum) GetLatestBlock() (string, error) {
-	var blockNum *hexutil.Big
-	err := self.client.Call(&blockNum, "eth_blockNumber", "latest")
-	if err != nil {
-		return "", err
-	}
-	return blockNum.ToInt().String(), nil
 }
 
 func (self *Ethereum) EncodeRateData(source []string, dest []string, quantity []int64) (string, error) {
@@ -118,63 +74,55 @@ func (self *Ethereum) EncodeRateData(source []string, dest []string, quantity []
 	return common.Bytes2Hex(encodedData), nil
 }
 
-type RateWrapper struct {
-	ExpectedRate []*big.Int `json:"expectedRate"`
-	SlippageRate []*big.Int `json:"slippageRate"`
+func (self *Ethereum) EncodeKyberEnable() (string, error) {
+	encodedData, err := self.networkAbi.Pack("enabled")
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	return common.Bytes2Hex(encodedData), nil
 }
 
-func (self *Ethereum) ExactRateDataFromEtherscan(body io.ReadCloser, sourceArr []string, destAddr []string) (*[]ethereum.Rate, error) {
-	defer (body).Close()
-	b, err := ioutil.ReadAll(body)
+func (self *Ethereum) ExtractEnabled(result string) (bool, error) {
+	enabledByte, err := hexutil.Decode(result)
 	if err != nil {
 		log.Print(err)
-		return nil, err
+		return false, err
 	}
-	result := ResultRpc{}
-	err = json.Unmarshal(b, &result)
+	var enabled bool
+	err = self.networkAbi.Unpack(&enabled, "enabled", enabledByte)
 	if err != nil {
 		log.Print(err)
-		return nil, err
+		return false, err
 	}
-
-	rates, err := self.ReadRate(result.Result, sourceArr, destAddr)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	return rates, nil
+	return enabled, nil
 }
 
-// type RateParam struct {
-// 	Network common.Address   `json:"network"`
-// 	Sources []common.Address `json:"sources"`
-// 	Dests   []common.Address `json:"dests"`
-// 	Quanity []*big.Int  `json:"qty"`
-// }
-
-func (self *Ethereum) GetRateFromNode(sourceSymbolArr []string, destSymbolArr []string, dataAbi string) (*[]ethereum.Rate, error) {
-
-	params := make(map[string]string)
-	params["data"] = "0x" + dataAbi
-	params["to"] = self.wrapper
-
-	//fmt.Print(params)
-	var result string
-	err := self.client.Call(&result, "eth_call", params, "latest")
+func (self *Ethereum) EncodeMaxGasPrice() (string, error) {
+	encodedData, err := self.networkAbi.Pack("maxGasPrice")
 	if err != nil {
 		log.Print(err)
-		return nil, err
+		return "", err
 	}
-
-	rates, err := self.ReadRate(result, sourceSymbolArr, destSymbolArr)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	return rates, nil
+	return common.Bytes2Hex(encodedData), nil
 }
 
-func (self *Ethereum) ReadRate(result string, sourceArr []string, destArr []string) (*[]ethereum.Rate, error) {
+func (self *Ethereum) ExtractMaxGasPrice(result string) (string, error) {
+	gasByte, err := hexutil.Decode(result)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	var gasPrice *big.Int
+	err = self.networkAbi.Unpack(&gasPrice, "maxGasPrice", gasByte)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	return gasPrice.String(), nil
+}
+
+func (self *Ethereum) ExtractRateData(result string, sourceArr []string, destAddr []string) (*[]ethereum.Rate, error) {
 	rateByte, err := hexutil.Decode(result)
 	if err != nil {
 		log.Print(err)
@@ -197,7 +145,7 @@ func (self *Ethereum) ReadRate(result string, sourceArr []string, destArr []stri
 	rateReturn := make([]ethereum.Rate, 0)
 	for i := 0; i < lenArr; i++ {
 		source := sourceArr[i]
-		dest := destArr[i]
+		dest := destAddr[i]
 		rate := rateWapper.ExpectedRate[i]
 		minRate := rateWapper.SlippageRate[i]
 		rateReturn = append(rateReturn, ethereum.Rate{
@@ -207,6 +155,26 @@ func (self *Ethereum) ReadRate(result string, sourceArr []string, destArr []stri
 	return &rateReturn, nil
 }
 
+func (self *Ethereum) ReadEventsWithBlockNumber(eventRaw *[]ethereum.EventRaw, latestBlock string) (*[]ethereum.EventHistory, error) {
+	//get latestBlock to calculate timestamp
+	events, err := self.ReadEvents(eventRaw, "node", latestBlock)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return events, nil
+}
+
+func (self *Ethereum) ReadEventsWithTimeStamp(eventRaw *[]ethereum.EventRaw) (*[]ethereum.EventHistory, error) {
+	//get latestBlock to calculate timestamp
+	events, err := self.ReadEvents(eventRaw, "etherscan", "0")
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return events, nil
+}
+
 type LogData struct {
 	Source           common.Address `json:"source"`
 	Dest             common.Address `json:"dest"`
@@ -214,78 +182,7 @@ type LogData struct {
 	ActualDestAmount *big.Int       `json:"actualDestAmount"`
 }
 
-func (self *Ethereum) ExactEventFromEtherscan(body io.ReadCloser) (*[]ethereum.EventHistory, error) {
-	defer (body).Close()
-	b, err := ioutil.ReadAll(body)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	result := ResultEvent{}
-	err = json.Unmarshal(b, &result)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	listEvent := result.Result
-	events, err := self.ReadEvents(&listEvent, "etherscan", nil, 0)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	return events, nil
-}
-
-type TopicParam struct {
-	FromBlock string   `json:"fromBlock"`
-	ToBlock   string   `json:"toBlock"`
-	Address   string   `json:"address"`
-	Topics    []string `json:"topics"`
-}
-
-func (self *Ethereum) GetEventsFromNode(fromBlock string, toBlock string, averageBlockTime int64) (*[]ethereum.EventHistory, error) {
-	fromBlockInt, err := strconv.ParseUint(fromBlock, 10, 64)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	toBlockInt, err := strconv.ParseUint(toBlock, 10, 64)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	fromBlockHex := hexutil.EncodeUint64(fromBlockInt)
-	toBlockHex := hexutil.EncodeUint64(toBlockInt)
-
-	param := TopicParam{
-		fromBlockHex, toBlockHex, self.network, []string{self.tradeTopic},
-	}
-	var result []ethereum.EventRaw
-	err = self.client.Call(&result, "eth_getLogs", param)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	//get latestBlock to calculate timestamp
-	latestBlock, err := self.GetLatestBlock()
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	events, err := self.ReadEvents(&result, "node", &latestBlock, averageBlockTime)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	return events, nil
-}
-
-func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch string, latestBlock *string, averageBlockTime int64) (*[]ethereum.EventHistory, error) {
+func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch string, latestBlock string) (*[]ethereum.EventHistory, error) {
 	listEvent := *listEventAddr
 	endIndex := len(listEvent) - 1
 	var beginIndex = 0
@@ -310,8 +207,9 @@ func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch s
 				return nil, err
 			}
 			timestamp = timestampHex.String()
+			fmt.Println(timestamp)
 		} else {
-			timestamp, err = self.Gettimestamp(blockNumber.String(), *latestBlock, averageBlockTime)
+			timestamp, err = self.Gettimestamp(blockNumber.String(), latestBlock, self.averageBlockTime)
 			if err != nil {
 				log.Print(err)
 				return nil, err
@@ -350,16 +248,14 @@ func (self *Ethereum) Gettimestamp(block string, latestBlock string, averageBloc
 		log.Print(err)
 		return "", err
 	}
-	toBlock, err := strconv.ParseInt(block, 10, 64)
+	toBlock, err := strconv.ParseInt(latestBlock, 10, 64)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 	timeNow := time.Now().Unix()
-	timeStamp := timeNow - averageBlockTime*(toBlock-fromBlock)
+	timeStamp := timeNow - averageBlockTime*(toBlock-fromBlock)/1000
 
 	timeStampBig := big.NewInt(timeStamp)
-
 	return timeStampBig.String(), nil
-
 }

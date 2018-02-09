@@ -1,7 +1,10 @@
 package http
 
 import (
+	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
@@ -80,6 +83,69 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) GetKyberEnabled(c *gin.Context) {
+	if !self.persister.GetNewKyberEnabled() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+
+	enabled := self.persister.GetKyberEnabled()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": enabled},
+	)
+}
+
+func (self *HTTPServer) GetMaxGasPrice(c *gin.Context) {
+	if !self.persister.GetNewMaxGasPrice() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+
+	gasPrice := self.persister.GetMaxGasPrice()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": gasPrice},
+	)
+}
+
+func (self *HTTPServer) GetGasPrice(c *gin.Context) {
+	if !self.persister.GetNewGasPrice() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+
+	gasPrice := self.persister.GetGasPrice()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": gasPrice},
+	)
+}
+
+func (self *HTTPServer) GetErrorLog(c *gin.Context) {
+	dat, err := ioutil.ReadFile("error.log")
+	if err != nil {
+		log.Print(err)
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false, "data": err},
+		)
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": string(dat[:])},
+	)
+}
+
 // func (self *HTTPServer) GetLanguagePack(c *gin.Context) {
 // 	c.JSON(
 // 		http.StatusOK,
@@ -94,7 +160,14 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 
 	self.r.GET("/getRateUSD", self.GetRateUSD)
+
+	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
+	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
+	self.r.GET("/getGasPrice", self.GetGasPrice)
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
+	if os.Getenv("KYBER_ENV") != "production" {
+		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
+	}
 
 	self.r.Run(self.host)
 }

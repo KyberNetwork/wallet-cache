@@ -7,13 +7,13 @@ docker build . -t cached
 ```
 
 ## Run
-```
 docker run -p 3001:3001 cached
 ```
 
+
 ## One command to build and run with docker-compose
-```
-docker-compose up --build
+
+docker-compose -f docker-compose-staging.yml up --build
 ```
 
 ## Api:
@@ -21,3 +21,6 @@ docker-compose up --build
  - /getHistoryOneColumn
  - /getLatestBlock
  - /getRateUSD
+ - /getKyberEnabled
+ - /getMaxGasPrice
+ - /getGasPrice

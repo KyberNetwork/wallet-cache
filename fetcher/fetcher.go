@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -21,17 +20,19 @@ type Token struct {
 	UsdId   string `json:"usd_id"`
 }
 
-type ServerLog struct {
-	Url    string `json:"url"`
-	ApiKey string `json:"api_key"`
+type Connection struct {
+	Endpoint string `json:"endPoint"`
+	Type     string `json:"type"`
+	Apikey   string `json:"api_key"`
 }
 
 type InfoData struct {
-	ApiUsd    string           `json:"api_usd"`
-	Tokens    map[string]Token `json:"tokens"`
-	ServerLog ServerLog        `json:"server_logs"`
+	ApiUsd string           `json:"api_usd"`
+	Tokens map[string]Token `json:"tokens"`
+	//ServerLog ServerLog        `json:"server_logs"`
+	Connections []Connection `json:"connections"`
 
-	NodeEndpoint string `json:"node_endpoint"`
+	//NodeEndpoint string `json:"node_endpoint"`
 
 	Network    string `json:"network"`
 	NetworkAbi string
@@ -42,12 +43,17 @@ type InfoData struct {
 	EthAdress  string
 	EthSymbol  string
 
-	averageBlockTime int64 `json:"averageBlockTime"`
+	AverageBlockTime int64 `json:"averageBlockTime"`
+}
+
+type ResultRpc struct {
+	Result string `json:"result"`
 }
 
 type Fetcher struct {
 	info     *InfoData
 	ethereum *Ethereum
+	fetIns   []FetcherInterface
 }
 
 func NewFetcher() (*Fetcher, error) {
@@ -74,6 +80,12 @@ func NewFetcher() (*Fetcher, error) {
 			log.Print(err)
 			return nil, err
 		}
+	case "kovan":
+		file, err = ioutil.ReadFile("env/kovan.json")
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
 	default:
 		file, err = ioutil.ReadFile("env/internal_mainnet.json")
 		if err != nil {
@@ -94,14 +106,28 @@ func NewFetcher() (*Fetcher, error) {
 		log.Print(err)
 		return nil, err
 	}
-	ethereum, err := NewEthereum(infoData.NodeEndpoint, infoData.Network, infoData.NetworkAbi, infoData.TradeTopic,
-		infoData.Wapper, infoData.WrapperAbi)
+
+	fetIns := make([]FetcherInterface, 0)
+	for _, connection := range infoData.Connections {
+		newFetcher, err := NewFetcherIns(connection.Type, connection.Endpoint, connection.Apikey)
+		if err != nil {
+			log.Print(err)
+		} else {
+			fetIns = append(fetIns, newFetcher)
+		}
+	}
+
+	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi, infoData.TradeTopic,
+		infoData.Wapper, infoData.WrapperAbi, infoData.AverageBlockTime)
 	if err != nil {
 		log.Print(err)
+		return nil, err
 	}
+
 	fetcher := &Fetcher{
 		info:     &infoData,
 		ethereum: ethereum,
+		fetIns:   fetIns,
 	}
 	//reader info from json
 
@@ -109,21 +135,75 @@ func NewFetcher() (*Fetcher, error) {
 }
 
 func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
-	outPut := make([]io.ReadCloser, 0)
+	usdId := make([]string, 0)
 	for _, token := range self.info.Tokens {
-		usdId := token.UsdId
-		response, err := http.Get(self.info.ApiUsd + "/v1/ticker/" + usdId)
+		usdId = append(usdId, token.UsdId)
+	}
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.GetRateUsd(usdId)
 		if err != nil {
 			log.Print(err)
-			return nil, err
+			continue
 		}
-		if response.StatusCode != 200 {
-			log.Print(errors.New("Status code is 200"))
-			return nil, errors.New("Status code is 200")
-		}
-		outPut = append(outPut, response.Body)
+		return result, nil
 	}
-	return outPut, nil
+	return nil, errors.New("Cannot get rate USD")
+}
+
+func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.GetGasPrice()
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return result, nil
+	}
+	return nil, errors.New("Cannot get gas price")
+}
+
+func (self *Fetcher) GetMaxGasPrice() (string, error) {
+	dataAbi, err := self.ethereum.EncodeMaxGasPrice()
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.EthCall(self.info.Network, dataAbi)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		gasPrice, err := self.ethereum.ExtractMaxGasPrice(result)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return gasPrice, nil
+	}
+	return "", errors.New("Cannot get gas price")
+}
+
+func (self *Fetcher) CheckKyberEnable() (bool, error) {
+	dataAbi, err := self.ethereum.EncodeKyberEnable()
+	if err != nil {
+		log.Print(err)
+		return false, err
+	}
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.EthCall(self.info.Network, dataAbi)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		enabled, err := self.ethereum.ExtractEnabled(result)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return enabled, nil
+	}
+	return false, errors.New("Cannot check kyber enable")
 }
 
 func (self *Fetcher) GetRate() (*[]ethereum.Rate, error) {
@@ -152,69 +232,32 @@ func (self *Fetcher) GetRate() (*[]ethereum.Rate, error) {
 		return nil, err
 	}
 
-	// rates1, err := self.ethereum.GetRateFromNode(sourceSymbolArr, destSymbolArr, dataAbi)
-	// if err != nil {
-	// 	log.Print(err)
-	// 	return nil, err
-	// }
-	// return rates1, nil
-
-	url := self.info.ServerLog.Url + "/api?module=proxy&action=eth_call&to=" +
-		self.info.Wapper + "&data=" + dataAbi + "&tag=latest&apikey=" + self.info.ServerLog.ApiKey
-	response, err := http.Get(url)
-	if err != nil {
-		log.Print(err)
-		//get rate from node
-		rates, err := self.ethereum.GetRateFromNode(sourceSymbolArr, destSymbolArr, dataAbi)
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.EthCall(self.info.Wapper, dataAbi)
 		if err != nil {
 			log.Print(err)
-			return nil, err
+			continue
 		}
-		return rates, nil
-
-	}
-	if response.StatusCode != 200 {
-		return nil, errors.New("Status code is 200")
-	}
-	rates, err := self.ethereum.ExactRateDataFromEtherscan(response.Body, sourceSymbolArr, destSymbolArr)
-	if err != nil {
-		log.Print(err)
-		//get rate from node
-		rates, err := self.ethereum.GetRateFromNode(sourceSymbolArr, destSymbolArr, dataAbi)
+		rates, err := self.ethereum.ExtractRateData(result, sourceSymbolArr, destSymbolArr)
 		if err != nil {
 			log.Print(err)
-			return nil, err
+			continue
 		}
 		return rates, nil
 	}
-	return rates, nil
+	return nil, errors.New("Cannot get rate")
 }
 
 func (self *Fetcher) GetLatestBlock() (string, error) {
-	//get from etherscan
-	response, err := http.Get(self.info.ServerLog.Url + "/api?module=proxy&action=eth_blockNumber")
-	if err != nil {
-		log.Print(err)
-		blockNumber, err := self.ethereum.GetLatestBlock()
+	for _, fetIns := range self.fetIns {
+		blockNo, err := fetIns.GetLatestBlock()
 		if err != nil {
 			log.Print(err)
-			return "", err
+			continue
 		}
-		return blockNumber, nil
+		return blockNo, nil
 	}
-	//exact block number
-	blockNumber, err := self.ethereum.ExactBlockNumber(response.Body)
-	if err != nil {
-		log.Print(err)
-		//get from node
-		blockNumber, err := self.ethereum.GetLatestBlock()
-		if err != nil {
-			log.Print(err)
-			return "", err
-		}
-		return blockNumber, nil
-	}
-	return blockNumber, nil
+	return "", errors.New("Cannot get block number")
 }
 
 func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error) {
@@ -232,27 +275,29 @@ func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error
 	}
 	fromBlock := strconv.Itoa(blockInt)
 
-	url := self.info.ServerLog.Url + "/api?module=logs&action=getLogs&fromBlock=" +
-		fromBlock + "&toBlock=" + toBlock + "&address=" + self.info.Network + "&topic0=" +
-		self.info.TradeTopic + "&apikey=" + self.info.ServerLog.ApiKey
-	response, err := http.Get(url)
-	if err != nil {
-		log.Print(err)
-		//get events from node
-		events, err := self.ethereum.GetEventsFromNode(fromBlock, toBlock, self.info.averageBlockTime)
+	for _, fetIns := range self.fetIns {
+		eventRaw, err := fetIns.GetEvents(fromBlock, toBlock, self.info.Network, self.info.TradeTopic)
 		if err != nil {
 			log.Print(err)
-			return nil, err
+			continue
+		}
+		var events *[]ethereum.EventHistory
+		var errorEvent error
+		if fetIns.GetTypeName() == "node" {
+			latestBlock, err := self.GetLatestBlock()
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+			events, errorEvent = self.ethereum.ReadEventsWithBlockNumber(eventRaw, latestBlock)
+		} else {
+			events, errorEvent = self.ethereum.ReadEventsWithTimeStamp(eventRaw)
+		}
+		if errorEvent != nil {
+			log.Print(errorEvent)
+			continue
 		}
 		return events, nil
 	}
-	if response.StatusCode != 200 {
-		return nil, errors.New("Status code is 200")
-	}
-	events, err := self.ethereum.ExactEventFromEtherscan(response.Body)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	return events, nil
+	return nil, errors.New("Cannot get events")
 }

@@ -23,3 +23,10 @@ type Rate struct {
 	Rate    string `json:"rate"`
 	Minrate string `json:"minRate"`
 }
+
+type GasPrice struct {
+	Fast     string `json:"fast"`
+	Standard string `json:"standard"`
+	Low      string `json:"low"`
+	Default  string `json:"default"`
+}

@@ -1,0 +1,65 @@
+{
+    "connections": [
+        {
+            "endPoint": "https://kovan.etherscan.io",
+            "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",
+            "type": "etherscan"
+        },
+        {
+            "endPoint": "https://kovan.infura.io/DtzEYY0Km2BA3YwyJcBG",
+            "type": "node"
+        }
+    ],
+    "api_usd": "https://api.coinmarketcap.com",
+    "tokens": {
+        "ETH": {
+            "name": "Ethereum",
+            "symbol": "ETH",
+            "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "decimal": 18,
+            "usd_id": "ethereum"
+        },
+        "KNC": {
+            "name": "KyberNetwork",
+            "symbol": "KNC",
+            "address": "0x8dc114d77e857558aefbe8e1a50b460ff9578f1a",
+            "decimal": 18,
+            "usd_id": "kyber-network"
+        },
+        "OMG": {
+            "name": "OmiseGO",
+            "symbol": "OMG",
+            "address": "0x7606bd550f467546212649a9c25623dfca88dcd7",
+            "decimal": 18,
+            "usd_id": "omisego"
+        },
+        "EOS": {
+            "name": "Eos",
+            "symbol": "EOS",
+            "address": "0x15fb2a9d7dadbb88f260f78dcbb574b3b76a8e06",
+            "decimal": 18,
+            "usd_id": "eos"
+        },
+        "SNT": {
+            "name": "Status",
+            "address": "0x676f650000f420485b99ef0377a2e1c96eb3e821",
+            "symbol": "SNT",
+            "decimal": 18,
+            "usd_id": "status"
+        },
+        "SALT": {
+            "name": "Salt",
+            "address": "0xcc112cd38362bf3c07d226768fd5869e65296083",
+            "symbol": "SALT",
+            "decimal": 8,
+            "usd_id": "salt"
+        }
+    },
+    "reserve": "0x2d1ceabd5a1cd16581ad199031601615a434a2cd",
+    "network": "0x643211b405c9a14139142e1104250bbcd94bd0ef",
+    "wrapper": "0xa54f27b5a72fc1ddc5c4bc6ed50391f457e4a46a",
+    "trade_topic": "0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
+    "endpoint": "https://kovan.infura.io/DtzEYY0Km2BA3YwyJcBG",
+    "averageBlockTime": 6000,
+    "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json"
+}
