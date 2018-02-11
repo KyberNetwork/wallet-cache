@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/KyberNetwork/server-go/fetcher"
@@ -13,7 +14,8 @@ import (
 type fetcherFunc func(persister persister.Persister, fetcher *fetcher.Fetcher)
 
 func main() {
-
+	numCPU := runtime.NumCPU()
+	runtime.GOMAXPROCS(numCPU)
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	f, err := os.OpenFile("error.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
