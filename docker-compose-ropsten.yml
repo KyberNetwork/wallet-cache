@@ -1,0 +1,8 @@
+version: "3"
+services:
+  cached:
+    build: ./
+    env_file:
+      - env_ropsten.env
+    ports:
+      - "3001:3001"
