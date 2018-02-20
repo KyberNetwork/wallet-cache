@@ -97,6 +97,34 @@
       "symbol": "GTO",
       "decimal": 5,
       "usd_id":"gifto"
+    },
+    "RDN": {
+      "name":"Raiden",
+      "address": "0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6",
+      "symbol": "RDN",
+      "decimal": 18,
+      "usd_id":"raiden-network-token"
+    },
+    "APPC": {
+      "name":"AppCoins",
+      "address": "0x1a7a8bd9106f2b8d977e08582dc7d24c723ab0db",
+      "symbol": "APPC",
+      "decimal": 18,
+      "usd_id":"appcoins"
+    },
+    "ENG": {
+      "name":"Enigma",
+      "address": "0xf0ee6b27b759c9893ce4f094b49ad28fd15a23e4",
+      "symbol": "ENG",
+      "decimal": 8,
+      "usd_id":"enigma-project"
+    },
+    "SALT": {
+      "name":"Salt",
+      "address": "0x4156d3342d5c385a87d264f90653733592000581",
+      "symbol": "SALT",
+      "decimal": 8,
+      "usd_id":"salt"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
