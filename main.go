@@ -42,7 +42,7 @@ func main() {
 
 	runFetchData(persisterIns, fetchGasPrice, fertcherIns, 30)
 
-	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 60)
+	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 600)
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
