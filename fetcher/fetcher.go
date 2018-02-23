@@ -86,6 +86,12 @@ func NewFetcher() (*Fetcher, error) {
 			log.Print(err)
 			return nil, err
 		}
+	case "ropsten":
+		file, err = ioutil.ReadFile("env/ropsten.json")
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
 	default:
 		file, err = ioutil.ReadFile("env/internal_mainnet.json")
 		if err != nil {
