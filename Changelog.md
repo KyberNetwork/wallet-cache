@@ -1,4 +1,4 @@
-# 0.4.2 (2018-02-07)
+# 0.4.2 (2018-02-23)
 ## Fix bugs: 
 - Increase time when fetching USD rate
 
