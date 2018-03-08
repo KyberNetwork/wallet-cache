@@ -124,6 +124,13 @@
       "symbol": "SALT",
       "decimal": 8,
       "usd_id":"salt"
+    },
+    "BQX": {
+      "name" : "Ethos",
+      "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+      "symbol": "BQX",
+      "decimal": 8,
+      "usd_id":"ethos"
     }
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",

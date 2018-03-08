@@ -179,6 +179,9 @@ func (self *RamPersister) SaveRateUSD(body []io.ReadCloser) error {
 			log.Print(err)
 			return err
 		}
+		if rateItem[0].Symbol == "ETHOS" {
+			rateItem[0].Symbol = "BQX"
+		}
 		rates = append(rates, rateItem[0])
 	}
 	self.mu.Lock()
