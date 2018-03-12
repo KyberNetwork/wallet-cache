@@ -1,7 +1,10 @@
 package fetcher
 
 import (
+	"encoding/json"
+	"errors"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/big"
 	"net/http"
@@ -111,37 +114,32 @@ func (self *BlockchainFetcher) GetTypeName() string {
 }
 
 func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	var gasPriceHex *hexutil.Big
-	err := self.client.Call(&gasPriceHex, "eth_gasPrice")
+	response, err := http.Get("https://ethgasstation.info/json/ethgasAPI.json")
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	if response.StatusCode != 200 {
+		return nil, errors.New("Status code is 200")
+	}
+	defer (response.Body).Close()
+	b, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
 
-	gWei := big.NewFloat(1000000000)
-
-	gasPriceInt := (*big.Int)(gasPriceHex)
-	gasPriceFloat := new(big.Float).SetInt(gasPriceInt)
-	gasPrice := new(big.Float).Quo(gasPriceFloat, gWei)
-
-	var fast *big.Float
-	var standard *big.Float
-	var low *big.Float
-	var defaultGas *big.Float
-
-	maxGwei := big.NewFloat(20)
-	if gasPrice.Cmp(maxGwei) == -1 {
-		standard = gasPrice
-		defaultGas = gasPrice
-
-		low = new(big.Float).Mul(standard, big.NewFloat(0.7))
-		fast = new(big.Float).Mul(standard, big.NewFloat(1.3))
-	} else {
-		standard = maxGwei
-		defaultGas = maxGwei
-		low = maxGwei
-		fast = new(big.Float).Mul(standard, big.NewFloat(1.3))
+	var gasPrice GasStation
+	err = json.Unmarshal(b, &gasPrice)
+	if err != nil {
+		log.Print(err)
+		return nil, err
 	}
+
+	fast := big.NewFloat(gasPrice.Fast / 10)
+	standard := big.NewFloat((gasPrice.Fast + gasPrice.Standard) / 20)
+	low := big.NewFloat(gasPrice.Low / 10)
+	defaultGas := standard
 
 	return &ethereum.GasPrice{
 		fast.String(), standard.String(), low.String(), defaultGas.String(),

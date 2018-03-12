@@ -1,14 +1,18 @@
 {
   "connections": [
     {
-      "endPoint": "https://api.etherscan.io",
-      "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",
-      "type": "etherscan"
-    },
+      "endPoint" : "https://semi-node.kyber.network",
+      "type": "node"
+    }, 
     {
       "endPoint": "https://mainnet.infura.io",
       "type": "node"
     },
+    {
+      "endPoint": "https://api.etherscan.io",
+      "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",
+      "type": "etherscan"
+    },    
     {
       "endPoint": "https://api.mycryptoapi.com/eth",
       "type": "node"
@@ -124,6 +128,13 @@
       "symbol": "SALT",
       "decimal": 8,
       "usd_id":"salt"
+    },
+    "BQX": {
+      "name" : "Ethos",
+      "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+      "symbol": "BQX",
+      "decimal": 8,
+      "usd_id":"ethos"
     }
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
