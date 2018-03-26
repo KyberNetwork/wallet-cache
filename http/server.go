@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
@@ -165,9 +164,9 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
 	self.r.GET("/getGasPrice", self.GetGasPrice)
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
-	if os.Getenv("KYBER_ENV") != "production" {
-		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
-	}
+	//if os.Getenv("KYBER_ENV") != "production" {
+	self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
+	//}
 
 	self.r.Run(self.host)
 }
