@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"strconv"
@@ -184,49 +185,34 @@ type LogData struct {
 func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch string, latestBlock string) (*[]ethereum.EventHistory, error) {
 	listEvent := *listEventAddr
 	endIndex := len(listEvent) - 1
-	// var beginIndex = 0
-	// if endIndex > 4 {
-	// 	beginIndex = endIndex - 4
-	// }
+	var beginIndex = 0
+	if endIndex > 4 {
+		beginIndex = endIndex - 4
+	}
 
-	index := 0
 	events := make([]ethereum.EventHistory, 0)
-	for i := endIndex; i >= 0; i-- {
-		if index >= 5 {
-			break
-		}
-		//filter amount
-		isSmallAmount, err := self.IsSmallAmount(listEvent[i])
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		if isSmallAmount {
-			continue
-		}
-
+	for i := endIndex; i >= beginIndex; i-- {
 		txHash := listEvent[i].Txhash
 
 		blockNumber, err := hexutil.DecodeBig(listEvent[i].BlockNumber)
 		if err != nil {
 			log.Print(err)
-			continue
+			return nil, err
 		}
-
 		var timestamp string
 		if typeFetch == "etherscan" {
 			timestampHex, err := hexutil.DecodeBig(listEvent[i].Timestamp)
 			if err != nil {
 				log.Print(err)
-				continue
+				return nil, err
 			}
 			timestamp = timestampHex.String()
-			//fmt.Println(timestamp)
+			fmt.Println(timestamp)
 		} else {
 			timestamp, err = self.Gettimestamp(blockNumber.String(), latestBlock, self.averageBlockTime)
 			if err != nil {
 				log.Print(err)
-				continue
+				return nil, err
 			}
 		}
 
@@ -234,13 +220,13 @@ func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch s
 		data, err := hexutil.Decode(listEvent[i].Data)
 		if err != nil {
 			log.Print(err)
-			continue
+			return nil, err
 		}
 		//fmt.Print(listEvent[i].Data)
 		err = self.networkAbi.Unpack(&logData, "ExecuteTrade", data)
 		if err != nil {
 			log.Print(err)
-			continue
+			return nil, err
 		}
 
 		actualDestAmount := logData.ActualDestAmount.String()
@@ -251,49 +237,9 @@ func (self *Ethereum) ReadEvents(listEventAddr *[]ethereum.EventRaw, typeFetch s
 		events = append(events, ethereum.EventHistory{
 			actualDestAmount, actualSrcAmount, dest, source, blockNumber.String(), txHash, timestamp,
 		})
-		index++
 	}
+
 	return &events, nil
-}
-
-func (self *Ethereum) IsSmallAmount(eventRaw ethereum.EventRaw) (bool, error) {
-	data, err := hexutil.Decode(eventRaw.Data)
-	if err != nil {
-		log.Print(err)
-		return true, err
-	}
-	var logData LogData
-	err = self.networkAbi.Unpack(&logData, "ExecuteTrade", data)
-	if err != nil {
-		log.Print(err)
-		return true, err
-	}
-
-	source := logData.Source
-	var amount *big.Int
-	if strings.ToLower(source.String()) == "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" {
-		amount = logData.ActualSrcAmount
-	} else {
-		amount = logData.ActualDestAmount
-	}
-
-	//fmt.Print(amount.String())
-	//check amount is greater than episol
-	// amountBig, ok := new(big.Int).SetString(amount)
-	// if !ok {
-	// 	errorAmount := errors.New("Cannot read amount as number")
-	// 	log.Print(errorAmount)
-	// 	return false, errorAmount
-	// }
-	var episol, weight = big.NewInt(10), big.NewInt(15)
-	episol.Exp(episol, weight, nil)
-	//fmt.Print(episol.String())
-
-	//fmt.Print(amount.Cmp(episol))
-	if amount.Cmp(episol) == -1 {
-		return true, nil
-	}
-	return false, nil
 }
 
 func (self *Ethereum) Gettimestamp(block string, latestBlock string, averageBlockTime int64) (string, error) {
