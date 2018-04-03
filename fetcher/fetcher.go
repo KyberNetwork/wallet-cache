@@ -137,7 +137,9 @@ func NewFetcher() (*Fetcher, error) {
 func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	usdId := make([]string, 0)
 	for _, token := range self.info.Tokens {
-		usdId = append(usdId, token.UsdId)
+		if token.UsdId != "" {
+			usdId = append(usdId, token.UsdId)
+		}
 	}
 	for _, fetIns := range self.fetIns {
 		result, err := fetIns.GetRateUsd(usdId)
