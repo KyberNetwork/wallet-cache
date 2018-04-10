@@ -1,20 +1,24 @@
 {
   "connections":[
     {
-      "endPoint" : "https://api.etherscan.io",
+      "endPoint" : "https://semi-node.kyber.network",
+      "type": "node"
+    }, 
+    {
+      "endPoint": "https://mainnet.infura.io",
+      "type": "node"
+    },
+    {
+      "endPoint": "https://api.etherscan.io",
       "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",
       "type": "etherscan"
-    },
+    },    
     {
-      "endPoint" : "https://api.mycryptoapi.com/eth",
+      "endPoint": "https://api.mycryptoapi.com/eth",
       "type": "node"
     },
     {
-      "endPoint" : "https://mainnet.infura.io",
-      "type": "node"
-    },
-    {
-      "endPoint" : "https://mew.giveth.io/",
+      "endPoint": "https://mew.giveth.io/",
       "type": "node"
     }
   ],
@@ -125,6 +129,48 @@
       "symbol": "SALT",
       "decimal": 8,
       "usd_id":"salt"
+    },
+    "BQX": {
+      "name" : "Ethos",
+      "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+      "symbol": "BQX",
+      "decimal": 8,
+      "usd_id":"ethos"
+    },
+    "ADX": {
+      "name": "AdEx",
+      "address": "0x4470bb87d77b963a013db939be332f927f2b992e",
+      "symbol": "ADX",
+      "decimal": 4,
+      "usd_id": "adx-net"
+    },
+    "AST": {
+      "name": "AirSwap",
+      "address": "0x27054b13b1b798b345b591a4d22e6562d47ea75a",
+      "symbol": "AST",
+      "decimal": 4,
+      "usd_id": "airswap"
+    },
+    "RCN": {
+      "name": "Ripio Credit Network",
+      "address": "0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6",
+      "symbol": "RCN",
+      "decimal": 18,
+      "usd_id": "ripio-credit-network"
+    },
+    "ZIL": {
+      "name": "Zilliqa",
+      "address": "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
+      "symbol": "ZIL",
+      "decimal": 12,
+      "usd_id":"zilliqa"
+    },
+    "LINK": {
+      "name": "Chain Link",
+      "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "symbol": "LINK",
+      "decimal": 18,
+      "usd_id":"chainlink"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
