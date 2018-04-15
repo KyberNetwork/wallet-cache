@@ -39,6 +39,13 @@
       "decimal": 18,
       "usd_id":"kyber-network"
     },
+    "DAI": {
+      "name" : "DAI",
+      "symbol": "DAI",
+      "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
+      "decimal": 18,
+      "usd_id":"dai"
+    },
     "OMG": {
       "name": "OmiseGO",
       "symbol": "OMG",
