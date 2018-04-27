@@ -145,3 +145,24 @@ func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
 		fast.String(), standard.String(), low.String(), defaultGas.String(),
 	}, nil
 }
+
+func (self *BlockchainFetcher) GetRateUsdEther() (string, error) {
+	response, err := http.Get("https://api.coinmarketcap.com/v1/ticker/ethereum")
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	defer (response.Body).Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	rateItem := make([]RateUSD, 0)
+	err = json.Unmarshal(b, &rateItem)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	return rateItem[0].PriceUsd, nil
+}

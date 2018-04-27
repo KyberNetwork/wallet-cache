@@ -20,6 +20,8 @@ type FetcherInterface interface {
 	GetGasPrice() (*ethereum.GasPrice, error)
 
 	GetTypeName() string
+
+	GetRateUsdEther() (string, error)
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
