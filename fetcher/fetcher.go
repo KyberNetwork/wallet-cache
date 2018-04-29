@@ -156,6 +156,24 @@ func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	return nil, errors.New("Cannot get rate USD")
 }
 
+func (self *Fetcher) GetRateUsdEther() (string, error) {
+	//rateUsd, err := fetIns.GetRateUsdEther()
+
+	// usdId := make([]string, 0)
+	// for _, token := range self.info.Tokens {
+	// 	usdId = append(usdId, token.UsdId)
+	// }
+	for _, fetIns := range self.fetIns {
+		rateUsd, err := fetIns.GetRateUsdEther()
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return rateUsd, nil
+	}
+	return "", errors.New("Cannot get rate USD")
+}
+
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {
 	for _, fetIns := range self.fetIns {
 		result, err := fetIns.GetGasPrice()

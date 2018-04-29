@@ -1,8 +1,6 @@
 package Persister
 
 import (
-	"io"
-
 	"github.com/KyberNetwork/server-go/ethereum"
 )
 
@@ -49,7 +47,8 @@ type Persister interface {
 
 	GetRateUSD() []RateUSD
 	GetIsNewRateUSD() bool
-	SaveRateUSD([]io.ReadCloser) error
+	//SaveRateUSD([]io.ReadCloser) error
+	SaveRateUSD(string) error
 	SetNewRateUSD(bool)
 
 	SaveKyberEnabled(bool)

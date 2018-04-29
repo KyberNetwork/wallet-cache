@@ -1,10 +1,9 @@
 package Persister
 
 import (
-	"encoding/json"
-	"io"
-	"io/ioutil"
+	"errors"
 	"log"
+	"math/big"
 	"sync"
 
 	"github.com/KyberNetwork/server-go/ethereum"
@@ -164,31 +163,81 @@ func (self *RamPersister) GetIsNewRateUSD() bool {
 	return self.isNewRateUsd
 }
 
-func (self *RamPersister) SaveRateUSD(body []io.ReadCloser) error {
+// func (self *RamPersister) SaveRateUSD(body []io.ReadCloser) error {
+// 	rates := make([]RateUSD, 0)
+// 	for _, item := range body {
+// 		rateItem := make([]RateUSD, 0)
+// 		defer (item).Close()
+// 		b, err := ioutil.ReadAll(item)
+// 		if err != nil {
+// 			log.Print(err)
+// 			return err
+// 		}
+// 		err = json.Unmarshal(b, &rateItem)
+// 		if err != nil {
+// 			log.Print(err)
+// 			return err
+// 		}
+// 		if rateItem[0].Symbol == "ETHOS" {
+// 			rateItem[0].Symbol = "BQX"
+// 		}
+// 		rates = append(rates, rateItem[0])
+// 	}
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	self.rateUSD = rates
+// 	self.isNewRateUsd = true
+// 	return nil
+// }
+
+func (self *RamPersister) SaveRateUSD(rateUSDEth string) error {
 	rates := make([]RateUSD, 0)
-	for _, item := range body {
-		rateItem := make([]RateUSD, 0)
-		defer (item).Close()
-		b, err := ioutil.ReadAll(item)
-		if err != nil {
-			log.Print(err)
-			return err
+
+	itemRateEth := RateUSD{Symbol: "ETH", PriceUsd: rateUSDEth}
+	rates = append(rates, itemRateEth)
+	for _, item := range *(self.rates) {
+		if item.Source != "ETH" {
+			priceUsd, err := CalculateRateUSD(item.Rate, rateUSDEth)
+			if err != nil {
+				log.Print(err)
+				return err
+			}
+			sourceSymbol := item.Source
+			if sourceSymbol == "ETHOS" {
+				sourceSymbol = "BQX"
+			}
+			itemRate := RateUSD{Symbol: sourceSymbol, PriceUsd: priceUsd}
+			rates = append(rates, itemRate)
 		}
-		err = json.Unmarshal(b, &rateItem)
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-		if rateItem[0].Symbol == "ETHOS" {
-			rateItem[0].Symbol = "BQX"
-		}
-		rates = append(rates, rateItem[0])
 	}
+
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.rateUSD = rates
 	self.isNewRateUsd = true
 	return nil
+}
+
+func CalculateRateUSD(rateEther string, rateUSD string) (string, error) {
+	//func (z *Int) SetString(s string, base int) (*Int, bool)
+
+	bigRateUSD, ok := new(big.Float).SetString(rateUSD)
+	if !ok {
+		err := errors.New("Cannot convert rate usd of ether to big float")
+		return "", err
+	}
+	bigRateEth, ok := new(big.Float).SetString(rateEther)
+	if !ok {
+		err := errors.New("Cannot convert rate token-eth to big float")
+		return "", err
+	}
+	i, e := big.NewInt(10), big.NewInt(18)
+	i.Exp(i, e, nil)
+	weight := new(big.Float).SetInt(i)
+
+	rateUSDBig := new(big.Float).Mul(bigRateUSD, bigRateEth)
+	rateUSDNormal := new(big.Float).Quo(rateUSDBig, weight)
+	return rateUSDNormal.String(), nil
 }
 
 func (self *RamPersister) SetNewRateUSD(isNew bool) {
