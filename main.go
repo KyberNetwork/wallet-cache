@@ -42,7 +42,9 @@ func main() {
 
 	runFetchData(persisterIns, fetchGasPrice, fertcherIns, 30)
 
-	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 60)
+	//runFetchData(persisterIns, fetchRateUSD, fertcherIns, 600)
+	runFetchData(persisterIns, fetchRateUSDEther, fertcherIns, 600)
+
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
@@ -113,14 +115,29 @@ func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) 
 	persister.SaveKyberEnabled(enabled)
 }
 
-func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	body, err := fetcher.GetRateUsd()
+// func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
+// 	body, err := fetcher.GetRateUsd()
+// 	if err != nil {
+// 		log.Print(err)
+// 		persister.SetNewRateUSD(false)
+// 		return
+// 	}
+// 	err = persister.SaveRateUSD(body)
+// 	if err != nil {
+// 		log.Print(err)
+// 		persister.SetNewRateUSD(false)
+// 		return
+// 	}
+// }
+
+func fetchRateUSDEther(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	rateUSD, err := fetcher.GetRateUsdEther()
 	if err != nil {
 		log.Print(err)
 		persister.SetNewRateUSD(false)
 		return
 	}
-	err = persister.SaveRateUSD(body)
+	err = persister.SaveRateUSD(rateUSD)
 	if err != nil {
 		log.Print(err)
 		persister.SetNewRateUSD(false)

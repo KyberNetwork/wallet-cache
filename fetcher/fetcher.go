@@ -86,6 +86,12 @@ func NewFetcher() (*Fetcher, error) {
 			log.Print(err)
 			return nil, err
 		}
+	case "ropsten":
+		file, err = ioutil.ReadFile("env/ropsten.json")
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
 	default:
 		file, err = ioutil.ReadFile("env/internal_mainnet.json")
 		if err != nil {
@@ -150,6 +156,24 @@ func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 		return result, nil
 	}
 	return nil, errors.New("Cannot get rate USD")
+}
+
+func (self *Fetcher) GetRateUsdEther() (string, error) {
+	//rateUsd, err := fetIns.GetRateUsdEther()
+
+	// usdId := make([]string, 0)
+	// for _, token := range self.info.Tokens {
+	// 	usdId = append(usdId, token.UsdId)
+	// }
+	for _, fetIns := range self.fetIns {
+		rateUsd, err := fetIns.GetRateUsdEther()
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return rateUsd, nil
+	}
+	return "", errors.New("Cannot get rate USD")
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {

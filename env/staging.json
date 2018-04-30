@@ -38,6 +38,13 @@
       "decimal": 18,
       "usd_id":"kyber-network"
     },
+    "DAI": {
+      "name" : "DAI",
+      "symbol": "DAI",
+      "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
+      "decimal": 18,
+      "usd_id":"dai"
+    },
     "OMG": {
       "name": "OmiseGO",
       "symbol": "OMG",
@@ -176,6 +183,20 @@
       "address": "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
       "symbol":"DGX",
       "decimal": 9
+    },
+    "STORM": {
+      "name": "Storm",
+      "address": "0xd0a4b8946cb52f0661273bfbc6fd0e0c75fc6433",
+      "symbol": "STORM",
+      "decimal": 18,
+      "usd_id":"storm"
+    },
+    "IOST": {
+      "name": "IOStoken",
+      "address": "0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab",
+      "symbol": "IOST",
+      "decimal": 18,
+      "usd_id":"iostoken"
     }
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",

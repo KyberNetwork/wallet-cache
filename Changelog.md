@@ -1,3 +1,10 @@
+# 0.6.0 (2018-04-10)
+## Features: 
+- Add token ADX, AST, RCN, ZIL, LINK to list
+
+## Bugfixes:
+- Remove small amount exchanges in log transaction
+
 # 0.5.0 (2018-03-08)
 ## Features: 
 - Add token BQX to list
