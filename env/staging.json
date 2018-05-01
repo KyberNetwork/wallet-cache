@@ -191,6 +191,13 @@
       "symbol": "IOST",
       "decimal": 18,
       "usd_id":"iostoken"
+    },
+    "MOT": {
+      "name": "Olympus Labs",
+      "address": "0x263c618480dbe35c300d8d5ecda19bbb986acaed",
+      "symbol": "MOT",
+      "decimal": 18,
+      "usd_id":"olympus-labs"
     }
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
