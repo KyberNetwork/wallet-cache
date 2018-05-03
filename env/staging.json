@@ -178,6 +178,12 @@
       "decimal": 18,
       "usd_id":"chainlink"
     },
+    "DGX": {
+      "name" : "Digix Gold Token",
+      "address": "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
+      "symbol":"DGX",
+      "decimal": 9
+    },
     "STORM": {
       "name": "Storm",
       "address": "0xd0a4b8946cb52f0661273bfbc6fd0e0c75fc6433",
