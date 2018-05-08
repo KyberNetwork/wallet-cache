@@ -205,6 +205,13 @@
       "symbol": "MOT",
       "decimal": 18,
       "usd_id":"olympus-labs"
+    },
+    "ABT": {
+      "name": "ArcBlock",
+      "address": "0xb98d4c97425d9908e66e53a6fdf673acca0be986",
+      "decimal": 18,
+      "symbol":"ABT",        
+      "usd_id":"arcblock"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
