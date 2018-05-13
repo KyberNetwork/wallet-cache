@@ -45,6 +45,8 @@ func main() {
 	//runFetchData(persisterIns, fetchRateUSD, fertcherIns, 600)
 	runFetchData(persisterIns, fetchRateUSDEther, fertcherIns, 600)
 
+	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, 86400)
+
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
@@ -185,6 +187,17 @@ func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	} else {
 		persister.SetNewEvents(false)
 	}
+}
+
+func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	generalInfo, err := fetcher.GetGeneralInfoTokens()
+	if err != nil {
+		log.Print(err)
+		persister.SetGeneralInfoTokens(false)
+		return
+	}
+	persister.SaveGeneralInfoTokens(generalInfo)
+	persister.SetGeneralInfoTokens(true)
 }
 
 // func fetchKyberEnable(persister persister.Persister, fetcher *fetcher.Fetcher) {
