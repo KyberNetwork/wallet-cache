@@ -212,6 +212,13 @@
       "decimal": 18,
       "symbol":"ABT",        
       "usd_id":"arcblock"
+    },
+    "ENJ": {
+      "name": "Enjin Coin",
+      "address": "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c",
+      "decimal": 18,
+      "symbol":"ENJ",        
+      "usd_id":"enjin-coin"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
