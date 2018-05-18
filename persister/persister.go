@@ -30,26 +30,37 @@ type RateUSD struct {
 }
 
 type Persister interface {
-	GetRate() *[]ethereum.Rate
-	SaveRate(*[]ethereum.Rate) error
-	SetNewRate(bool)
-	GetIsNewRate() bool
+	SetRateToken(map[string]ethereum.Token)
 
-	GetEvent() []ethereum.EventHistory
-	SaveEvent(*[]ethereum.EventHistory) error
-	GetIsNewEvent() bool
-	SetNewEvents(bool)
+	GetRate() map[string]*ethereum.RateInfo
 
-	GetLatestBlock() string
-	GetIsNewLatestBlock() bool
-	SaveLatestBlock(string) error
-	SetNewLatestBlock(bool)
+	SaveRate(*[]ethereum.Rate)
+	//	SaveNewRate(bool)
+	//GetIsNewRate() bool
 
-	GetRateUSD() []RateUSD
-	GetIsNewRateUSD() bool
-	//SaveRateUSD([]io.ReadCloser) error
-	SaveRateUSD(string) error
-	SetNewRateUSD(bool)
+	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
+	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
+	//SetIsNewGeneralInfoTokens(bool)
+
+	SaveNewRateUsdEther(bool)
+	SaveRateUSDEther(string)
+	GetIsNewRateUsdEther() bool
+	GetRateUSDEther() string
+
+	// GetEvent() []ethereum.EventHistory
+	// SaveEvent(*[]ethereum.EventHistory) error
+	// GetIsNewEvent() bool
+	// SetNewEvents(bool)
+
+	// GetLatestBlock() string
+	// GetIsNewLatestBlock() bool
+	// SaveLatestBlock(string) error
+	// SetNewLatestBlock(bool)
+
+	// GetRateUSD() []RateUSD
+	// GetIsNewRateUSD() bool
+	// SaveRateUSD(string) error
+	// SetNewRateUSD(bool)
 
 	SaveKyberEnabled(bool)
 	SetNewKyberEnabled(bool)

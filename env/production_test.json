@@ -1,0 +1,211 @@
+{
+  "connections":[
+    {
+      "endPoint" : "https://semi-node.kyber.network",
+      "type": "node"
+    }, 
+    {
+      "endPoint": "https://mainnet.infura.io",
+      "type": "node"
+    },
+    {
+      "endPoint": "https://api.etherscan.io",
+      "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",
+      "type": "etherscan"
+    },    
+    {
+      "endPoint": "https://api.mycryptoapi.com/eth",
+      "type": "node"
+    },
+    {
+      "endPoint": "https://mew.giveth.io/",
+      "type": "node"
+    }
+  ],
+  "api_usd":"https://api.coinmarketcap.com",
+  "tokens": {
+    "ETH": {
+      "name": "Ethereum",
+      "symbol": "ETH",
+      "icon": "eth.svg",
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "decimal": 18,
+      "usd_id":"1027"
+    },
+    "KNC": {
+      "name": "KyberNetwork",
+      "symbol": "KNC",
+      "address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
+      "decimal": 18,
+      "usd_id":"1982"
+    },
+    "DAI": {
+      "name" : "DAI",
+      "symbol": "DAI",
+      "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
+      "decimal": 18,
+      "usd_id":"2308"
+    },
+    "OMG": {
+      "name": "OmiseGO",
+      "symbol": "OMG",
+      "address": "0xd26114cd6ee289accf82350c8d8487fedb8a0c07",
+      "decimal": 18,
+      "usd_id":"1808"
+    },
+    "EOS": {
+      "name": "Eos",
+      "symbol": "EOS",
+      "address": "0x86fa049857e0209aa7d9e616f7eb3b3b78ecfdb0",
+      "decimal": 18,
+      "usd_id":"2644"
+    },
+    "SNT": {
+      "name":"Status",
+      "address": "0x744d70fdbe2ba4cf95131626614a1763df805b9e",
+      "symbol": "SNT",
+      "decimal": 18,
+      "usd_id":"1759"
+    },
+    "ELF": {
+      "name":"Aelf",
+      "address": "0xbf2179859fc6d5bee9bf9158632dc51678a4100e",
+      "symbol": "ELF",
+      "decimal": 18,
+      "usd_id":"2299"
+    },
+    "POWR": {
+      "name":"Power Ledger",
+      "address": "0x595832f8fc6bf59c85c527fec3740a1b7a361269",
+      "symbol": "POWR",
+      "decimal": 6,
+      "usd_id":"2132"
+    },
+    "MANA": {
+      "name":"Mana",
+      "address": "0x0f5d2fb29fb7d3cfee444a200298f468908cc942",
+      "symbol": "MANA",
+      "decimal": 18,
+      "usd_id":"1966"
+    },
+    "BAT": {
+      "name":"Basic Attention Token",
+      "address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+      "symbol": "BAT",
+      "decimal": 18,
+      "usd_id":"1697"
+    },
+    "REQ": {
+      "name":"Request",
+      "address": "0x8f8221afbb33998d8584a2b05749ba73c37a938a",
+      "symbol": "REQ",
+      "decimal": 18,
+      "usd_id":"2071"
+    },
+    "GTO": {
+      "name":"Gifto",
+      "address": "0xc5bbae50781be1669306b9e001eff57a2957b09d",
+      "symbol": "GTO",
+      "decimal": 5,
+      "usd_id":"2289"
+    },
+    "RDN": {
+      "name":"Raiden",
+      "address": "0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6",
+      "symbol": "RDN",
+      "decimal": 18,
+      "usd_id":"2161"
+    },
+    "APPC": {
+      "name":"AppCoins",
+      "address": "0x1a7a8bd9106f2b8d977e08582dc7d24c723ab0db",
+      "symbol": "APPC",
+      "decimal": 18,
+      "usd_id":"2344"
+    },
+    "ENG": {
+      "name":"Enigma",
+      "address": "0xf0ee6b27b759c9893ce4f094b49ad28fd15a23e4",
+      "symbol": "ENG",
+      "decimal": 8,
+      "usd_id":"2044"
+    },
+    "SALT": {
+      "name":"Salt",
+      "address": "0x4156d3342d5c385a87d264f90653733592000581",
+      "symbol": "SALT",
+      "decimal": 8,
+      "usd_id":"1996"
+    },
+    "BQX": {
+      "name" : "Ethos",
+      "address": "0x5af2be193a6abca9c8817001f45744777db30756",
+      "symbol": "BQX",
+      "decimal": 8,
+      "usd_id":"1817"
+    },
+    "ADX": {
+      "name": "AdEx",
+      "address": "0x4470bb87d77b963a013db939be332f927f2b992e",
+      "symbol": "ADX",
+      "decimal": 4,
+      "usd_id": "1768"
+    },
+    "AST": {
+      "name": "AirSwap",
+      "address": "0x27054b13b1b798b345b591a4d22e6562d47ea75a",
+      "symbol": "AST",
+      "decimal": 4,
+      "usd_id": "2058"
+    },
+    "RCN": {
+      "name": "Ripio Credit Network",
+      "address": "0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6",
+      "symbol": "RCN",
+      "decimal": 18,
+      "usd_id": "2096"
+    },
+    "ZIL": {
+      "name": "Zilliqa",
+      "address": "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
+      "symbol": "ZIL",
+      "decimal": 12,
+      "usd_id":"2469"
+    },
+    "LINK": {
+      "name": "Chain Link",
+      "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "symbol": "LINK",
+      "decimal": 18,
+      "usd_id":"1975"
+    },
+    "STORM": {
+      "name": "Storm",
+      "address": "0xd0a4b8946cb52f0661273bfbc6fd0e0c75fc6433",
+      "symbol": "STORM",
+      "decimal": 18,
+      "usd_id":"2297"
+    },
+    "IOST": {
+      "name": "IOStoken",
+      "address": "0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab",
+      "symbol": "IOST",
+      "decimal": 18,
+      "usd_id":"2405"
+    },
+    "MOT": {
+      "name": "Olympus Labs",
+      "address": "0x263c618480dbe35c300d8d5ecda19bbb986acaed",
+      "symbol": "MOT",
+      "decimal": 18,
+      "usd_id":"2327"
+    }
+  },
+  "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
+  "network": "0x964f35fae36d75b1e72770e244f6595b68508cf5",
+  "wrapper": "0x533e6d1ffa2b96cf9c157475c76c38d1b13bc584",
+  "trade_topic":"0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
+  "endpoint": "wss://mainnet.infura.io/ws",
+  "averageBlockTime": 15000,
+  "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json"
+}
