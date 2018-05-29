@@ -187,6 +187,7 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 
 		}
 	}
+
 	return generalInfo
 	// for _, fetIns := range self.fetIns {
 	// 	result, err := fetIns.GetGeneralInfo(usdId)

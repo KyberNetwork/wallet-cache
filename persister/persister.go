@@ -30,9 +30,9 @@ type RateUSD struct {
 }
 
 type Persister interface {
-	SetRateToken(map[string]ethereum.Token)
+	//	SetRateToken(map[string]ethereum.Token)
 
-	GetRate() map[string]*ethereum.RateInfo
+	GetRate() *[]ethereum.Rate
 
 	SaveRate(*[]ethereum.Rate)
 	//	SaveNewRate(bool)
@@ -42,25 +42,25 @@ type Persister interface {
 	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
 	//SetIsNewGeneralInfoTokens(bool)
 
-	SaveNewRateUsdEther(bool)
-	SaveRateUSDEther(string)
-	GetIsNewRateUsdEther() bool
-	GetRateUSDEther() string
+	// SaveNewRateUsdEther(bool)
+	// SaveRateUSDEther(string)
+	// GetIsNewRateUsdEther() bool
+	// GetRateUSDEther() string
 
 	// GetEvent() []ethereum.EventHistory
 	// SaveEvent(*[]ethereum.EventHistory) error
 	// GetIsNewEvent() bool
 	// SetNewEvents(bool)
 
-	// GetLatestBlock() string
-	// GetIsNewLatestBlock() bool
-	// SaveLatestBlock(string) error
-	// SetNewLatestBlock(bool)
+	GetLatestBlock() string
+	GetIsNewLatestBlock() bool
+	SaveLatestBlock(string) error
+	SetNewLatestBlock(bool)
 
-	// GetRateUSD() []RateUSD
-	// GetIsNewRateUSD() bool
-	// SaveRateUSD(string) error
-	// SetNewRateUSD(bool)
+	GetRateUSD() []RateUSD
+	GetIsNewRateUSD() bool
+	SaveRateUSD(string) error
+	SetNewRateUSD(bool)
 
 	SaveKyberEnabled(bool)
 	SetNewKyberEnabled(bool)

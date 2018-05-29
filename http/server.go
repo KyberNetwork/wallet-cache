@@ -44,36 +44,36 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 // 	)
 // }
 
-// func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
-// 	if !self.persister.GetIsNewLatestBlock() {
-// 		c.JSON(
-// 			http.StatusOK,
-// 			gin.H{"success": false},
-// 		)
-// 		return
-// 	}
-// 	blockNum := self.persister.GetLatestBlock()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": blockNum},
-// 	)
-// }
+func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
+	if !self.persister.GetIsNewLatestBlock() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+	blockNum := self.persister.GetLatestBlock()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": blockNum},
+	)
+}
 
-// func (self *HTTPServer) GetRateUSD(c *gin.Context) {
-// 	if !self.persister.GetIsNewRateUSD() {
-// 		c.JSON(
-// 			http.StatusOK,
-// 			gin.H{"success": false},
-// 		)
-// 		return
-// 	}
+func (self *HTTPServer) GetRateUSD(c *gin.Context) {
+	if !self.persister.GetIsNewRateUSD() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
 
-// 	rates := self.persister.GetRateUSD()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": rates},
-// 	)
-// }
+	rates := self.persister.GetRateUSD()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": rates},
+	)
+}
 
 func (self *HTTPServer) GetKyberEnabled(c *gin.Context) {
 	if !self.persister.GetNewKyberEnabled() {
@@ -157,8 +157,9 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 func (self *HTTPServer) Run() {
 	//self.r.GET("/getRate", self.GetRate)
 	//self.r.GET("/getHistoryOneColumn", self.GetEvent)
-	//self.r.GET("/getLatestBlock", self.GetLatestBlock)
+	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 
+	self.r.GET("/getRateUSD", self.GetRateUSD)
 	self.r.GET("/getRate", self.GetRate)
 	self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
