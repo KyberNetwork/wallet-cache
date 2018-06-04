@@ -235,6 +235,12 @@
       "decimal": 18,
       "symbol":"PAL", 
       "address": "0xfedae5642668f8636a11987ff386bfd215f942ee"
+    },
+    "ELEC": {
+      "name": "ElectrifyAsia",
+      "decimal": 18,
+      "address": "0xd49ff13661451313ca1553fd6954bd1d9b6e02b9",
+      "symbol":"ELEC"
     }
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
