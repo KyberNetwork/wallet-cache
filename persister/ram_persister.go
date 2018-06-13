@@ -27,8 +27,8 @@ type RamPersister struct {
 	rateUSD      []RateUSD
 	isNewRateUsd bool
 
-	// events     []ethereum.EventHistory
-	// isNewEvent bool
+	events     []ethereum.EventHistory
+	isNewEvent bool
 
 	maxGasPrice      string
 	isNewMaxGasPrice bool
@@ -59,8 +59,8 @@ func NewRamPersister() (*RamPersister, error) {
 	rateUSD := make([]RateUSD, 0)
 	isNewRateUsd := true
 
-	// events := make([]ethereum.EventHistory, 0)
-	// isNewEvent := true
+	events := make([]ethereum.EventHistory, 0)
+	isNewEvent := true
 
 	maxGasPrice := "50"
 	isNewMaxGasPrice := true
@@ -75,7 +75,7 @@ func NewRamPersister() (*RamPersister, error) {
 	//isNewTokenInfo := true
 
 	persister := &RamPersister{
-		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, isNewRateUsd, maxGasPrice, isNewMaxGasPrice,
+		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
 		&gasPrice, isNewGasPrice, tokenInfo,
 	}
 	return persister, nil
@@ -336,4 +336,30 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewLatestBlock = isNew
+}
+
+/////-----------------------------------
+func (self *RamPersister) GetEvent() []ethereum.EventHistory {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.events
+}
+
+func (self *RamPersister) GetIsNewEvent() bool {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.isNewEvent
+}
+
+func (self *RamPersister) SaveEvent(events *[]ethereum.EventHistory) error {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.events = *events
+	return nil
+}
+
+func (self *RamPersister) SetNewEvents(isNew bool) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.isNewEvent = isNew
 }

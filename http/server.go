@@ -28,21 +28,21 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 	return
 }
 
-// func (self *HTTPServer) GetEvent(c *gin.Context) {
-// 	if !self.persister.GetIsNewEvent() {
-// 		c.JSON(
-// 			http.StatusOK,
-// 			gin.H{"success": false},
-// 		)
-// 		return
-// 	}
+func (self *HTTPServer) GetEvent(c *gin.Context) {
+	if !self.persister.GetIsNewEvent() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
 
-// 	events := self.persister.GetEvent()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": events},
-// 	)
-// }
+	events := self.persister.GetEvent()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": events},
+	)
+}
 
 func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
 	if !self.persister.GetIsNewLatestBlock() {
@@ -156,7 +156,7 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 
 func (self *HTTPServer) Run() {
 	//self.r.GET("/getRate", self.GetRate)
-	//self.r.GET("/getHistoryOneColumn", self.GetEvent)
+	self.r.GET("/getHistoryOneColumn", self.GetEvent)
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 
 	self.r.GET("/getRateUSD", self.GetRateUSD)

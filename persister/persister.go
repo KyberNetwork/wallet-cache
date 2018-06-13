@@ -47,10 +47,10 @@ type Persister interface {
 	// GetIsNewRateUsdEther() bool
 	// GetRateUSDEther() string
 
-	// GetEvent() []ethereum.EventHistory
-	// SaveEvent(*[]ethereum.EventHistory) error
-	// GetIsNewEvent() bool
-	// SetNewEvents(bool)
+	GetEvent() []ethereum.EventHistory
+	SaveEvent(*[]ethereum.EventHistory) error
+	GetIsNewEvent() bool
+	SetNewEvents(bool)
 
 	GetLatestBlock() string
 	GetIsNewLatestBlock() bool
