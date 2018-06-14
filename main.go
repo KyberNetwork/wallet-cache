@@ -59,7 +59,7 @@ func main() {
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
 	//run server
-	server := http.NewHTTPServer(":3001", persisterIns)
+	server := http.NewHTTPServer(":4000", persisterIns)
 	server.Run()
 
 	//init fetch data
