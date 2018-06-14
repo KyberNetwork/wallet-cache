@@ -7,4 +7,4 @@ services:
     env_file:
       - env_production.env
     ports:
-      - "8443:8443"
+      - "3001:3001"
