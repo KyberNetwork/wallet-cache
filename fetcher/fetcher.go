@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 )
@@ -184,7 +185,7 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 				generalInfo[token.Symbol] = result
 				break
 			}
-
+			time.Sleep(5 * time.Second)
 		}
 	}
 
