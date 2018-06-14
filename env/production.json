@@ -248,11 +248,18 @@
       "address": "0xd49ff13661451313ca1553fd6954bd1d9b6e02b9",
       "symbol": "ELEC",
       "usd_id":"2573"
+    },
+    "BBO": {
+      "name": "Bigbom",
+      "decimal": 18,
+      "address": "0x84f7c44b6fed1080f647e354d552595be2cc602f",
+      "symbol":"BBO",
+      "usd_id":"2836"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
   "network": "0x964f35fae36d75b1e72770e244f6595b68508cf5",
-  "wrapper": "0x533e6d1ffa2b96cf9c157475c76c38d1b13bc584",
+  "wrapper": "0x6172afc8c00c46e0d07ce3af203828198194620a",
   "trade_topic":"0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
   "endpoint": "wss://mainnet.infura.io/ws",
   "averageBlockTime": 15000,
