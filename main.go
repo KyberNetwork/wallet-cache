@@ -38,6 +38,8 @@ func main() {
 	}
 
 	fmt.Print("Start")
+	tokenNum := 33
+	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 5)
 
 	//	initRateToken(persisterIns, fertcherIns)
 
@@ -51,7 +53,7 @@ func main() {
 
 	//runFetchData(persisterIns, fetchRateUSDEther, fertcherIns, 600)
 
-	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, 7200)
+	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
 
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 20)
@@ -82,18 +84,11 @@ func main() {
 // }
 
 func runFetchData(persister persister.Persister, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
-	fn(persister, fertcherIns)
-	ticker := time.NewTicker(5 * time.Second)
-	quit := make(chan struct{})
+	ticker := time.NewTicker(interval * time.Second)
 	go func() {
 		for {
-			select {
-			case <-ticker.C:
-				fn(persister, fertcherIns)
-			case <-quit:
-				ticker.Stop()
-				return
-			}
+			fn(persister, fertcherIns)
+			<-ticker.C
 		}
 	}()
 }
