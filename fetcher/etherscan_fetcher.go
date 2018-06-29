@@ -192,3 +192,31 @@ func (self *Etherscan) GetRateUsdEther() (string, error) {
 	}
 	return rateItem[0].PriceUsd, nil
 }
+
+func (self *Etherscan) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo, error) {
+	response, err := http.Get("https://api.coinmarketcap.com/v2/ticker/" + usdId + "/?convert=ETH")
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	defer (response.Body).Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	tokenItem := map[string]ethereum.TokenGeneralInfo{}
+	err = json.Unmarshal(b, &tokenItem)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	if data, ok := tokenItem["data"]; ok {
+		data.MarketCap = data.Quotes["ETH"].MarketCap
+		return &data, nil
+	}
+	err = errors.New("Cannot find data key in return quotes of ticker")
+	log.Print(err)
+	return nil, err
+}

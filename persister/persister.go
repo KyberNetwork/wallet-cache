@@ -30,10 +30,22 @@ type RateUSD struct {
 }
 
 type Persister interface {
+	//	SetRateToken(map[string]ethereum.Token)
+
 	GetRate() *[]ethereum.Rate
-	SaveRate(*[]ethereum.Rate) error
-	SetNewRate(bool)
-	GetIsNewRate() bool
+
+	SaveRate(*[]ethereum.Rate)
+	//	SaveNewRate(bool)
+	//GetIsNewRate() bool
+
+	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
+	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
+	//SetIsNewGeneralInfoTokens(bool)
+
+	// SaveNewRateUsdEther(bool)
+	// SaveRateUSDEther(string)
+	// GetIsNewRateUsdEther() bool
+	// GetRateUSDEther() string
 
 	GetEvent() []ethereum.EventHistory
 	SaveEvent(*[]ethereum.EventHistory) error
@@ -47,7 +59,6 @@ type Persister interface {
 
 	GetRateUSD() []RateUSD
 	GetIsNewRateUSD() bool
-	//SaveRateUSD([]io.ReadCloser) error
 	SaveRateUSD(string) error
 	SetNewRateUSD(bool)
 

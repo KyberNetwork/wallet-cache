@@ -30,3 +30,54 @@ type GasPrice struct {
 	Low      string `json:"low"`
 	Default  string `json:"default"`
 }
+
+type Token struct {
+	Name    string `json:"name"`
+	Symbol  string `json:"symbol"`
+	Address string `json:"address"`
+	Decimal int    `json:"decimal"`
+	UsdId   string `json:"usd_id"`
+}
+
+type QuoInfo struct {
+	MarketCap float64 `json:"market_cap"`
+}
+
+type TokenGeneralInfo struct {
+	CirculatingSupply float64            `json:"circulating_supply"`
+	TotalSupply       float64            `json:"total_supply"`
+	MaxSupply         float64            `json:"max_supply"`
+	MarketCap         float64            `json:"market_cap"`
+	Quotes            map[string]QuoInfo `json:"quotes`
+}
+
+// type TokenInfoData struct {
+// 	Data TokenGeneralInfo `data`
+// }
+
+type CandleTicker struct {
+	SellPrice string `json:"sell_price"`
+	BuyPrice  string `json:"buy_price"`
+	UnixTime  uint64 `json:"unix_time"`
+}
+
+type TokenInfo struct {
+	TokenSymbol       string                  `json:"symbol"`
+	CirculatingSupply string                  `json:"circulating_supply"`
+	TotalSupply       string                  `json:"total_supply"`
+	MaxSupply         string                  `json:"max_supply"`
+	MarketCap         string                  `json:"market_cap"`
+	SellPrice         string                  `json:"sell_price"`
+	BuyPrice          string                  `json:"buy_price"`
+	Last7days         map[uint64]CandleTicker `json:"last_7d"`
+}
+
+type RateHistory struct {
+	SellPrice string `json:"sell_price"`
+	BuyPrice  string `json:"buy_price"`
+}
+type RateInfo struct {
+	LastSell      string                 `json:"last_sell"`
+	LastBuy       string                 `json:"last_buy"`
+	HistoryRecord map[int64]*RateHistory `json:"history_record"`
+}

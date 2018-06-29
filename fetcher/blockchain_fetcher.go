@@ -166,3 +166,9 @@ func (self *BlockchainFetcher) GetRateUsdEther() (string, error) {
 	}
 	return rateItem[0].PriceUsd, nil
 }
+
+func (self *BlockchainFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo, error) {
+	err := errors.New("Blockchain is not support this api")
+	//log.Print(err)
+	return nil, err
+}

@@ -18,7 +18,7 @@
       "icon": "eth.svg",
       "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
       "decimal": 18,
-      "usd_id":"ethereum"
+      "usd_id":"1027"      
     },
     "KNC": {
       "name": "KyberNetwork",
@@ -26,7 +26,7 @@
       "icon": "knc.svg",
       "address": "0x4e470dc7321e84ca96fcaedd0c8abcebbaeb68c6",
       "decimal": 18,
-      "usd_id":"kyber-network"
+      "usd_id":"1982"
     },
     "OMG": {
       "name": "OmiseGO",
@@ -34,7 +34,7 @@
       "icon": "omg.svg",
       "address": "0x4bfba4a8f28755cb2061c413459ee562c6b9c51b",
       "decimal": 18,
-      "usd_id":"omisego"
+      "usd_id":"1808"
     },
     "EOS": {
       "name": "Eos",
@@ -42,7 +42,7 @@
       "icon": "eos.svg",
       "address": "0xd5b4218b950a53ff07985e2d88346925c335eae7",
       "decimal": 18,
-      "usd_id":"eos"
+      "usd_id":"1765"
     },
     "SNT": {
       "name":"Status",
@@ -50,7 +50,7 @@
       "symbol": "SNT",
       "icon": "snt.svg",
       "decimal": 18,
-      "usd_id":"status"
+      "usd_id":"1759"
     },
     "ELF": {
       "name":"Aelf",
@@ -58,7 +58,7 @@
       "symbol": "ELF",
       "icon": "aelf.svg",
       "decimal": 18,
-      "usd_id":"aelf"
+      "usd_id":"2299"
     },
     "POWR": {
       "name":"Power Ledger",
@@ -66,7 +66,7 @@
       "symbol": "POWR",
       "icon": "pwr.svg",
       "decimal": 6,
-      "usd_id":"power-ledger"
+      "usd_id":"2132"
     },
     "MANA": {
       "name":"Mana",
@@ -74,7 +74,7 @@
       "symbol": "MANA",
       "icon": "mana.svg",
       "decimal": 18,
-      "usd_id":"decentraland"
+      "usd_id":"1966"
     },
     "BAT": {
       "name":"Basic Attention Token",
@@ -82,7 +82,7 @@
       "symbol": "BAT",
       "icon": "bat.svg",
       "decimal": 18,
-      "usd_id":"basic-attention-token"
+      "usd_id":"1697"
     },
     "REQ": {
       "name":"Request",
@@ -90,7 +90,7 @@
       "symbol": "REQ",
       "icon": "req.svg",
       "decimal": 18,
-      "usd_id":"request-network"
+      "usd_id":"2071"
     },
     "GTO": {
       "name":"Gifto",
@@ -98,6 +98,9 @@
       "symbol": "GTO",
       "icon": "gifto.svg",
       "decimal": 5,
+<<<<<<< HEAD
+      "usd_id":"2289"
+=======
       "usd_id":"gifto"
     },
     "RDN": {
@@ -209,6 +212,7 @@
       "address": "0xa94758d328af7ef1815e73053e95b5f86588c16d",
       "symbol" : "BBO",
       "decimal": 18
+>>>>>>> d1817770f5bc459d7ebb1cf5cc7cecb723ffbab9
     }
   },
   "reserve": "0x0fc1cf3e7dd049f7b42e6823164a64f76fc06be0",

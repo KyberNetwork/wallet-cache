@@ -20,14 +20,6 @@ type HTTPServer struct {
 }
 
 func (self *HTTPServer) GetRate(c *gin.Context) {
-	if !self.persister.GetIsNewRate() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": false},
-		)
-		return
-	}
-
 	rates := self.persister.GetRate()
 	c.JSON(
 		http.StatusOK,
@@ -131,6 +123,14 @@ func (self *HTTPServer) GetGasPrice(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) GetTokenInfo(c *gin.Context) {
+	tokenInfo := self.persister.GetTokenInfo()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": tokenInfo},
+	)
+}
+
 func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 	dat, err := ioutil.ReadFile("error.log")
 	if err != nil {
@@ -155,15 +155,18 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 // }
 
 func (self *HTTPServer) Run() {
-	self.r.GET("/getRate", self.GetRate)
+	//self.r.GET("/getRate", self.GetRate)
 	self.r.GET("/getHistoryOneColumn", self.GetEvent)
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 
 	self.r.GET("/getRateUSD", self.GetRateUSD)
+	self.r.GET("/getRate", self.GetRate)
+	self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
 	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
 	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
 	self.r.GET("/getGasPrice", self.GetGasPrice)
+
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if os.Getenv("KYBER_ENV") != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)

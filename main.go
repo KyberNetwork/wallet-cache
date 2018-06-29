@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -36,17 +37,26 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Print("Start")
+	tokenNum := 33
+	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 5)
+
+	//	initRateToken(persisterIns, fertcherIns)
+
 	//run fetch data
 	runFetchData(persisterIns, fetchKyberEnabled, fertcherIns, 10)
 	runFetchData(persisterIns, fetchMaxGasPrice, fertcherIns, 60)
 
 	runFetchData(persisterIns, fetchGasPrice, fertcherIns, 30)
 
-	//runFetchData(persisterIns, fetchRateUSD, fertcherIns, 600)
-	runFetchData(persisterIns, fetchRateUSDEther, fertcherIns, 600)
+	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 600)
+
+	//runFetchData(persisterIns, fetchRateUSDEther, fertcherIns, 600)
+
+	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
 
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
-	runFetchData(persisterIns, fetchRate, fertcherIns, 10)
+	runFetchData(persisterIns, fetchRate, fertcherIns, 20)
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
@@ -68,19 +78,17 @@ func main() {
 // 	log.SetOutput(f)
 // }
 
+// func initRateToken(persister persister.Persister, fertcherIns *fetcher.Fetcher) {
+// 	tokens := fertcherIns.GetListToken()
+// 	persister.SetRateToken(tokens)
+// }
+
 func runFetchData(persister persister.Persister, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
-	fn(persister, fertcherIns)
-	ticker := time.NewTicker(5 * time.Second)
-	quit := make(chan struct{})
+	ticker := time.NewTicker(interval * time.Second)
 	go func() {
 		for {
-			select {
-			case <-ticker.C:
-				fn(persister, fertcherIns)
-			case <-quit:
-				ticker.Stop()
-				return
-			}
+			fn(persister, fertcherIns)
+			<-ticker.C
 		}
 	}()
 }
@@ -115,22 +123,7 @@ func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) 
 	persister.SaveKyberEnabled(enabled)
 }
 
-// func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
-// 	body, err := fetcher.GetRateUsd()
-// 	if err != nil {
-// 		log.Print(err)
-// 		persister.SetNewRateUSD(false)
-// 		return
-// 	}
-// 	err = persister.SaveRateUSD(body)
-// 	if err != nil {
-// 		log.Print(err)
-// 		persister.SetNewRateUSD(false)
-// 		return
-// 	}
-// }
-
-func fetchRateUSDEther(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	rateUSD, err := fetcher.GetRateUsdEther()
 	if err != nil {
 		log.Print(err)
@@ -144,6 +137,16 @@ func fetchRateUSDEther(persister persister.Persister, fetcher *fetcher.Fetcher) 
 		return
 	}
 }
+
+// func fetchRateUSDEther(persister persister.Persister, fetcher *fetcher.Fetcher) {
+// 	rateUSD, err := fetcher.GetRateUsdEther()
+// 	if err != nil {
+// 		log.Print(err)
+// 		persister.SaveNewRateUsdEther(false)
+// 		return
+// 	}
+// 	persister.SaveRateUSDEther(rateUSD)
+// }
 
 func fetchBlockNumber(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	blockNum, err := fetcher.GetLatestBlock()
@@ -164,11 +167,11 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	rates, err := fetcher.GetRate()
 	if err != nil {
 		log.Print(err)
-		persister.SetNewRate(false)
+		//persister.SetNewRate(false)
 		return
 	}
 	persister.SaveRate(rates)
-	persister.SetNewRate(true)
+	//	persister.SetNewRate(true)
 }
 
 func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
@@ -185,6 +188,19 @@ func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	} else {
 		persister.SetNewEvents(false)
 	}
+}
+
+func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	generalInfo := fetcher.GetGeneralInfoTokens()
+	persister.SaveGeneralInfoTokens(generalInfo)
+
+	// if err != nil {
+	// 	log.Print(err)
+	// 	persister.SetIsNewGeneralInfoTokens(false)
+	// 	return
+	// }
+	// persister.SaveGeneralInfoTokens(generalInfo)
+	// persister.SetIsNewGeneralInfoTokens(true)
 }
 
 // func fetchKyberEnable(persister persister.Persister, fetcher *fetcher.Fetcher) {

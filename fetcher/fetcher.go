@@ -8,17 +8,18 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 )
 
-type Token struct {
-	Name    string `json:"name"`
-	Symbol  string `json:"symbol"`
-	Address string `json:"address"`
-	Decimal int    `json:"decimal"`
-	UsdId   string `json:"usd_id"`
-}
+// type Token struct {
+// 	Name    string `json:"name"`
+// 	Symbol  string `json:"symbol"`
+// 	Address string `json:"address"`
+// 	Decimal int    `json:"decimal"`
+// 	UsdId   string `json:"usd_id"`
+// }
 
 type Connection struct {
 	Endpoint string `json:"endPoint"`
@@ -27,8 +28,8 @@ type Connection struct {
 }
 
 type InfoData struct {
-	ApiUsd string           `json:"api_usd"`
-	Tokens map[string]Token `json:"tokens"`
+	ApiUsd string                    `json:"api_usd"`
+	Tokens map[string]ethereum.Token `json:"tokens"`
 	//ServerLog ServerLog        `json:"server_logs"`
 	Connections []Connection `json:"connections"`
 
@@ -92,6 +93,12 @@ func NewFetcher() (*Fetcher, error) {
 			log.Print(err)
 			return nil, err
 		}
+	case "production_test":
+		file, err = ioutil.ReadFile("env/production_test.json")
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
 	default:
 		file, err = ioutil.ReadFile("env/internal_mainnet.json")
 		if err != nil {
@@ -140,6 +147,10 @@ func NewFetcher() (*Fetcher, error) {
 	return fetcher, nil
 }
 
+func (self *Fetcher) GetListToken() map[string]ethereum.Token {
+	return self.info.Tokens
+}
+
 func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	usdId := make([]string, 0)
 	for _, token := range self.info.Tokens {
@@ -158,6 +169,38 @@ func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	return nil, errors.New("Cannot get rate USD")
 }
 
+func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInfo {
+	generalInfo := map[string]*ethereum.TokenGeneralInfo{}
+	//	usdId := make([]string, 0)
+	for _, token := range self.info.Tokens {
+		if token.UsdId != "" {
+			//usdId = append(usdId, token.UsdId)
+			for _, fetIns := range self.fetIns {
+				result, err := fetIns.GetGeneralInfo(token.UsdId)
+				if err != nil {
+					log.Print(err)
+					continue
+				}
+				//return result, nil
+				generalInfo[token.Symbol] = result
+				break
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}
+
+	return generalInfo
+	// for _, fetIns := range self.fetIns {
+	// 	result, err := fetIns.GetGeneralInfo(usdId)
+	// 	if err != nil {
+	// 		log.Print(err)
+	// 		continue
+	// 	}
+	// 	return result, nil
+	// }
+	// return nil, errors.New("Cannot get rate USD")
+}
+
 func (self *Fetcher) GetRateUsdEther() (string, error) {
 	//rateUsd, err := fetIns.GetRateUsdEther()
 
@@ -167,6 +210,7 @@ func (self *Fetcher) GetRateUsdEther() (string, error) {
 	// }
 	for _, fetIns := range self.fetIns {
 		rateUsd, err := fetIns.GetRateUsdEther()
+		//fmt.Print(rateUsd)
 		if err != nil {
 			log.Print(err)
 			continue

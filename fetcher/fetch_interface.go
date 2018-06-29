@@ -22,6 +22,8 @@ type FetcherInterface interface {
 	GetTypeName() string
 
 	GetRateUsdEther() (string, error)
+
+	GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
