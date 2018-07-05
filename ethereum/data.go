@@ -41,6 +41,7 @@ type Token struct {
 
 type QuoInfo struct {
 	MarketCap float64 `json:"market_cap"`
+	Volume24h float64 `json:"volume_24h"`
 }
 
 type TokenGeneralInfo struct {
