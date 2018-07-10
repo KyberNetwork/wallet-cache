@@ -226,8 +226,8 @@ func (self *Etherscan) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo,
 
 // get data from tracker.kyber
 
-func (self *Etherscan) GetTrackerData() (map[string]*ethereum.Rates, error) {
-	trackerAPI := "https://tracker.kyber.network/api/tokens/rates?api_key=" + API_KEY_TRACKER
+func (self *Etherscan) GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error) {
+	trackerAPI := trackerEndpoint + "/api/tokens/rates?api_key=" + API_KEY_TRACKER
 	response, err := http.Get(trackerAPI)
 	if err != nil {
 		log.Print(err)

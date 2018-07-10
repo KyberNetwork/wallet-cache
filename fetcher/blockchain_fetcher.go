@@ -173,7 +173,7 @@ func (self *BlockchainFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGene
 	return nil, err
 }
 
-func (self *BlockchainFetcher) GetTrackerData() (map[string]*ethereum.Rates, error) {
+func (self *BlockchainFetcher) GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error) {
 	trackerData := map[string]*ethereum.Rates{}
 	err := errors.New("Blockchain is not support this api")
 	//log.Print(err)

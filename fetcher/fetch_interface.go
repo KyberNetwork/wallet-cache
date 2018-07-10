@@ -26,7 +26,7 @@ type FetcherInterface interface {
 	GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
 
 	// get data from tracker
-	GetTrackerData() (map[string]*ethereum.Rates, error)
+	GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error)
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
