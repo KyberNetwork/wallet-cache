@@ -60,6 +60,8 @@ func main() {
 	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
+	runFetchData(persisterIns, fetchTrackerData, fertcherIns, 300)
+
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns)
 	server.Run()
@@ -213,3 +215,14 @@ func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetc
 // 	persister.SaveKyberEnable(enable)
 // 	persister.SetNewKyberEnable(true)
 // }
+
+func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	data, err := fetcher.FetchTrackerData()
+	if err != nil {
+		log.Print(err)
+		persister.SetIsNewMarketInfo(false)
+		return
+	}
+	persister.SaveMarketData(data)
+	persister.SetIsNewMarketInfo(true)
+}

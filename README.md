@@ -24,3 +24,4 @@ docker-compose -f docker-compose-staging.yml up --build
  - /getKyberEnabled
  - /getMaxGasPrice
  - /getGasPrice
+ - /getMarketInfo
