@@ -396,6 +396,11 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates) 
 			marketInfo := ethereum.NewMarketInfo(quotes, info)
 			result[symbol] = marketInfo
 			// resultMarketInfo = append(resultMarketInfo, result)
+		} else {
+			marketInfo := &ethereum.MarketInfo{
+				Rates: info,
+			}
+			result[symbol] = marketInfo
 		}
 	}
 	self.marketInfo = result
