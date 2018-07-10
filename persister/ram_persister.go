@@ -42,6 +42,9 @@ type RamPersister struct {
 	tokenInfo map[string]*ethereum.TokenGeneralInfo
 
 	//isNewTokenInfo bool
+
+	marketInfo      map[string]*ethereum.MarketInfo
+	isNewMarketInfo bool
 }
 
 func NewRamPersister() (*RamPersister, error) {
@@ -74,9 +77,12 @@ func NewRamPersister() (*RamPersister, error) {
 	tokenInfo := map[string]*ethereum.TokenGeneralInfo{}
 	//isNewTokenInfo := true
 
+	marketInfo := map[string]*ethereum.MarketInfo{}
+	isNewMarketInfo := true
+
 	persister := &RamPersister{
 		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
-		&gasPrice, isNewGasPrice, tokenInfo,
+		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, isNewMarketInfo,
 	}
 	return persister, nil
 }
@@ -362,4 +368,47 @@ func (self *RamPersister) SetNewEvents(isNew bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewEvent = isNew
+}
+
+// ----------------------------------------
+// return data from kyber tracker
+
+func (self *RamPersister) GetMarketData(page, pageSize uint64) map[string]*ethereum.MarketInfo {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	// marketInfo := self.marketInfo
+	// beginPosition := (page - 1) * pageSize
+	// result := []map[string]*ethereum.MarketInfo{}
+	// for index := beginPosition; index < beginPosition+pageSize && int(index) < len(marketInfo); index++ {
+	// 	result = append(result, marketInfo[index])
+	// }
+	return self.marketInfo
+}
+
+func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	// resultMarketInfo := []map[string]*ethereum.MarketInfo{}
+	result := map[string]*ethereum.MarketInfo{}
+	for symbol, info := range marketRate {
+		if currentToken := self.tokenInfo[symbol]; currentToken != nil {
+			quotes := currentToken.Quotes
+			marketInfo := ethereum.NewMarketInfo(quotes, info)
+			result[symbol] = marketInfo
+			// resultMarketInfo = append(resultMarketInfo, result)
+		}
+	}
+	self.marketInfo = result
+}
+
+func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.isNewMarketInfo = isNewMarketInfo
+}
+
+func (self *RamPersister) GetIsNewMarketInfo() bool {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.isNewMarketInfo
 }

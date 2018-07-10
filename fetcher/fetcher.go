@@ -371,3 +371,15 @@ func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error
 	}
 	return nil, errors.New("Cannot get events")
 }
+
+func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.GetTrackerData()
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return result, nil
+	}
+	return nil, errors.New("Cannot get data from tracker")
+}

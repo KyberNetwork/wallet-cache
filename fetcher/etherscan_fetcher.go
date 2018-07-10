@@ -13,6 +13,9 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
+// api_key for tracker.kyber
+const API_KEY_TRACKER = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
+
 type Etherscan struct {
 	url      string
 	apiKey   string
@@ -219,4 +222,28 @@ func (self *Etherscan) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo,
 	err = errors.New("Cannot find data key in return quotes of ticker")
 	log.Print(err)
 	return nil, err
+}
+
+// get data from tracker.kyber
+
+func (self *Etherscan) GetTrackerData() (map[string]*ethereum.Rates, error) {
+	trackerAPI := "https://tracker.kyber.network/api/tokens/rates?api_key=" + API_KEY_TRACKER
+	response, err := http.Get(trackerAPI)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	defer (response.Body).Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	trackerData := map[string]*ethereum.Rates{}
+	err = json.Unmarshal(b, &trackerData)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return trackerData, nil
 }
