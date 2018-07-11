@@ -346,7 +346,14 @@
       "address": "0x8dd5fbce2f6a956c3022ba3663759011dd51e73e",
       "symbol":"TUSD", 
       "usd_id":"2563"
-    } 
+    },
+    "TOMO": {
+      "name": "Tomocoin",
+      "decimal": 18,
+      "address": "0x8b353021189375591723e7384262f45709a3c3dc",
+      "symbol":"TOMO", 
+      "usd_id":"2570"
+    }
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
   "network": "0xc14f34233071543e979f6a79aa272b0ab1b4947d",
