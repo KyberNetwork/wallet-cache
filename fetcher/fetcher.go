@@ -45,6 +45,8 @@ type InfoData struct {
 	EthSymbol  string
 
 	AverageBlockTime int64 `json:"averageBlockTime"`
+
+	TrackerEndpoint string `json:"tracker_endpoint"`
 }
 
 type ResultRpc struct {
@@ -370,4 +372,16 @@ func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error
 		return events, nil
 	}
 	return nil, errors.New("Cannot get events")
+}
+
+func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.GetTrackerData(self.info.TrackerEndpoint)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return result, nil
+	}
+	return nil, errors.New("Cannot get data from tracker")
 }
