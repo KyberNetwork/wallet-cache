@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
+	// "os"
 	"runtime"
 	"time"
 
@@ -19,17 +19,17 @@ func main() {
 	runtime.GOMAXPROCS(numCPU)
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	f, err := os.OpenFile("error.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	//clear error log file
-	err = f.Truncate(0)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	log.SetOutput(f)
+	// f, err := os.OpenFile("error.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// //clear error log file
+	// err = f.Truncate(0)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer f.Close()
+	// log.SetOutput(f)
 
 	persisterIns, _ := persister.NewPersister("ram")
 	fertcherIns, err := fetcher.NewFetcher()
@@ -38,9 +38,8 @@ func main() {
 	}
 
 	fmt.Print("Start")
-	tokenNum := 33
+	tokenNum := fertcherIns.GetNumTokens()
 	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 5)
-
 	//	initRateToken(persisterIns, fertcherIns)
 
 	//run fetch data
@@ -223,6 +222,7 @@ func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		persister.SetIsNewMarketInfo(false)
 		return
 	}
-	persister.SaveMarketData(data)
+	tokens := fetcher.GetListToken()
+	persister.SaveMarketData(data, tokens)
 	persister.SetIsNewMarketInfo(true)
 }
