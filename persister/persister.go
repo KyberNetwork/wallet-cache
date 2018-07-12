@@ -76,6 +76,11 @@ type Persister interface {
 	SetNewGasPrice(bool)
 	GetGasPrice() *ethereum.GasPrice
 	GetNewGasPrice() bool
+
+	SaveMarketData(map[string]*ethereum.Rates)
+	GetMarketData(page, pageSize uint64) map[string]*ethereum.MarketInfo
+	SetIsNewMarketInfo(isNewMarketInfo bool)
+	GetIsNewMarketInfo() bool
 }
 
 //var transactionPersistent = models.NewTransactionPersister()

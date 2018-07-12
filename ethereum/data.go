@@ -82,3 +82,20 @@ type RateInfo struct {
 	LastBuy       string                 `json:"last_buy"`
 	HistoryRecord map[int64]*RateHistory `json:"history_record"`
 }
+
+type Rates struct {
+	R float64   `json:"r"`
+	P []float64 `json:"p"`
+}
+
+type MarketInfo struct {
+	Rates  *Rates             `json:"rates"`
+	Quotes map[string]QuoInfo `json:"quotes"`
+}
+
+func NewMarketInfo(quotes map[string]QuoInfo, rates *Rates) *MarketInfo {
+	return &MarketInfo{
+		Rates:  rates,
+		Quotes: quotes,
+	}
+}

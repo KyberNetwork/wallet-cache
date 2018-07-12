@@ -283,12 +283,83 @@
       "address": "0x41e5560054824ea6b0732e656e3ad64e20e94e45",
       "symbol":"CVC",
       "usd_id":"1816"
-    } 
+    },
+    "WAX": {
+      "name": "Wax",
+      "decimal": 8,
+      "address": "0x39bb259f66e1c59d5abef88375979b4d20d98022",
+      "symbol":"WAX", 
+      "usd_id":"2300"
+    },
+    "SUB": {
+      "name": "Substratum",
+      "decimal": 2,
+      "address": "0x12480e24eb5bec1a9d4369cab6a80cad3c0a377a",
+      "symbol":"SUB", 
+      "usd_id":"1984"
+    },
+    "POE": {
+      "name": "Po.et",
+      "decimal": 8,
+      "address": "0x0e0989b1f9b8a38983c2ba8053269ca62ec9b195",
+      "symbol":"POE", 
+      "usd_id":"1937"
+    },
+    "PAY": {
+      "name": "TenX",
+      "decimal": 18,
+      "address": "0xb97048628db6b661d4c2aa833e95dbe1a905b280",
+      "symbol":"PAY", 
+      "usd_id":"1758"
+    },
+    "CHAT": {
+      "name": "Chatcoin",
+      "decimal": 18,
+      "address": "0x442bc47357919446eabc18c7211e57a13d983469",
+      "symbol":"CHAT", 
+      "usd_id":"2427"
+    },
+    "REP": {
+      "name": "Augur",
+      "decimal": 18,
+      "address": "0xe94327d07fc17907b4db788e5adf2ed424addff6",
+      "symbol":"REP", 
+      "usd_id":"1104"
+    },
+    "DTA": {
+      "name": "Data",
+      "decimal": 18,
+      "address": "0x69b148395ce0015c13e36bffbad63f49ef874e03",
+      "symbol":"DTA", 
+      "usd_id":"2446"
+    },
+    "BNT": {
+      "name": "Bancor",
+      "decimal": 18,
+      "address": "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c",
+      "symbol":"BNT", 
+      "usd_id":"1727"
+    },
+    "TUSD": {
+      "name": "TrueUSD",
+      "decimal": 18,
+      "address": "0x8dd5fbce2f6a956c3022ba3663759011dd51e73e",
+      "symbol":"TUSD", 
+      "usd_id":"2563"
+    },
+    "TOMO": {
+      "name": "Tomocoin",
+      "decimal": 18,
+      "address": "0x8b353021189375591723e7384262f45709a3c3dc",
+      "symbol":"TOMO", 
+      "usd_id":"2570"
+    }
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
   "network": "0xc14f34233071543e979f6a79aa272b0ab1b4947d",
   "wrapper": "0x6172AFC8c00c46E0D07ce3AF203828198194620a",
   "trade_topic": "0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
   "averageBlockTime": 15000,
-  "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json"
+  "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
+  "tracker_endpoint":"https://staging-tracker.knstats.com"
 }
