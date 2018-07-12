@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	// "os"
+	"os"
 	"runtime"
 	"time"
 
@@ -19,17 +19,17 @@ func main() {
 	runtime.GOMAXPROCS(numCPU)
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	// f, err := os.OpenFile("error.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// //clear error log file
-	// err = f.Truncate(0)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer f.Close()
-	// log.SetOutput(f)
+	f, err := os.OpenFile("error.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//clear error log file
+	err = f.Truncate(0)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
 
 	persisterIns, _ := persister.NewPersister("ram")
 	fertcherIns, err := fetcher.NewFetcher()
@@ -37,9 +37,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Print("Start")
 	tokenNum := fertcherIns.GetNumTokens()
-	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 5)
+	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
 	//	initRateToken(persisterIns, fertcherIns)
 
 	//run fetch data
