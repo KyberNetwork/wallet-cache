@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -37,10 +36,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Print("Start")
-	tokenNum := 33
-	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 5)
-
+	tokenNum := fertcherIns.GetNumTokens()
+	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
 	//	initRateToken(persisterIns, fertcherIns)
 
 	//run fetch data
@@ -223,6 +220,7 @@ func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		persister.SetIsNewMarketInfo(false)
 		return
 	}
-	persister.SaveMarketData(data)
+	tokens := fetcher.GetListToken()
+	persister.SaveMarketData(data, tokens)
 	persister.SetIsNewMarketInfo(true)
 }

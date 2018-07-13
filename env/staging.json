@@ -319,13 +319,6 @@
       "symbol":"CHAT", 
       "usd_id":"2427"
     },
-    "REP": {
-      "name": "Augur",
-      "decimal": 18,
-      "address": "0xe94327d07fc17907b4db788e5adf2ed424addff6",
-      "symbol":"REP", 
-      "usd_id":"1104"
-    },
     "DTA": {
       "name": "Data",
       "decimal": 18,

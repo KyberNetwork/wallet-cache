@@ -394,24 +394,26 @@ func (self *RamPersister) GetMarketData(page, pageSize uint64) map[string]*ether
 	return self.marketInfo
 }
 
-func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates) {
+func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, tokens map[string]ethereum.Token) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	// resultMarketInfo := []map[string]*ethereum.MarketInfo{}
 	result := map[string]*ethereum.MarketInfo{}
-	for symbol, info := range marketRate {
-		if currentToken := self.tokenInfo[symbol]; currentToken != nil {
-			quotes := currentToken.Quotes
-			marketInfo := ethereum.NewMarketInfo(quotes, info)
-			result[symbol] = marketInfo
-			// resultMarketInfo = append(resultMarketInfo, result)
-		} else {
-			marketInfo := &ethereum.MarketInfo{
-				Rates: info,
-			}
-			result[symbol] = marketInfo
+
+	for symbol, _ := range tokens {
+		marketInfo := &ethereum.MarketInfo{}
+		if rateInfo := marketRate[symbol]; rateInfo != nil {
+			marketInfo.Rates = rateInfo
 		}
+		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
+			marketInfo.Quotes = tokenInfo.Quotes
+		}
+		if marketInfo.Rates == nil && marketInfo.Quotes == nil {
+			continue
+		}
+		result[symbol] = marketInfo
 	}
+
 	self.marketInfo = result
 }
 

@@ -59,6 +59,10 @@ type Fetcher struct {
 	fetIns   []FetcherInterface
 }
 
+func (self *Fetcher) GetNumTokens() int {
+	return len(self.info.Tokens)
+}
+
 func NewFetcher() (*Fetcher, error) {
 	var file []byte
 	var err error
