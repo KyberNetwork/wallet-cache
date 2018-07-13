@@ -34,21 +34,21 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 	return
 }
 
-func (self *HTTPServer) GetEvent(c *gin.Context) {
-	if !self.persister.GetIsNewEvent() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": false},
-		)
-		return
-	}
+// func (self *HTTPServer) GetEvent(c *gin.Context) {
+// 	if !self.persister.GetIsNewEvent() {
+// 		c.JSON(
+// 			http.StatusOK,
+// 			gin.H{"success": false},
+// 		)
+// 		return
+// 	}
 
-	events := self.persister.GetEvent()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": events},
-	)
-}
+// 	events := self.persister.GetEvent()
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": events},
+// 	)
+// }
 
 func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
 	if !self.persister.GetIsNewLatestBlock() {
@@ -78,6 +78,22 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": rates},
+	)
+}
+
+func (self *HTTPServer) GetRateETH(c *gin.Context) {
+	if !self.persister.GetIsNewRateUSD() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+
+	ethRate := self.persister.GetRateETH()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": ethRate},
 	)
 }
 
@@ -129,13 +145,13 @@ func (self *HTTPServer) GetGasPrice(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetTokenInfo(c *gin.Context) {
-	tokenInfo := self.persister.GetTokenInfo()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": tokenInfo},
-	)
-}
+// func (self *HTTPServer) GetTokenInfo(c *gin.Context) {
+// 	tokenInfo := self.persister.GetTokenInfo()
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": tokenInfo},
+// 	)
+// }
 
 func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 	dat, err := ioutil.ReadFile("error.log")
@@ -190,17 +206,18 @@ func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
 
 func (self *HTTPServer) Run() {
 	//self.r.GET("/getRate", self.GetRate)
-	self.r.GET("/getHistoryOneColumn", self.GetEvent)
+	// self.r.GET("/getHistoryOneColumn", self.GetEvent)
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 
 	self.r.GET("/getRateUSD", self.GetRateUSD)
 	self.r.GET("/getRate", self.GetRate)
-	self.r.GET("/getTokenInfo", self.GetTokenInfo)
+	// self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
 	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
 	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
 	self.r.GET("/getGasPrice", self.GetGasPrice)
 	self.r.GET("/getMarketInfo", self.GetMarketInfo)
+	self.r.GET("/getRateETH", self.GetRateETH)
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if os.Getenv("KYBER_ENV") != "production" {
