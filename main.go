@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -183,6 +182,7 @@ func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
 			persister.SetNewEvents(false)
 			return
 		}
+
 		persister.SaveEvent(events)
 		persister.SetNewEvents(true)
 	} else {
