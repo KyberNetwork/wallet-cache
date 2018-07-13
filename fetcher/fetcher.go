@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
+	// "strconv"
 	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
@@ -332,47 +332,47 @@ func (self *Fetcher) GetLatestBlock() (string, error) {
 	return "", errors.New("Cannot get block number")
 }
 
-func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error) {
-	toBlock := blockNum
+// func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error) {
+// 	toBlock := blockNum
 
-	blockInt, err := strconv.Atoi(blockNum)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	if blockInt > 5000 {
-		blockInt = blockInt - 5000
-	} else {
-		blockInt = 0
-	}
-	fromBlock := strconv.Itoa(blockInt)
+// 	blockInt, err := strconv.Atoi(blockNum)
+// 	if err != nil {
+// 		log.Print(err)
+// 		return nil, err
+// 	}
+// 	if blockInt > 5000 {
+// 		blockInt = blockInt - 5000
+// 	} else {
+// 		blockInt = 0
+// 	}
+// 	fromBlock := strconv.Itoa(blockInt)
 
-	for _, fetIns := range self.fetIns {
-		eventRaw, err := fetIns.GetEvents(fromBlock, toBlock, self.info.Network, self.info.TradeTopic)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		var events *[]ethereum.EventHistory
-		var errorEvent error
-		if fetIns.GetTypeName() == "node" {
-			latestBlock, err := self.GetLatestBlock()
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-			events, errorEvent = self.ethereum.ReadEventsWithBlockNumber(eventRaw, latestBlock)
-		} else {
-			events, errorEvent = self.ethereum.ReadEventsWithTimeStamp(eventRaw)
-		}
-		if errorEvent != nil {
-			log.Print(errorEvent)
-			continue
-		}
-		return events, nil
-	}
-	return nil, errors.New("Cannot get events")
-}
+// 	for _, fetIns := range self.fetIns {
+// 		eventRaw, err := fetIns.GetEvents(fromBlock, toBlock, self.info.Network, self.info.TradeTopic)
+// 		if err != nil {
+// 			log.Print(err)
+// 			continue
+// 		}
+// 		var events *[]ethereum.EventHistory
+// 		var errorEvent error
+// 		if fetIns.GetTypeName() == "node" {
+// 			latestBlock, err := self.GetLatestBlock()
+// 			if err != nil {
+// 				log.Print(err)
+// 				continue
+// 			}
+// 			events, errorEvent = self.ethereum.ReadEventsWithBlockNumber(eventRaw, latestBlock)
+// 		} else {
+// 			events, errorEvent = self.ethereum.ReadEventsWithTimeStamp(eventRaw)
+// 		}
+// 		if errorEvent != nil {
+// 			log.Print(errorEvent)
+// 			continue
+// 		}
+// 		return events, nil
+// 	}
+// 	return nil, errors.New("Cannot get events")
+// }
 
 func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
 	for _, fetIns := range self.fetIns {
