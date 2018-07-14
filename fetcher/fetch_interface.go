@@ -14,7 +14,7 @@ type RateUSD struct {
 type FetcherInterface interface {
 	EthCall(string, string) (string, error)
 	GetLatestBlock() (string, error)
-	GetEvents(string, string, string, string) (*[]ethereum.EventRaw, error)
+	// GetEvents(string, string, string, string) (*[]ethereum.EventRaw, error)
 
 	GetRateUsd([]string) ([]io.ReadCloser, error)
 	GetGasPrice() (*ethereum.GasPrice, error)

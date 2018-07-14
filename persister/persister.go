@@ -47,10 +47,10 @@ type Persister interface {
 	// GetIsNewRateUsdEther() bool
 	// GetRateUSDEther() string
 
-	GetEvent() []ethereum.EventHistory
-	SaveEvent(*[]ethereum.EventHistory) error
-	GetIsNewEvent() bool
-	SetNewEvents(bool)
+	// GetEvent() []ethereum.EventHistory
+	// SaveEvent(*[]ethereum.EventHistory) error
+	// GetIsNewEvent() bool
+	// SetNewEvents(bool)
 
 	GetLatestBlock() string
 	GetIsNewLatestBlock() bool
@@ -58,6 +58,7 @@ type Persister interface {
 	SetNewLatestBlock(bool)
 
 	GetRateUSD() []RateUSD
+	GetRateETH() string
 	GetIsNewRateUSD() bool
 	SaveRateUSD(string) error
 	SetNewRateUSD(bool)

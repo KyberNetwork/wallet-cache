@@ -25,6 +25,7 @@ type RamPersister struct {
 	isNewLatestBlock bool
 
 	rateUSD      []RateUSD
+	rateETH      string
 	isNewRateUsd bool
 
 	events     []ethereum.EventHistory
@@ -60,6 +61,7 @@ func NewRamPersister() (*RamPersister, error) {
 	isNewLatestBlock := true
 
 	rateUSD := make([]RateUSD, 0)
+	rateETH := "0"
 	isNewRateUsd := true
 
 	events := make([]ethereum.EventHistory, 0)
@@ -81,7 +83,7 @@ func NewRamPersister() (*RamPersister, error) {
 	isNewMarketInfo := true
 
 	persister := &RamPersister{
-		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
+		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, rateETH, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
 		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, isNewMarketInfo,
 	}
 	return persister, nil
@@ -256,6 +258,12 @@ func (self *RamPersister) GetRateUSD() []RateUSD {
 	return self.rateUSD
 }
 
+func (self *RamPersister) GetRateETH() string {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.rateETH
+}
+
 func (self *RamPersister) GetIsNewRateUSD() bool {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
@@ -286,6 +294,7 @@ func (self *RamPersister) SaveRateUSD(rateUSDEth string) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.rateUSD = rates
+	self.rateETH = rateUSDEth
 	self.isNewRateUsd = true
 	return nil
 }
@@ -345,30 +354,30 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 }
 
 /////-----------------------------------
-func (self *RamPersister) GetEvent() []ethereum.EventHistory {
-	self.mu.RLock()
-	defer self.mu.RUnlock()
-	return self.events
-}
+// func (self *RamPersister) GetEvent() []ethereum.EventHistory {
+// 	self.mu.RLock()
+// 	defer self.mu.RUnlock()
+// 	return self.events
+// }
 
-func (self *RamPersister) GetIsNewEvent() bool {
-	self.mu.RLock()
-	defer self.mu.RUnlock()
-	return self.isNewEvent
-}
+// func (self *RamPersister) GetIsNewEvent() bool {
+// 	self.mu.RLock()
+// 	defer self.mu.RUnlock()
+// 	return self.isNewEvent
+// }
 
-func (self *RamPersister) SaveEvent(events *[]ethereum.EventHistory) error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	self.events = *events
-	return nil
-}
+// func (self *RamPersister) SaveEvent(events *[]ethereum.EventHistory) error {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	self.events = *events
+// 	return nil
+// }
 
-func (self *RamPersister) SetNewEvents(isNew bool) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	self.isNewEvent = isNew
-}
+// func (self *RamPersister) SetNewEvents(isNew bool) {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	self.isNewEvent = isNew
+// }
 
 // ----------------------------------------
 // return data from kyber tracker
