@@ -375,11 +375,11 @@
       "symbol":"MTL", 
       "usd_id":"1788"
     },
-    "WAB": {
+    "WABI": {
       "name": "WaBi",
       "decimal": 18,
       "address": "0x286bda1413a2df81731d4930ce2f862a35a609fe",
-      "symbol":"WAB", 
+      "symbol":"WABI", 
       "usd_id":"2267"
     },
     "NULS": {
