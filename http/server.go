@@ -171,6 +171,7 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
 	pageSizeString := c.Query("pageSize")
 	pageNumString := c.Query("page")
+	listTokens := c.Query("listToken")
 	pageSizeNum, err := strconv.ParseUint(pageSizeString, 10, 64)
 	if err != nil || (err == nil && pageSizeNum <= 0) {
 		log.Printf("%v is not a number or its value smaller than zero", pageSizeNum)
@@ -182,7 +183,7 @@ func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
 		pageNumUint = DEFAULT_PAGE
 	}
 
-	data := self.persister.GetMarketData(pageNumUint, pageSizeNum)
+	data := self.persister.GetMarketData(pageNumUint, pageSizeNum, listTokens)
 	if self.persister.GetIsNewMarketInfo() {
 		c.JSON(
 			http.StatusOK,
