@@ -54,7 +54,7 @@ func main() {
 
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, fetchRate, fertcherIns, 20)
-	runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
+	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
 	runFetchData(persisterIns, fetchTrackerData, fertcherIns, 300)
@@ -173,22 +173,21 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	//	persister.SetNewRate(true)
 }
 
-func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	if persister.GetIsNewLatestBlock() {
-		blockNum := persister.GetLatestBlock()
-		events, err := fetcher.GetEvents(blockNum)
-		if err != nil {
-			log.Print(err)
-			persister.SetNewEvents(false)
-			return
-		}
-
-		persister.SaveEvent(events)
-		persister.SetNewEvents(true)
-	} else {
-		persister.SetNewEvents(false)
-	}
-}
+// func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
+// 	if persister.GetIsNewLatestBlock() {
+// 		blockNum := persister.GetLatestBlock()
+// 		events, err := fetcher.GetEvents(blockNum)
+// 		if err != nil {
+// 			log.Print(err)
+// 			persister.SetNewEvents(false)
+// 			return
+// 		}
+// 		persister.SaveEvent(events)
+// 		persister.SetNewEvents(true)
+// 	} else {
+// 		persister.SetNewEvents(false)
+// 	}
+// }
 
 func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	generalInfo := fetcher.GetGeneralInfoTokens()

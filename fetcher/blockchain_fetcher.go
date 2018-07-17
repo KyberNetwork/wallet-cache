@@ -8,7 +8,7 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"strconv"
+	// "strconv"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -65,35 +65,35 @@ type TopicParam struct {
 	Topics    []string `json:"topics"`
 }
 
-func (self *BlockchainFetcher) GetEvents(fromBlock string, toBlock string, network string, tradeTopic string) (*[]ethereum.EventRaw, error) {
-	fromBlockInt, err := strconv.ParseUint(fromBlock, 10, 64)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
+// func (self *BlockchainFetcher) GetEvents(fromBlock string, toBlock string, network string, tradeTopic string) (*[]ethereum.EventRaw, error) {
+// 	fromBlockInt, err := strconv.ParseUint(fromBlock, 10, 64)
+// 	if err != nil {
+// 		log.Print(err)
+// 		return nil, err
+// 	}
 
-	toBlockInt, err := strconv.ParseUint(toBlock, 10, 64)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
+// 	toBlockInt, err := strconv.ParseUint(toBlock, 10, 64)
+// 	if err != nil {
+// 		log.Print(err)
+// 		return nil, err
+// 	}
 
-	fromBlockHex := hexutil.EncodeUint64(fromBlockInt)
-	toBlockHex := hexutil.EncodeUint64(toBlockInt)
+// 	fromBlockHex := hexutil.EncodeUint64(fromBlockInt)
+// 	toBlockHex := hexutil.EncodeUint64(toBlockInt)
 
-	param := TopicParam{
-		fromBlockHex, toBlockHex, network, []string{tradeTopic},
-	}
+// 	param := TopicParam{
+// 		fromBlockHex, toBlockHex, network, []string{tradeTopic},
+// 	}
 
-	var result []ethereum.EventRaw
-	err = self.client.Call(&result, "eth_getLogs", param)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
+// 	var result []ethereum.EventRaw
+// 	err = self.client.Call(&result, "eth_getLogs", param)
+// 	if err != nil {
+// 		log.Print(err)
+// 		return nil, err
+// 	}
 
-	return &result, nil
-}
+// 	return &result, nil
+// }
 
 func (self *BlockchainFetcher) GetRateUsd(tickers []string) ([]io.ReadCloser, error) {
 	outPut := make([]io.ReadCloser, 0)
