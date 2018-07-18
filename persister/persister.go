@@ -79,7 +79,8 @@ type Persister interface {
 	GetNewGasPrice() bool
 
 	SaveMarketData(rates map[string]*ethereum.Rates, tokens map[string]ethereum.Token)
-	GetMarketData(listTokens string) map[string]*ethereum.MarketInfo
+	GetMarketData() map[string]*ethereum.MarketInfo
+	GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo
 	SetIsNewMarketInfo(isNewMarketInfo bool)
 	GetIsNewMarketInfo() bool
 }
