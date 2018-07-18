@@ -383,17 +383,11 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 // ----------------------------------------
 // return data from kyber tracker
 
-func (self *RamPersister) GetMarketData(page, pageSize uint64, listTokens string) map[string]*ethereum.MarketInfo {
+func (self *RamPersister) GetMarketData(listTokens string) map[string]*ethereum.MarketInfo {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	tokens := strings.Split(listTokens, "-")
 	result := make(map[string]*ethereum.MarketInfo)
-	// marketInfo := self.marketInfo
-	// beginPosition := (page - 1) * pageSize
-	// result := []map[string]*ethereum.MarketInfo{}
-	// for index := beginPosition; index < beginPosition+pageSize && int(index) < len(marketInfo); index++ {
-	// 	result = append(result, marketInfo[index])
-	// }
 	for _, symbol := range tokens {
 		if self.marketInfo[symbol] != nil {
 			result[symbol] = self.marketInfo[symbol]

@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
@@ -169,21 +168,8 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
-	pageSizeString := c.Query("pageSize")
-	pageNumString := c.Query("page")
 	listTokens := c.Query("listToken")
-	pageSizeNum, err := strconv.ParseUint(pageSizeString, 10, 64)
-	if err != nil || (err == nil && pageSizeNum <= 0) {
-		log.Printf("%v is not a number or its value smaller than zero", pageSizeNum)
-		pageSizeNum = MAX_PAGE_SIZE
-	}
-	pageNumUint, err := strconv.ParseUint(pageNumString, 10, 64)
-	if err != nil || (err == nil && pageNumUint <= 0) {
-		log.Printf("%v is not a number or its value smaller than zero", pageNumUint)
-		pageNumUint = DEFAULT_PAGE
-	}
-
-	data := self.persister.GetMarketData(pageNumUint, pageSizeNum, listTokens)
+	data := self.persister.GetMarketData(listTokens)
 	if self.persister.GetIsNewMarketInfo() {
 		c.JSON(
 			http.StatusOK,
