@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"math/big"
+	"strings"
 	"sync"
 
 	"github.com/KyberNetwork/server-go/ethereum"
@@ -382,16 +383,23 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 // ----------------------------------------
 // return data from kyber tracker
 
-func (self *RamPersister) GetMarketData(page, pageSize uint64) map[string]*ethereum.MarketInfo {
+func (self *RamPersister) GetMarketData() map[string]*ethereum.MarketInfo {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	// marketInfo := self.marketInfo
-	// beginPosition := (page - 1) * pageSize
-	// result := []map[string]*ethereum.MarketInfo{}
-	// for index := beginPosition; index < beginPosition+pageSize && int(index) < len(marketInfo); index++ {
-	// 	result = append(result, marketInfo[index])
-	// }
 	return self.marketInfo
+}
+
+func (self *RamPersister) GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	tokens := strings.Split(listTokens, "-")
+	result := make(map[string]*ethereum.MarketInfo)
+	for _, symbol := range tokens {
+		if self.marketInfo[symbol] != nil {
+			result[symbol] = self.marketInfo[symbol]
+		}
+	}
+	return result
 }
 
 func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, tokens map[string]ethereum.Token) {
