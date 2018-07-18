@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
@@ -169,20 +168,23 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
-	pageSizeString := c.Query("pageSize")
-	pageNumString := c.Query("page")
-	pageSizeNum, err := strconv.ParseUint(pageSizeString, 10, 64)
-	if err != nil || (err == nil && pageSizeNum <= 0) {
-		log.Printf("%v is not a number or its value smaller than zero", pageSizeNum)
-		pageSizeNum = MAX_PAGE_SIZE
+	data := self.persister.GetMarketData()
+	if self.persister.GetIsNewMarketInfo() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "data": data, "status": "latest"},
+		)
+		return
 	}
-	pageNumUint, err := strconv.ParseUint(pageNumString, 10, 64)
-	if err != nil || (err == nil && pageNumUint <= 0) {
-		log.Printf("%v is not a number or its value smaller than zero", pageNumUint)
-		pageNumUint = DEFAULT_PAGE
-	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": data, "status": "old"},
+	)
+}
 
-	data := self.persister.GetMarketData(pageNumUint, pageSizeNum)
+func (self *HTTPServer) GetMarketInfoByTokens(c *gin.Context) {
+	listTokens := c.Query("listToken")
+	data := self.persister.GetMarketDataByTokens(listTokens)
 	if self.persister.GetIsNewMarketInfo() {
 		c.JSON(
 			http.StatusOK,
@@ -217,6 +219,7 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
 	self.r.GET("/getGasPrice", self.GetGasPrice)
 	self.r.GET("/getMarketInfo", self.GetMarketInfo)
+	self.r.GET("/getMarketInfoByTokens", self.GetMarketInfoByTokens)
 	self.r.GET("/getRateETH", self.GetRateETH)
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
