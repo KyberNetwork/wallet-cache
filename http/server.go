@@ -182,6 +182,37 @@ func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
+	data := self.persister.GetRightMarketData()
+	if self.persister.GetIsNewMarketInfo() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "data": data, "status": "latest"},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": data, "status": "old"},
+	)
+}
+
+func (self *HTTPServer) GetLast7D(c *gin.Context) {
+	listTokens := c.Query("listToken")
+	data := self.persister.GetLast7D(listTokens)
+	if self.persister.GetIsNewMarketInfo() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "data": data, "status": "latest"},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": data, "status": "old"},
+	)
+}
+
 func (self *HTTPServer) GetMarketInfoByTokens(c *gin.Context) {
 	listTokens := c.Query("listToken")
 	data := self.persister.GetMarketDataByTokens(listTokens)
@@ -219,6 +250,8 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
 	self.r.GET("/getGasPrice", self.GetGasPrice)
 	self.r.GET("/getMarketInfo", self.GetMarketInfo)
+	self.r.GET("/getRightMarketInfo", self.GetRightMarketInfo)
+	self.r.GET("/getLast7D", self.GetLast7D)
 	self.r.GET("/getMarketInfoByTokens", self.GetMarketInfoByTokens)
 	self.r.GET("/getRateETH", self.GetRateETH)
 
