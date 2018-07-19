@@ -46,6 +46,8 @@ type RamPersister struct {
 	//isNewTokenInfo bool
 
 	marketInfo      map[string]*ethereum.MarketInfo
+	last7D          map[string][]float64
+	rightMarketInfo map[string]*ethereum.RightMarketInfo
 	isNewMarketInfo bool
 }
 
@@ -81,11 +83,13 @@ func NewRamPersister() (*RamPersister, error) {
 	//isNewTokenInfo := true
 
 	marketInfo := map[string]*ethereum.MarketInfo{}
+	last7D := map[string][]float64{}
+	rightMarketInfo := map[string]*ethereum.RightMarketInfo{}
 	isNewMarketInfo := true
 
 	persister := &RamPersister{
 		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, rateETH, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
-		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, isNewMarketInfo,
+		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, rightMarketInfo, isNewMarketInfo,
 	}
 	return persister, nil
 }
@@ -389,6 +393,26 @@ func (self *RamPersister) GetMarketData() map[string]*ethereum.MarketInfo {
 	return self.marketInfo
 }
 
+// use this api for 3 infomations change, marketcap, volume
+func (self *RamPersister) GetRightMarketData() map[string]*ethereum.RightMarketInfo {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.rightMarketInfo
+}
+
+func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	tokens := strings.Split(listTokens, "-")
+	result := make(map[string][]float64)
+	for _, symbol := range tokens {
+		if self.last7D[symbol] != nil {
+			result[symbol] = self.last7D[symbol]
+		}
+	}
+	return result
+}
+
 func (self *RamPersister) GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo {
 	self.mu.Lock()
 	defer self.mu.Unlock()
@@ -407,22 +431,33 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 	defer self.mu.Unlock()
 	// resultMarketInfo := []map[string]*ethereum.MarketInfo{}
 	result := map[string]*ethereum.MarketInfo{}
+	lastSevenDays := map[string][]float64{}
+	newResult := map[string]*ethereum.RightMarketInfo{}
 
 	for symbol, _ := range tokens {
 		marketInfo := &ethereum.MarketInfo{}
+		dataSevenDays := []float64{}
+		rightMarketInfo := &ethereum.RightMarketInfo{}
 		if rateInfo := marketRate[symbol]; rateInfo != nil {
 			marketInfo.Rates = rateInfo
+			dataSevenDays = rateInfo.P
+			rightMarketInfo.Rate = &rateInfo.R
 		}
 		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
 			marketInfo.Quotes = tokenInfo.Quotes
+			rightMarketInfo.Quotes = tokenInfo.Quotes
 		}
 		if marketInfo.Rates == nil && marketInfo.Quotes == nil {
 			continue
 		}
 		result[symbol] = marketInfo
+		newResult[symbol] = rightMarketInfo
+		lastSevenDays[symbol] = dataSevenDays
 	}
 
 	self.marketInfo = result
+	self.last7D = lastSevenDays
+	self.rightMarketInfo = newResult
 }
 
 func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
