@@ -93,6 +93,11 @@ type MarketInfo struct {
 	Quotes map[string]QuoInfo `json:"quotes"`
 }
 
+type RightMarketInfo struct {
+	Rate   *float64           `json:"rate"`
+	Quotes map[string]QuoInfo `json:"quotes"`
+}
+
 func NewMarketInfo(quotes map[string]QuoInfo, rates *Rates) *MarketInfo {
 	return &MarketInfo{
 		Rates:  rates,

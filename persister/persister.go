@@ -47,10 +47,10 @@ type Persister interface {
 	// GetIsNewRateUsdEther() bool
 	// GetRateUSDEther() string
 
-	GetEvent() []ethereum.EventHistory
-	SaveEvent(*[]ethereum.EventHistory) error
-	GetIsNewEvent() bool
-	SetNewEvents(bool)
+	// GetEvent() []ethereum.EventHistory
+	// SaveEvent(*[]ethereum.EventHistory) error
+	// GetIsNewEvent() bool
+	// SetNewEvents(bool)
 
 	GetLatestBlock() string
 	GetIsNewLatestBlock() bool
@@ -58,6 +58,7 @@ type Persister interface {
 	SetNewLatestBlock(bool)
 
 	GetRateUSD() []RateUSD
+	GetRateETH() string
 	GetIsNewRateUSD() bool
 	SaveRateUSD(string) error
 	SetNewRateUSD(bool)
@@ -78,7 +79,10 @@ type Persister interface {
 	GetNewGasPrice() bool
 
 	SaveMarketData(rates map[string]*ethereum.Rates, tokens map[string]ethereum.Token)
-	GetMarketData(page, pageSize uint64) map[string]*ethereum.MarketInfo
+	GetMarketData() map[string]*ethereum.MarketInfo
+	GetRightMarketData() map[string]*ethereum.RightMarketInfo
+	GetLast7D(listTokens string) map[string][]float64
+	GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo
 	SetIsNewMarketInfo(isNewMarketInfo bool)
 	GetIsNewMarketInfo() bool
 }

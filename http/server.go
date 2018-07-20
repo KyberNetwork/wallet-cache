@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
@@ -34,21 +33,21 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 	return
 }
 
-func (self *HTTPServer) GetEvent(c *gin.Context) {
-	if !self.persister.GetIsNewEvent() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": false},
-		)
-		return
-	}
+// func (self *HTTPServer) GetEvent(c *gin.Context) {
+// 	if !self.persister.GetIsNewEvent() {
+// 		c.JSON(
+// 			http.StatusOK,
+// 			gin.H{"success": false},
+// 		)
+// 		return
+// 	}
 
-	events := self.persister.GetEvent()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": events},
-	)
-}
+// 	events := self.persister.GetEvent()
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": events},
+// 	)
+// }
 
 func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
 	if !self.persister.GetIsNewLatestBlock() {
@@ -78,6 +77,22 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": rates},
+	)
+}
+
+func (self *HTTPServer) GetRateETH(c *gin.Context) {
+	if !self.persister.GetIsNewRateUSD() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+
+	ethRate := self.persister.GetRateETH()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": ethRate},
 	)
 }
 
@@ -129,13 +144,13 @@ func (self *HTTPServer) GetGasPrice(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetTokenInfo(c *gin.Context) {
-	tokenInfo := self.persister.GetTokenInfo()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": tokenInfo},
-	)
-}
+// func (self *HTTPServer) GetTokenInfo(c *gin.Context) {
+// 	tokenInfo := self.persister.GetTokenInfo()
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": tokenInfo},
+// 	)
+// }
 
 func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 	dat, err := ioutil.ReadFile("error.log")
@@ -153,20 +168,54 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
-	pageSizeString := c.Query("pageSize")
-	pageNumString := c.Query("page")
-	pageSizeNum, err := strconv.ParseUint(pageSizeString, 10, 64)
-	if err != nil || (err == nil && pageSizeNum <= 0) {
-		log.Printf("%v is not a number or its value smaller than zero", pageSizeNum)
-		pageSizeNum = MAX_PAGE_SIZE
+	data := self.persister.GetMarketData()
+	if self.persister.GetIsNewMarketInfo() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "data": data, "status": "latest"},
+		)
+		return
 	}
-	pageNumUint, err := strconv.ParseUint(pageNumString, 10, 64)
-	if err != nil || (err == nil && pageNumUint <= 0) {
-		log.Printf("%v is not a number or its value smaller than zero", pageNumUint)
-		pageNumUint = DEFAULT_PAGE
-	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": data, "status": "old"},
+	)
+}
 
-	data := self.persister.GetMarketData(pageNumUint, pageSizeNum)
+func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
+	data := self.persister.GetRightMarketData()
+	if self.persister.GetIsNewMarketInfo() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "data": data, "status": "latest"},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": data, "status": "old"},
+	)
+}
+
+func (self *HTTPServer) GetLast7D(c *gin.Context) {
+	listTokens := c.Query("listToken")
+	data := self.persister.GetLast7D(listTokens)
+	if self.persister.GetIsNewMarketInfo() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "data": data, "status": "latest"},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": data, "status": "old"},
+	)
+}
+
+func (self *HTTPServer) GetMarketInfoByTokens(c *gin.Context) {
+	listTokens := c.Query("listToken")
+	data := self.persister.GetMarketDataByTokens(listTokens)
 	if self.persister.GetIsNewMarketInfo() {
 		c.JSON(
 			http.StatusOK,
@@ -190,17 +239,21 @@ func (self *HTTPServer) GetMarketInfo(c *gin.Context) {
 
 func (self *HTTPServer) Run() {
 	//self.r.GET("/getRate", self.GetRate)
-	self.r.GET("/getHistoryOneColumn", self.GetEvent)
+	// self.r.GET("/getHistoryOneColumn", self.GetEvent)
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 
 	self.r.GET("/getRateUSD", self.GetRateUSD)
 	self.r.GET("/getRate", self.GetRate)
-	self.r.GET("/getTokenInfo", self.GetTokenInfo)
+	// self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
 	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
 	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
 	self.r.GET("/getGasPrice", self.GetGasPrice)
 	self.r.GET("/getMarketInfo", self.GetMarketInfo)
+	self.r.GET("/getRightMarketInfo", self.GetRightMarketInfo)
+	self.r.GET("/getLast7D", self.GetLast7D)
+	self.r.GET("/getMarketInfoByTokens", self.GetMarketInfoByTokens)
+	self.r.GET("/getRateETH", self.GetRateETH)
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if os.Getenv("KYBER_ENV") != "production" {
