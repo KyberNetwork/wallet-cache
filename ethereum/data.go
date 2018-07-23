@@ -89,13 +89,13 @@ type Rates struct {
 }
 
 type MarketInfo struct {
-	Rates  *Rates             `json:"rates"`
-	Quotes map[string]QuoInfo `json:"quotes"`
+	Rates  *Rates             `json:"r"`
+	Quotes map[string]QuoInfo `json:"q"`
 }
 
 type RightMarketInfo struct {
-	Rate   *float64           `json:"rate"`
-	Quotes map[string]QuoInfo `json:"quotes"`
+	Rate   *float64           `json:"r"`
+	Quotes map[string]QuoInfo `json:"q"`
 }
 
 func NewMarketInfo(quotes map[string]QuoInfo, rates *Rates) *MarketInfo {

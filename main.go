@@ -214,13 +214,14 @@ func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetc
 // }
 
 func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	timeStamp := time.Now().Unix()
 	data, err := fetcher.FetchTrackerData()
 	if err != nil {
 		log.Print(err)
-		persister.SetIsNewMarketInfo(false)
+		persister.SetIsNewMarketInfo(false, timeStamp)
 		return
 	}
 	tokens := fetcher.GetListToken()
 	persister.SaveMarketData(data, tokens)
-	persister.SetIsNewMarketInfo(true)
+	persister.SetIsNewMarketInfo(true, timeStamp)
 }

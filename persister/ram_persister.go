@@ -48,6 +48,7 @@ type RamPersister struct {
 	marketInfo      map[string]*ethereum.MarketInfo
 	last7D          map[string][]float64
 	rightMarketInfo map[string]*ethereum.RightMarketInfo
+	timeStamp       uint64
 	isNewMarketInfo bool
 }
 
@@ -89,7 +90,7 @@ func NewRamPersister() (*RamPersister, error) {
 
 	persister := &RamPersister{
 		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, rateETH, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
-		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, rightMarketInfo, isNewMarketInfo,
+		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, rightMarketInfo, 0, isNewMarketInfo,
 	}
 	return persister, nil
 }
@@ -400,17 +401,18 @@ func (self *RamPersister) GetRightMarketData() map[string]*ethereum.RightMarketI
 	return self.rightMarketInfo
 }
 
-func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
+func (self *RamPersister) GetLast7D(listTokens string) (map[string][]float64, uint64) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	tokens := strings.Split(listTokens, "-")
+	timeStamp := self.timeStamp
 	result := make(map[string][]float64)
 	for _, symbol := range tokens {
 		if self.last7D[symbol] != nil {
 			result[symbol] = self.last7D[symbol]
 		}
 	}
-	return result
+	return result, timeStamp
 }
 
 func (self *RamPersister) GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo {
@@ -460,10 +462,11 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 	self.rightMarketInfo = newResult
 }
 
-func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
+func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool, timeStamp int64) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewMarketInfo = isNewMarketInfo
+	self.timeStamp = uint64(timeStamp)
 }
 
 func (self *RamPersister) GetIsNewMarketInfo() bool {
