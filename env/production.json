@@ -381,6 +381,13 @@
       "address": "0x286bda1413a2df81731d4930ce2f862a35a609fe",
       "symbol":"WABI", 
       "usd_id":"2267"
+    },
+    "COFI":{
+      "name": "CoinFi",
+      "decimal": 18,
+      "address": "0x3136ef851592acf49ca4c825131e364170fa32b3",
+      "symbol":"COFI", 
+      "usd_id":"2478"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
