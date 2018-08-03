@@ -331,7 +331,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 				r.SetString(rate.Rate, 10)
 				destSym := rate.Dest
 				decimal := self.info.Tokens[destSym].Decimal
-				if decimal != 0 {
+				if decimal != 0 || r.Cmp(amountToken) != 0 {
 					amountToken = getAmountTokenWithMinETH(r, decimal)
 				}
 				amount = append(amount, amountToken)
