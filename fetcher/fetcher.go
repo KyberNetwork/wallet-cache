@@ -6,11 +6,18 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/big"
 	"os"
+
 	// "strconv"
 	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
+)
+
+const (
+	ETH_TO_WEI = 1000000000000000000
+	MIN_ETH    = 0.001
 )
 
 // type Token struct {
@@ -282,25 +289,82 @@ func (self *Fetcher) CheckKyberEnable() (bool, error) {
 	return false, errors.New("Cannot check kyber enable")
 }
 
-func (self *Fetcher) GetRate() (*[]ethereum.Rate, error) {
+func getAmountInWei(amount float64) *big.Int {
+	amountFloat := big.NewFloat(amount)
+	ethFloat := big.NewFloat(ETH_TO_WEI)
+	weiFloat := big.NewFloat(0).Mul(amountFloat, ethFloat)
+	amoutInt, _ := weiFloat.Int(nil)
+	return amoutInt
+}
+
+func getAmountTokenWithMinETH(rate *big.Int, decimal int) *big.Int {
+	rFloat := big.NewFloat(0).SetInt(rate)
+	ethFloat := big.NewFloat(ETH_TO_WEI)
+	amoutnToken1ETH := rFloat.Quo(rFloat, ethFloat)
+	minAmountWithMinETH := amoutnToken1ETH.Mul(amoutnToken1ETH, big.NewFloat(MIN_ETH))
+	decimalWei := big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(decimal)), nil)
+	amountWithDecimal := big.NewFloat(0).Mul(minAmountWithMinETH, big.NewFloat(0).SetInt(decimalWei))
+	amountInt, _ := amountWithDecimal.Int(nil)
+	return amountInt
+}
+
+func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	//append rate
 	sourceAddr := make([]string, 0)
 	sourceSymbol := make([]string, 0)
 	destAddr := make([]string, 0)
 	destSymbol := make([]string, 0)
-	amount := make([]int64, 0)
-	for _, token := range self.info.Tokens {
-		sourceAddr = append(sourceAddr, token.Address)
-		sourceSymbol = append(sourceSymbol, token.Symbol)
-		destAddr = append(destAddr, self.info.EthAdress)
-		destSymbol = append(destSymbol, self.info.EthSymbol)
-		amount = append(amount, 0)
+	amount := make([]*big.Int, 0)
+	amountETH := make([]*big.Int, 0)
+	ethSymbol := self.info.EthSymbol
+	ethAddr := self.info.EthAdress
+	minAmountETH := getAmountInWei(MIN_ETH)
+
+	if len(*rates) > 0 {
+		for _, rate := range *rates {
+			if rate.Source == "ETH" && rate.Dest == "ETH" {
+				continue
+			}
+			if rate.Source == "ETH" {
+				amountToken := big.NewInt(0)
+				r := big.NewInt(0)
+				r.SetString(rate.Rate, 10)
+				destSym := rate.Dest
+				decimal := self.info.Tokens[destSym].Decimal
+				if decimal != 0 {
+					amountToken = getAmountTokenWithMinETH(r, decimal)
+				}
+				amount = append(amount, amountToken)
+				tokenAddr := self.info.Tokens[destSym].Address
+				sourceAddr = append(sourceAddr, tokenAddr)
+				sourceSymbol = append(sourceSymbol, destSym)
+			} else {
+				destAddr = append(destAddr, ethAddr)
+				destSymbol = append(destSymbol, ethSymbol)
+				amountETH = append(amountETH, minAmountETH)
+			}
+		}
+		sourceAddr = append(sourceAddr, ethAddr)
+		destAddr = append(destAddr, ethAddr)
+		sourceSymbol = append(sourceSymbol, ethSymbol)
+		destSymbol = append(destSymbol, ethSymbol)
+		amount = append(amount, minAmountETH)
+		amountETH = append(amountETH, minAmountETH)
+	} else {
+		for _, token := range self.info.Tokens {
+			sourceAddr = append(sourceAddr, token.Address)
+			sourceSymbol = append(sourceSymbol, token.Symbol)
+			destAddr = append(destAddr, ethAddr)
+			destSymbol = append(destSymbol, ethSymbol)
+			amount = append(amount, big.NewInt(0))
+			amountETH = append(amountETH, minAmountETH)
+		}
 	}
 	sourceArr := append(sourceAddr, destAddr...)
 	sourceSymbolArr := append(sourceSymbol, destSymbol...)
 	destArr := append(destAddr, sourceAddr...)
 	destSymbolArr := append(destSymbol, sourceSymbol...)
-	amountArr := append(amount, amount...)
+	amountArr := append(amount, amountETH...)
 
 	dataAbi, err := self.ethereum.EncodeRateData(sourceArr, destArr, amountArr)
 	if err != nil {
