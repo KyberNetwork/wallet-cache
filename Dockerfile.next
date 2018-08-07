@@ -1,0 +1,18 @@
+FROM golang:stretch AS build-env
+
+ADD . /go/src/github.com/KyberNetwork/server-go
+WORKDIR /go
+RUN go install -v github.com/KyberNetwork/server-go
+
+FROM debian:stretch
+
+RUN apt-get update && \
+    apt install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+ADD . /go/src/github.com/KyberNetwork/server-go
+COPY --from=build-env /go/bin/server-go /go/src/github.com/KyberNetwork/server-go/server
+EXPOSE 3001
+
+WORKDIR /go/src/github.com/KyberNetwork/server-go 
+CMD ["/go/src/github.com/KyberNetwork/server-go/server"]
