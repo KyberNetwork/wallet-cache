@@ -1,6 +1,6 @@
 sudo: required
 
-go_import_path: github.com/vietthang207/wallet-cache
+go_import_path: github.com/KyberNetwork/server-go
 
 language: go
 
