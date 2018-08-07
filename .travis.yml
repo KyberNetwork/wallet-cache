@@ -1,6 +1,6 @@
 sudo: required
 
-go_import_path: github.com/KyberNetwork/wallet-cache
+go_import_path: github.com/vietthang207/wallet-cache
 
 language: go
 
@@ -9,7 +9,7 @@ services:
 
 after_success:
   - docker --version
-  - docker build -f Dockerfile.next -t kybernetwork/wallet-cache:$TRAVIS_COMMIT .
+  - docker build -f Dockerfile.next -t vietthang207/wallet-cache:$TRAVIS_COMMIT .
 
 deploy:
   provider: script

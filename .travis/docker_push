@@ -11,9 +11,9 @@ fi
 
 echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-docker tag kybernetwork/wallet-cache:"$TRAVIS_COMMIT" kybernetwork/wallet-cache:"$TRAVIS_BRANCH"
+docker tag vietthang207/wallet-cache:"$TRAVIS_COMMIT" vietthang207/wallet-cache:"$TRAVIS_BRANCH"
 if [[ -n "$TRAVIS_TAG" ]]; then
-    docker tag kybernetwork/wallet-cache:"$TRAVIS_COMMIT" kybernetwork/wallet-cache:"$TRAVIS_TAG"
+    docker tag vietthang207/wallet-cache:"$TRAVIS_COMMIT" vietthang207/wallet-cache:"$TRAVIS_TAG"
 fi
 
-docker push kybernetwork/wallet-cache
+docker push vietthang207/wallet-cache
