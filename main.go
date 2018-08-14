@@ -163,7 +163,8 @@ func fetchBlockNumber(persister persister.Persister, fetcher *fetcher.Fetcher) {
 }
 
 func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	rates, err := fetcher.GetRate()
+	currentRate := persister.GetRate()
+	rates, err := fetcher.GetRate(currentRate)
 	if err != nil {
 		log.Print(err)
 		//persister.SetNewRate(false)
