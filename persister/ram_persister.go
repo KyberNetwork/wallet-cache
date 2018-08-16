@@ -387,11 +387,11 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 // ----------------------------------------
 // return data from kyber tracker
 
-func (self *RamPersister) GetMarketData() map[string]*ethereum.MarketInfo {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	return self.marketInfo
-}
+// func (self *RamPersister) GetMarketData() map[string]*ethereum.MarketInfo {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	return self.marketInfo
+// }
 
 // use this api for 3 infomations change, marketcap, volume
 func (self *RamPersister) GetRightMarketData() map[string]*ethereum.RightMarketInfo {
@@ -413,18 +413,18 @@ func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
 	return result
 }
 
-func (self *RamPersister) GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	tokens := strings.Split(listTokens, "-")
-	result := make(map[string]*ethereum.MarketInfo)
-	for _, symbol := range tokens {
-		if self.marketInfo[symbol] != nil {
-			result[symbol] = self.marketInfo[symbol]
-		}
-	}
-	return result
-}
+// func (self *RamPersister) GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	tokens := strings.Split(listTokens, "-")
+// 	result := make(map[string]*ethereum.MarketInfo)
+// 	for _, symbol := range tokens {
+// 		if self.marketInfo[symbol] != nil {
+// 			result[symbol] = self.marketInfo[symbol]
+// 		}
+// 	}
+// 	return result
+// }
 
 func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, tokens map[string]ethereum.Token) {
 	self.mu.Lock()
