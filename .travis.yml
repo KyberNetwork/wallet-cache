@@ -7,6 +7,9 @@ language: go
 services:
   - docker
 
+install:
+  - go test -v ./...
+
 after_success:
   - docker --version
   - docker build -f Dockerfile.next -t kybernetwork/wallet-cache:$TRAVIS_COMMIT .
