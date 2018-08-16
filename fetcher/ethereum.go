@@ -49,7 +49,7 @@ func NewEthereum(network string, networkAbiStr string, tradeTopic string, wrappe
 	return ethereum, nil
 }
 
-func (self *Ethereum) EncodeRateData(source []string, dest []string, quantity []int64) (string, error) {
+func (self *Ethereum) EncodeRateData(source []string, dest []string, quantity []*big.Int) (string, error) {
 	sourceList := make([]common.Address, 0)
 	for _, sourceItem := range source {
 		sourceList = append(sourceList, common.HexToAddress(sourceItem))
@@ -61,7 +61,7 @@ func (self *Ethereum) EncodeRateData(source []string, dest []string, quantity []
 
 	quantityList := make([]*big.Int, 0)
 	for _, quanItem := range quantity {
-		quantityList = append(quantityList, big.NewInt(quanItem))
+		quantityList = append(quantityList, quanItem)
 	}
 
 	encodedData, err := self.wrapperAbi.Pack("getExpectedRates", common.HexToAddress(self.network), sourceList, destList, quantityList)
