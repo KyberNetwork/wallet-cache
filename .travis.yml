@@ -12,7 +12,7 @@ install:
 
 after_success:
   - docker --version
-  - docker build -f Dockerfile.next -t kybernetwork/wallet-cache:$TRAVIS_COMMIT .
+  - docker build -f Dockerfile.next -t kybernetwork/kyber-wallet-cache:$TRAVIS_COMMIT .
 
 deploy:
   provider: script
