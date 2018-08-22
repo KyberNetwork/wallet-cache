@@ -213,10 +213,10 @@ func (self *HTTPServer) GetLast7D(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetAnsibleVersion(c *gin.Context) {
+func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": true, "data": "1.0"},
+		gin.H{"success": true, "data": "1.6"},
 	)
 }
 
@@ -261,11 +261,11 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getLast7D", self.GetLast7D)
 	self.r.GET("/getMarketInfoByTokens", self.GetMarketInfoByTokens)
 	self.r.GET("/getRateETH", self.GetRateETH)
+	self.r.GET("/getCacheVersion", self.getCacheVersion)
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if os.Getenv("KYBER_ENV") != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
-		self.r.GET("/ansible", self.GetAnsibleVersion)
 	}
 
 	self.r.Run(self.host)
