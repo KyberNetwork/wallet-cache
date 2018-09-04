@@ -22,12 +22,14 @@ type RamPersister struct {
 	rates     *[]ethereum.Rate
 	isNewRate bool
 
-	latestBlock      string
-	isNewLatestBlock bool
+	latestBlock           string
+	isNewLatestBlock      bool
+	timeUpdateLatestBlock uint64
 
-	rateUSD      []RateUSD
-	rateETH      string
-	isNewRateUsd bool
+	rateUSD        []RateUSD
+	rateETH        string
+	isNewRateUsd   bool
+	timeUpdateRate uint64
 
 	events     []ethereum.EventHistory
 	isNewEvent bool
@@ -35,8 +37,9 @@ type RamPersister struct {
 	maxGasPrice      string
 	isNewMaxGasPrice bool
 
-	gasPrice      *ethereum.GasPrice
-	isNewGasPrice bool
+	gasPrice           *ethereum.GasPrice
+	isNewGasPrice      bool
+	timeUpdateGasPrice uint64
 
 	// ethRate      string
 	// isNewEthRate bool
