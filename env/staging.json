@@ -27,10 +27,16 @@
     "ETH": {
       "name": "Ethereum",
       "symbol": "ETH",
-      "icon": "eth.svg",
       "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
       "decimal": 18,
       "usd_id":"1027"
+    }, 
+    "WETH": {
+      "name": "Wrapped Ether",
+      "symbol" : "WETH",
+      "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "decimal": 18,
+      "usd_id":"2396"
     },
     "KNC": {
       "name": "KyberNetwork",
