@@ -181,7 +181,7 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	rates, err := fetcher.GetRate(currentRate)
 	if err != nil {
 		log.Print(err)
-		//persister.SetNewRate(false)
+		persister.SetIsNewRate(false)
 		return
 	}
 	persister.SaveRate(rates)
