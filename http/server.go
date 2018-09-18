@@ -25,6 +25,13 @@ type HTTPServer struct {
 }
 
 func (self *HTTPServer) GetRate(c *gin.Context) {
+	if !self.persister.GetIsNewRate() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
 	rates := self.persister.GetRate()
 	c.JSON(
 		http.StatusOK,
