@@ -10,8 +10,19 @@ import (
 	"github.com/KyberNetwork/server-go/ethereum"
 )
 
-const STEP_SAVE_RATE = 10      //1 minute
-const MAXIMUM_SAVE_RECORD = 60 //60 records
+const (
+	STEP_SAVE_RATE      = 10 //1 minute
+	MAXIMUM_SAVE_RECORD = 60 //60 records
+
+	INTERVAL_UPDATE_KYBER_ENABLE       = 20
+	INTERVAL_UPDATE_MAX_GAS            = 70
+	INTERVAL_UPDATE_GAS                = 40
+	INTERVAL_UPDATE_RATE_USD           = 610
+	INTERVAL_UPDATE_GENERAL_TOKEN_INFO = 3600
+	INTERVAL_UPDATE_GET_BLOCKNUM       = 20
+	INTERVAL_UPDATE_GET_RATE           = 30
+	INTERVAL_UPDATE_DATA_TRACKER       = 310
+)
 
 type RamPersister struct {
 	mu sync.RWMutex
@@ -45,8 +56,10 @@ type RamPersister struct {
 
 	//isNewTokenInfo bool
 
-	marketInfo      map[string]*ethereum.MarketInfo
-	last7D          map[string][]float64
+	marketInfo       map[string]*ethereum.MarketInfo
+	last7D           map[string][]float64
+	isNewTrackerData bool
+
 	rightMarketInfo map[string]*ethereum.RightMarketInfo
 	isNewMarketInfo bool
 }
@@ -84,12 +97,14 @@ func NewRamPersister() (*RamPersister, error) {
 
 	marketInfo := map[string]*ethereum.MarketInfo{}
 	last7D := map[string][]float64{}
+	isNewTrackerData := true
+
 	rightMarketInfo := map[string]*ethereum.RightMarketInfo{}
 	isNewMarketInfo := true
 
 	persister := &RamPersister{
 		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, rateETH, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
-		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, rightMarketInfo, isNewMarketInfo,
+		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, isNewTrackerData, rightMarketInfo, isNewMarketInfo,
 	}
 	return persister, nil
 }
@@ -387,17 +402,23 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 // ----------------------------------------
 // return data from kyber tracker
 
-func (self *RamPersister) GetMarketData() map[string]*ethereum.MarketInfo {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	return self.marketInfo
-}
-
 // use this api for 3 infomations change, marketcap, volume
 func (self *RamPersister) GetRightMarketData() map[string]*ethereum.RightMarketInfo {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	return self.rightMarketInfo
+}
+
+func (self *RamPersister) GetIsNewTrackerData() bool {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.isNewTrackerData
+}
+
+func (self *RamPersister) SetIsNewTrackerData(isNewTrackerData bool) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.isNewTrackerData = isNewTrackerData
 }
 
 func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
@@ -408,19 +429,6 @@ func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
 	for _, symbol := range tokens {
 		if self.last7D[symbol] != nil {
 			result[symbol] = self.last7D[symbol]
-		}
-	}
-	return result
-}
-
-func (self *RamPersister) GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	tokens := strings.Split(listTokens, "-")
-	result := make(map[string]*ethereum.MarketInfo)
-	for _, symbol := range tokens {
-		if self.marketInfo[symbol] != nil {
-			result[symbol] = self.marketInfo[symbol]
 		}
 	}
 	return result
