@@ -35,11 +35,11 @@ type Persister interface {
 	GetRate() *[]ethereum.Rate
 
 	SaveRate(*[]ethereum.Rate)
-	SetIsNewRate(bool)
-	GetIsNewRate() bool
+	//	SaveNewRate(bool)
+	//GetIsNewRate() bool
 
 	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
-	// GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
+	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
 	//SetIsNewGeneralInfoTokens(bool)
 
 	// SaveNewRateUsdEther(bool)

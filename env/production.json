@@ -402,6 +402,27 @@
       "symbol" : "MOC",
       "address": "0x865ec58b06bf6305b886793aa20a2da31d034e68",
       "usd_id":"2915"
+    },
+    "BNB":{
+      "name": "Binance Coin",
+      "decimal": 18,
+      "symbol" : "BNB",
+      "address": "0xb8c77482e45f1f44de1745f52c74426c631bdd52",
+      "usd_id":"1839"
+    },
+    "REP":{
+      "name": "Augur",
+      "decimal": 18,
+      "symbol" : "REP",
+      "address": "0xff3daa886d63547c4e2d78449915fa9e01193f59",
+      "usd_id":"1104"
+    },
+    "ZRX":{
+      "name": "0x Protocol",
+      "decimal": 18,
+      "symbol" : "ZRX",
+      "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
+      "usd_id":"1896"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
