@@ -6,7 +6,6 @@ import (
 	"math/big"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 )
@@ -53,7 +52,8 @@ type RamPersister struct {
 	// ethRate      string
 	// isNewEthRate bool
 
-	tokenInfo map[string]*ethereum.TokenGeneralInfo
+	tokenInfo           map[string]*ethereum.TokenGeneralInfo
+	timeUpdateTokenInfo uint64
 
 	//isNewTokenInfo bool
 
@@ -428,9 +428,6 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 	newResult := map[string]*ethereum.RightMarketInfo{}
 
 	tokenInfo := self.tokenInfo
-	if (self.timeUpdateTokenInfo + INTERVAL_UPDATE_GENERAL_TOKEN_INFO) > time.Now().Unix() {
-		tokenInfo = map[string]*ethereum.TokenGeneralInfo{}
-	}
 
 	for symbol, _ := range tokens {
 		marketInfo := &ethereum.MarketInfo{}
