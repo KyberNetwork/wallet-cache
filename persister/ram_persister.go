@@ -15,14 +15,14 @@ const (
 	STEP_SAVE_RATE      = 10 //1 minute
 	MAXIMUM_SAVE_RECORD = 60 //60 records
 
-	INTERVAL_UPDATE_KYBER_ENABLE       = 15
-	INTERVAL_UPDATE_MAX_GAS            = 65
-	INTERVAL_UPDATE_GAS                = 35
-	INTERVAL_UPDATE_RATE_USD           = 605
+	INTERVAL_UPDATE_KYBER_ENABLE       = 20
+	INTERVAL_UPDATE_MAX_GAS            = 70
+	INTERVAL_UPDATE_GAS                = 40
+	INTERVAL_UPDATE_RATE_USD           = 610
 	INTERVAL_UPDATE_GENERAL_TOKEN_INFO = 3600
-	INTERVAL_UPDATE_GET_BLOCKNUM       = 15
-	INTERVAL_UPDATE_GET_RATE           = 25
-	INTERVAL_UPDATE_DATA_TRACKER       = 305
+	INTERVAL_UPDATE_GET_BLOCKNUM       = 20
+	INTERVAL_UPDATE_GET_RATE           = 30
+	INTERVAL_UPDATE_DATA_TRACKER       = 310
 )
 
 type RamPersister struct {
@@ -384,12 +384,6 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 // ----------------------------------------
 // return data from kyber tracker
 
-func (self *RamPersister) GetMarketData() map[string]*ethereum.MarketInfo {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	return self.marketInfo
-}
-
 // use this api for 3 infomations change, marketcap, volume
 func (self *RamPersister) GetRightMarketData() map[string]*ethereum.RightMarketInfo {
 	self.mu.Lock()
@@ -410,19 +404,6 @@ func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
 	return result
 }
 
-func (self *RamPersister) GetMarketDataByTokens(listTokens string) map[string]*ethereum.MarketInfo {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	tokens := strings.Split(listTokens, "-")
-	result := make(map[string]*ethereum.MarketInfo)
-	for _, symbol := range tokens {
-		if self.marketInfo[symbol] != nil {
-			result[symbol] = self.marketInfo[symbol]
-		}
-	}
-	return result
-}
-
 func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, tokens map[string]ethereum.Token) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
@@ -432,6 +413,9 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 	newResult := map[string]*ethereum.RightMarketInfo{}
 
 	tokenInfo := self.tokenInfo
+	if (self.timeUpdateTokenInfo + INTERVAL_UPDATE_GENERAL_TOKEN_INFO) > time.Now().Unix() {
+		tokenInfo = map[string]*ethereum.TokenGeneralInfo{}
+	}
 
 	for symbol, _ := range tokens {
 		marketInfo := &ethereum.MarketInfo{}
@@ -469,7 +453,7 @@ func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
 func (self *RamPersister) GetIsNewMarketInfo() bool {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	if (self.timeUpdateMarketInfo + INTERVAL_UPDATE_GENERAL_TOKEN_INFO) < time.Now().Unix() {
+	if (self.timeUpdateMarketInfo + INTERVAL_UPDATE_DATA_TRACKER) < time.Now().Unix() {
 		return false
 	}
 	return self.isNewMarketInfo
