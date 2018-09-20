@@ -469,7 +469,7 @@ func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
 func (self *RamPersister) GetIsNewMarketInfo() bool {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	if (self.timeUpdateMarketInfo + INTERVAL_UPDATE_DATA_TRACKER) < time.Now().Unix() {
+	if (self.timeUpdateMarketInfo + INTERVAL_UPDATE_GENERAL_TOKEN_INFO) < time.Now().Unix() {
 		return false
 	}
 	return self.isNewMarketInfo
