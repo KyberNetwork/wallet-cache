@@ -185,7 +185,7 @@ func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
 func (self *HTTPServer) GetLast7D(c *gin.Context) {
 	listTokens := c.Query("listToken")
 	data := self.persister.GetLast7D(listTokens)
-	if self.persister.GetIsNewMarketInfo() {
+	if self.persister.GetIsNewTrackerData() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": true, "data": data, "status": "latest"},

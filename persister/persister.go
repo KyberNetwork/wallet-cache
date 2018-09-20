@@ -81,6 +81,8 @@ type Persister interface {
 	SaveMarketData(rates map[string]*ethereum.Rates, tokens map[string]ethereum.Token)
 	GetRightMarketData() map[string]*ethereum.RightMarketInfo
 	GetLast7D(listTokens string) map[string][]float64
+	GetIsNewTrackerData() bool
+	SetIsNewTrackerData(isNewTrackerData bool)
 	SetIsNewMarketInfo(isNewMarketInfo bool)
 	GetIsNewMarketInfo() bool
 }

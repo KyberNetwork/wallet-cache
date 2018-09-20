@@ -52,13 +52,14 @@ type RamPersister struct {
 	// ethRate      string
 	// isNewEthRate bool
 
-	tokenInfo           map[string]*ethereum.TokenGeneralInfo
-	timeUpdateTokenInfo uint64
+	tokenInfo map[string]*ethereum.TokenGeneralInfo
 
 	//isNewTokenInfo bool
 
-	marketInfo      map[string]*ethereum.MarketInfo
-	last7D          map[string][]float64
+	marketInfo       map[string]*ethereum.MarketInfo
+	last7D           map[string][]float64
+	isNewTrackerData bool
+
 	rightMarketInfo map[string]*ethereum.RightMarketInfo
 	isNewMarketInfo bool
 }
@@ -96,12 +97,14 @@ func NewRamPersister() (*RamPersister, error) {
 
 	marketInfo := map[string]*ethereum.MarketInfo{}
 	last7D := map[string][]float64{}
+	isNewTrackerData := true
+
 	rightMarketInfo := map[string]*ethereum.RightMarketInfo{}
 	isNewMarketInfo := true
 
 	persister := &RamPersister{
 		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, rateETH, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
-		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, rightMarketInfo, isNewMarketInfo,
+		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, isNewTrackerData, rightMarketInfo, isNewMarketInfo,
 	}
 	return persister, nil
 }
@@ -406,6 +409,18 @@ func (self *RamPersister) GetRightMarketData() map[string]*ethereum.RightMarketI
 	return self.rightMarketInfo
 }
 
+func (self *RamPersister) GetIsNewTrackerData() bool {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.isNewTrackerData
+}
+
+func (self *RamPersister) SetIsNewTrackerData(isNewTrackerData bool) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.isNewTrackerData = isNewTrackerData
+}
+
 func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
 	self.mu.Lock()
 	defer self.mu.Unlock()
@@ -426,8 +441,6 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 	result := map[string]*ethereum.MarketInfo{}
 	lastSevenDays := map[string][]float64{}
 	newResult := map[string]*ethereum.RightMarketInfo{}
-
-	tokenInfo := self.tokenInfo
 
 	for symbol, _ := range tokens {
 		marketInfo := &ethereum.MarketInfo{}
