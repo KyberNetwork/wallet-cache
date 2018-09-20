@@ -25,7 +25,6 @@ func enableLogToFile() (*os.File, error) {
 		log.Fatal(err)
 	}
 
-	defer f.Close()
 	log.SetOutput(f)
 	return f, nil
 }
