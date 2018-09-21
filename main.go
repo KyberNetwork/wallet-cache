@@ -231,8 +231,8 @@ func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	data, err := fetcher.FetchTrackerData()
 	if err != nil {
 		log.Print(err)
-		persister.SetIsNewMarketInfo(false)
-		return
+		persister.SetIsNewTrackerData(false)
+		// return
 	}
 	tokens := fetcher.GetListToken()
 	persister.SaveMarketData(data, tokens)
