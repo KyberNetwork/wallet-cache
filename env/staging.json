@@ -422,7 +422,13 @@
       "symbol" : "ZRX",
       "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
       "usd_id":"1896"
-    }
+    },
+    "MAS":{
+      "name": "MidasProtocol",
+      "decimal": 18,
+      "symbol" : "MAS",
+      "address": "0x23ccc43365d9dd3882eab88f43d515208f832430"               
+    }   
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
   "network": "0xc14f34233071543e979f6a79aa272b0ab1b4947d",
