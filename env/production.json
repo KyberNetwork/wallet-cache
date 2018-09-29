@@ -429,7 +429,13 @@
       "decimal": 18,
       "symbol" : "MAS",
       "address": "0x23ccc43365d9dd3882eab88f43d515208f832430"               
-    }   
+    },
+    "KCC":{
+      "name": "Kyber Community Coupon",
+      "decimal": 18,
+      "symbol" : "KCC",
+      "address": "0x09677d0175dec51e2215426cddd055a71bf4228d"
+    }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
   "network": "0x818E6FECD516Ecc3849DAf6845e3EC868087B755",
