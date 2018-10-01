@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+
 	// "strconv"
 
 	"github.com/KyberNetwork/server-go/ethereum"
@@ -178,4 +179,10 @@ func (self *BlockchainFetcher) GetTrackerData(trackerEndpoint string) (map[strin
 	err := errors.New("Blockchain is not support this api")
 	//log.Print(err)
 	return trackerData, err
+}
+
+func (self *BlockchainFetcher) GetListToken(configEndpoint, kyberENV string) (map[string]ethereum.Token, error) {
+	listToken := make(map[string]ethereum.Token)
+	err := errors.New("Blockchain is not support this api")
+	return listToken, err
 }

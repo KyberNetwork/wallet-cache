@@ -36,7 +36,7 @@ type Connection struct {
 }
 
 type InfoData struct {
-	mu     sync.RWMutex
+	mu     *sync.RWMutex
 	ApiUsd string                    `json:"api_usd"`
 	Tokens map[string]ethereum.Token `json:"tokens"`
 	//ServerLog ServerLog        `json:"server_logs"`
@@ -56,12 +56,19 @@ type InfoData struct {
 	AverageBlockTime int64 `json:"averageBlockTime"`
 
 	TrackerEndpoint string `json:"tracker_endpoint"`
+	ConfigEndpoint  string `json:"config_endpoint"`
 }
 
 func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.Tokens = tokens
+}
+
+func (self *InfoData) GetListToken() map[string]ethereum.Token {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.Tokens
 }
 
 type ResultRpc struct {
@@ -75,13 +82,15 @@ type Fetcher struct {
 }
 
 func (self *Fetcher) GetNumTokens() int {
-	return len(self.info.Tokens)
+	listTokens := self.GetListToken()
+	return len(listTokens)
 }
 
 func NewFetcher() (*Fetcher, error) {
 	var file []byte
 	var err error
-	switch os.Getenv("KYBER_ENV") {
+	kyberENV := os.Getenv("KYBER_ENV")
+	switch kyberENV {
 	case "internal_mainnet":
 		file, err = ioutil.ReadFile("env/internal_mainnet.json")
 		if err != nil {
@@ -167,29 +176,57 @@ func NewFetcher() (*Fetcher, error) {
 		fetIns:   fetIns,
 	}
 
-	fetcher.FetchListToken()
+	fetcher.FetchListToken(kyberENV)
 	//reader info from json
 
 	return fetcher, nil
 }
 
-func (self *Fetcher) FetchListToken() {
+func (self *Fetcher) FetchListToken(kyberENV string) {
+	var err error
+	var result map[string]ethereum.Token
 	for _, fetIns := range self.fetIns {
-		result, err := fetIns.GetListToken()
+		result, err = fetIns.GetListToken(self.info.ConfigEndpoint, kyberENV)
 		if err != nil {
 			log.Print(err)
 			continue
 		}
 	}
+	if err == nil {
+		self.info.UpdateListToken(result)
+	} else {
+		result = self.info.GetListToken()
+	}
+	err = storeConfig(result)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+// store config to a file json
+
+func storeConfig(tokens map[string]ethereum.Token) error {
+	fileJSON, err := os.Create("config/tokens.json")
+	if err != nil {
+		return err
+	}
+	defer fileJSON.Close()
+	enc := json.NewEncoder(fileJSON)
+	err = enc.Encode(tokens)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (self *Fetcher) GetListToken() map[string]ethereum.Token {
-	return self.info.Tokens
+	return self.info.GetListToken()
 }
 
 func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	usdId := make([]string, 0)
-	for _, token := range self.info.Tokens {
+	listTokens := self.GetListToken()
+	for _, token := range listTokens {
 		if token.UsdId != "" {
 			usdId = append(usdId, token.UsdId)
 		}
@@ -208,7 +245,8 @@ func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInfo {
 	generalInfo := map[string]*ethereum.TokenGeneralInfo{}
 	//	usdId := make([]string, 0)
-	for _, token := range self.info.Tokens {
+	listTokens := self.GetListToken()
+	for _, token := range listTokens {
 		if token.UsdId != "" {
 			//usdId = append(usdId, token.UsdId)
 			for _, fetIns := range self.fetIns {
@@ -333,6 +371,7 @@ func getAmountTokenWithMinETH(rate *big.Int, decimal int) *big.Int {
 
 func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	//append rate
+	listTokens := self.GetListToken()
 	sourceAddr := make([]string, 0)
 	sourceSymbol := make([]string, 0)
 	destAddr := make([]string, 0)
@@ -353,12 +392,12 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 				r := big.NewInt(0)
 				r.SetString(rate.Rate, 10)
 				destSym := rate.Dest
-				decimal := self.info.Tokens[destSym].Decimal
+				decimal := listTokens[destSym].Decimal
 				if decimal != 0 || r.Cmp(amountToken) != 0 {
 					amountToken = getAmountTokenWithMinETH(r, decimal)
 				}
 				amount = append(amount, amountToken)
-				tokenAddr := self.info.Tokens[destSym].Address
+				tokenAddr := listTokens[destSym].Address
 				sourceAddr = append(sourceAddr, tokenAddr)
 				sourceSymbol = append(sourceSymbol, destSym)
 			} else {
@@ -374,7 +413,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 		amount = append(amount, minAmountETH)
 		amountETH = append(amountETH, minAmountETH)
 	} else {
-		for _, token := range self.info.Tokens {
+		for _, token := range listTokens {
 			sourceAddr = append(sourceAddr, token.Address)
 			sourceSymbol = append(sourceSymbol, token.Symbol)
 			destAddr = append(destAddr, ethAddr)

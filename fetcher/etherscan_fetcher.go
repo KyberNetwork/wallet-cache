@@ -247,3 +247,24 @@ func (self *Etherscan) GetTrackerData(trackerEndpoint string) (map[string]*ether
 	}
 	return trackerData, nil
 }
+
+func (self *Etherscan) GetListToken(configEndpoint, kyberENV string) (map[string]ethereum.Token, error) {
+	listToken := make(map[string]ethereum.Token)
+	response, err := http.Get(configEndpoint)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	defer (response.Body).Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	err = json.Unmarshal(b, &listToken)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return listToken, nil
+}

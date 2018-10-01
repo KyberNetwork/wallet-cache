@@ -27,6 +27,10 @@ type FetcherInterface interface {
 
 	// get data from tracker
 	GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error)
+
+	// get config from api
+
+	GetListToken(configEndpoint, kyberENV string) (map[string]ethereum.Token, error)
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
