@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/KyberNetwork/server-go/fetcher"
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
 	"github.com/gin-contrib/cors"
@@ -19,6 +20,7 @@ const (
 )
 
 type HTTPServer struct {
+	fetcher   *fetcher.Fetcher
 	persister persister.Persister
 	host      string
 	r         *gin.Engine
@@ -213,6 +215,15 @@ func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 // 	return
 // }
 
+// Function for fetcher
+func (self *HTTPServer) GetCurrentListToken(c *gin.Context) {
+	listToken := self.fetcher.GetCurrentListToken()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": listToken},
+	)
+}
+
 func (self *HTTPServer) Run() {
 	//self.r.GET("/getRate", self.GetRate)
 	// self.r.GET("/getHistoryOneColumn", self.GetEvent)
@@ -231,6 +242,9 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getCacheVersion", self.getCacheVersion)
 	self.r.StaticFile("tokens.js", "config/tokens.js")
 
+	// Update Fetcher
+	self.r.GET("/currentListToken", self.GetCurrentListToken)
+
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if os.Getenv("KYBER_ENV") != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
@@ -239,12 +253,12 @@ func (self *HTTPServer) Run() {
 	self.r.Run(self.host)
 }
 
-func NewHTTPServer(host string, persister persister.Persister) *HTTPServer {
+func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
 	r.Use(cors.Default())
 
 	return &HTTPServer{
-		persister, host, r,
+		fetcher, persister, host, r,
 	}
 }

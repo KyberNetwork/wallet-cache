@@ -35,7 +35,7 @@ type Token struct {
 	Name    string `json:"name"`
 	Symbol  string `json:"symbol"`
 	Address string `json:"address"`
-	Decimal int    `json:"decimal"`
+	Decimal int    `json:"decimals"`
 	UsdId   string `json:"usd_id"`
 }
 
@@ -103,4 +103,9 @@ func NewMarketInfo(quotes map[string]QuoInfo, rates *Rates) *MarketInfo {
 		Rates:  rates,
 		Quotes: quotes,
 	}
+}
+
+type TokenConfig struct {
+	Error bool    `json:"error"`
+	Data  []Token `json:"data"`
 }

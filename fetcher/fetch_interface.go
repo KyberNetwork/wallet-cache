@@ -30,7 +30,7 @@ type FetcherInterface interface {
 
 	// get config from api
 
-	GetListToken(configEndpoint, kyberENV string) (map[string]ethereum.Token, error)
+	GetListToken(configEndpoint string) (map[string]ethereum.Token, error)
 }
 
 //var transactionPersistent = models.NewTransactionPersister()

@@ -181,7 +181,7 @@ func (self *BlockchainFetcher) GetTrackerData(trackerEndpoint string) (map[strin
 	return trackerData, err
 }
 
-func (self *BlockchainFetcher) GetListToken(configEndpoint, kyberENV string) (map[string]ethereum.Token, error) {
+func (self *BlockchainFetcher) GetListToken(configEndpoint string) (map[string]ethereum.Token, error) {
 	listToken := make(map[string]ethereum.Token)
 	err := errors.New("Blockchain is not support this api")
 	return listToken, err

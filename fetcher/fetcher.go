@@ -64,7 +64,15 @@ type InfoData struct {
 func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	self.Tokens = tokens
+	currentListToken := self.Tokens
+	finalListToken := make(map[string]ethereum.Token)
+	for symbol, token := range tokens {
+		if currentToken, ok := currentListToken[symbol]; ok {
+			token.UsdId = currentToken.UsdId
+		}
+		finalListToken[symbol] = token
+	}
+	self.Tokens = finalListToken
 }
 
 func (self *InfoData) GetListToken() map[string]ethereum.Token {
@@ -178,35 +186,51 @@ func NewFetcher() (*Fetcher, error) {
 		fetIns:   fetIns,
 	}
 
-	fetcher.FetchListToken(kyberENV)
-	//reader info from json
+	err = fetcher.UpdateListToken()
+	if err != nil {
+		panic(err)
+	}
+
+	tickerUpdateToken := time.NewTicker(3600 * time.Second)
+	go func() {
+		for {
+			<-tickerUpdateToken.C
+			fetcher.UpdateListToken()
+		}
+	}()
 
 	return fetcher, nil
 }
 
-func (self *Fetcher) FetchListToken(kyberENV string) {
+func (self *Fetcher) UpdateListToken() error {
 	var err error
-	var result map[string]ethereum.Token
+	listToken := make(map[string]ethereum.Token)
 	for _, fetIns := range self.fetIns {
-		result, err = fetIns.GetListToken(self.info.ConfigEndpoint, kyberENV)
+		result, err := fetIns.GetListToken(self.info.ConfigEndpoint)
 		if err != nil {
 			log.Print(err)
 			continue
 		}
+		listToken = result
+		break
 	}
 	if err == nil {
-		self.info.UpdateListToken(result)
+		self.info.UpdateListToken(listToken)
+		err = storeConfig(listToken)
+		if err != nil {
+			log.Println("fetch tokens success but write to file js failed")
+		}
 	} else {
-		result = self.info.GetListToken()
+		return err
 	}
-	err = storeConfig(result)
-	if err != nil {
-		log.Println(err)
-	}
+	return nil
 }
 
-// store config to a file json
+func (self *Fetcher) GetCurrentListToken() map[string]ethereum.Token {
+	return self.GetListToken()
+}
 
+// store config to a file js
 func storeConfig(tokens map[string]ethereum.Token) error {
 	fileJS, err := os.Create("config/tokens.js")
 	if err != nil {
@@ -217,11 +241,7 @@ func storeConfig(tokens map[string]ethereum.Token) error {
 	if err != nil {
 		return err
 	}
-	// log.Println(bytes)
 	stringFile := fmt.Sprintf("var configTokens = %s;", bytes)
-	// _, err = fileJS.WriteString("var configTokens = ")
-	// enc := json.NewEncoder(fileJSON)
-	// err = enc.Encode(tokens)
 	stringReader := strings.NewReader(stringFile)
 	_, err = stringReader.WriteTo(fileJS)
 	if err != nil {

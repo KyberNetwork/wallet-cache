@@ -25,6 +25,179 @@
   "api_usd":"https://api.coinmarketcap.com",
   "tokens": {
     "ETH": {
+      "usd_id":"1027"
+    },
+    "WETH": {
+      "usd_id":"2396"
+    },
+    "KNC": {
+      "usd_id":"1982"
+    },
+    "DAI": {
+      "usd_id":"2308"
+    },
+    "OMG": {
+      "usd_id":"1808"
+    },
+    "SNT": {
+      "usd_id":"1759"
+    },
+    "ELF": {
+      "usd_id":"2299"
+    },
+    "POWR": {
+      "usd_id":"2132"
+    },
+    "MANA": {
+      "usd_id":"1966"
+    },
+    "BAT": {
+      "usd_id":"1697"
+    },
+    "REQ": {
+      "usd_id":"2071"
+    },
+    "GTO": {
+      "usd_id":"2289"
+    },
+    "RDN": {
+      "usd_id":"2161"
+    },
+    "APPC": {
+      "usd_id":"2344"
+    },
+    "ENG": {
+      "usd_id":"2044"
+    },
+    "SALT": {
+      "usd_id":"1996"
+    },
+    "BQX": {
+      "usd_id":"1817"
+    },
+    "ADX": {
+      "usd_id": "1768"
+    },
+    "AST": {
+      "usd_id": "2058"
+    },
+    "RCN": {
+      "usd_id": "2096"
+    },
+    "ZIL": {
+      "usd_id":"2469"
+    },
+    "LINK": {
+      "usd_id":"1975"
+    },
+    "DGX": {
+      "usd_id": "2739"
+    },
+    "STORM": {
+      "usd_id":"2297"
+    },
+    "IOST": {
+      "usd_id":"2405"
+    },
+    "MOT": {
+      "usd_id":"2327"
+    },
+    "ABT": {
+      "usd_id":"2545"
+    },
+    "ENJ": {
+      "usd_id":"2130"
+    },
+    "AION": {
+      "usd_id": "2062"
+    },
+    "AE": {
+      "usd_id": "1700"
+    },
+    "BLZ": {
+      "usd_id":"2505"
+    },
+    "PAL": {
+      "usd_id":"2718"
+    },
+    "ELEC": {
+      "usd_id":"2573"
+    },
+    "BBO": {
+      "usd_id":"2836"
+    },
+    "POLY": {
+      "usd_id":"2496"
+    },
+    "LBA": {
+      "usd_id":"2760"
+    },
+    "EDU": {
+      "usd_id":"2734"
+    },
+    "CVC": {
+      "usd_id":"1816"
+    },
+    "WAX": {
+      "usd_id":"2300"
+    },
+    "SUB": {
+      "usd_id":"1984"
+    },
+    "POE": {
+      "usd_id":"1937"
+    },
+    "PAY": {
+      "usd_id":"1758"
+    },
+    "CHAT": {
+      "usd_id":"2427"
+    },
+    "DTA": {
+      "usd_id":"2446"
+    },
+    "BNT": {
+      "usd_id":"1727"
+    },
+    "TUSD": {
+      "usd_id":"2563"
+    },
+    "TOMO": {
+      "usd_id":"2570"
+    },
+    "MDS": {
+      "usd_id":"2274"
+    },
+    "LEND": {
+      "usd_id":"2239"
+    },
+    "WINGS": {
+      "usd_id":"1500"
+    },
+    "MTL": {
+      "usd_id":"1788"
+    },
+    "WABI": {
+      "usd_id":"2267"
+    },
+    "COFI":{
+      "usd_id":"2478"
+    },
+    "MOC": {
+      "usd_id":"2915"
+    },
+    "BNB":{
+      "usd_id":"1839"
+    },
+    "REP":{
+      "usd_id":"1104"
+    },
+    "ZRX":{
+      "usd_id":"1896"
+    }
+  },
+  "tokens_backup": {
+    "ETH": {
       "name": "Ethereum",
       "symbol": "ETH",
       "icon": "eth.svg",
@@ -433,5 +606,5 @@
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
   "tracker_endpoint":"https://tracker.kyber.network",
-  "config_endpoint": "https://api.getconfig"
+  "config_endpoint": "https://dev-api.knstats.com/trading/getList"
 }
