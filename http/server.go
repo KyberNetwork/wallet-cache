@@ -229,7 +229,7 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getLast7D", self.GetLast7D)
 	self.r.GET("/getRateETH", self.GetRateETH)
 	self.r.GET("/getCacheVersion", self.getCacheVersion)
-	self.r.StaticFile("tokens.json", "config/tokens.json")
+	self.r.StaticFile("tokens.js", "config/tokens.js")
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if os.Getenv("KYBER_ENV") != "production" {

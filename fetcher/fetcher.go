@@ -3,11 +3,13 @@ package fetcher
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"math/big"
 	"os"
+	"strings"
 	"sync"
 
 	// "strconv"
@@ -206,13 +208,22 @@ func (self *Fetcher) FetchListToken(kyberENV string) {
 // store config to a file json
 
 func storeConfig(tokens map[string]ethereum.Token) error {
-	fileJSON, err := os.Create("config/tokens.json")
+	fileJS, err := os.Create("config/tokens.js")
 	if err != nil {
 		return err
 	}
-	defer fileJSON.Close()
-	enc := json.NewEncoder(fileJSON)
-	err = enc.Encode(tokens)
+	defer fileJS.Close()
+	bytes, err := json.Marshal(tokens)
+	if err != nil {
+		return err
+	}
+	// log.Println(bytes)
+	stringFile := fmt.Sprintf("var configTokens = %s;", bytes)
+	// _, err = fileJS.WriteString("var configTokens = ")
+	// enc := json.NewEncoder(fileJSON)
+	// err = enc.Encode(tokens)
+	stringReader := strings.NewReader(stringFile)
+	_, err = stringReader.WriteTo(fileJS)
 	if err != nil {
 		return err
 	}
