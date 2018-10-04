@@ -27,10 +27,16 @@
     "ETH": {
       "name": "Ethereum",
       "symbol": "ETH",
-      "icon": "eth.svg",
       "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
       "decimal": 18,
       "usd_id":"1027"
+    }, 
+    "WETH": {
+      "name": "Wrapped Ether",
+      "symbol" : "WETH",
+      "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "decimal": 18,
+      "usd_id":"2396"
     },
     "KNC": {
       "name": "KyberNetwork",
@@ -396,6 +402,33 @@
       "address": "0x865ec58b06bf6305b886793aa20a2da31d034e68",
       "usd_id":"2915"
     },
+    "BNB":{
+      "name": "Binance Coin",
+      "decimal": 18,
+      "symbol" : "BNB",
+      "address": "0xb8c77482e45f1f44de1745f52c74426c631bdd52",
+      "usd_id":"1839"
+    },
+    "REP":{
+      "name": "Augur",
+      "decimal": 18,
+      "symbol" : "REP",
+      "address": "0x1985365e9f78359a9b6ad760e32412f4a445e862",
+      "usd_id":"1104"
+    },
+    "ZRX":{
+      "name": "0x Protocol",
+      "decimal": 18,
+      "symbol" : "ZRX",
+      "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
+      "usd_id":"1896"
+    },
+    "MAS":{
+      "name": "MidasProtocol",
+      "decimal": 18,
+      "symbol" : "MAS",
+      "address": "0x23ccc43365d9dd3882eab88f43d515208f832430"               
+    },
     "DAT": {
       "name": "Datum",
       "decimal": 18,
@@ -416,7 +449,7 @@
       "symbol": "QKC",
       "address": "0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664",
       "usd_id": "2840"
-    }
+    }   
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
   "network": "0xc14f34233071543e979f6a79aa272b0ab1b4947d",

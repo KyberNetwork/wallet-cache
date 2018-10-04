@@ -1,0 +1,24 @@
+sudo: required
+
+go_import_path: github.com/KyberNetwork/server-go
+
+language: go
+
+services:
+  - docker
+
+install:
+  - go test -v ./...
+
+after_success:
+  - docker --version
+  - docker build -f Dockerfile.next -t kybernetwork/wallet-cache:$TRAVIS_COMMIT .
+
+deploy:
+  provider: script
+  script: bash .travis/docker_push
+  on:
+    all_branches: true
+
+go:
+  - "1.10.x"

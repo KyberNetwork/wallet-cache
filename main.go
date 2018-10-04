@@ -13,22 +13,35 @@ import (
 
 type fetcherFunc func(persister persister.Persister, fetcher *fetcher.Fetcher)
 
+func enableLogToFile() (*os.File, error) {
+	const logFileName = "error.log"
+	f, err := os.OpenFile(logFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	//clear error log file
+	if err = f.Truncate(0); err != nil {
+		log.Fatal(err)
+	}
+
+	log.SetOutput(f)
+	return f, nil
+}
+
 func main() {
 	numCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(numCPU)
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	f, err := os.OpenFile("error.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
+
+	if os.Getenv("LOG_TO_STDOUT") != "true" {
+		f, err := enableLogToFile()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
 	}
-	//clear error log file
-	err = f.Truncate(0)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	log.SetOutput(f)
 
 	persisterIns, _ := persister.NewPersister("ram")
 	fertcherIns, err := fetcher.NewFetcher()
@@ -218,8 +231,8 @@ func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	data, err := fetcher.FetchTrackerData()
 	if err != nil {
 		log.Print(err)
-		persister.SetIsNewMarketInfo(false)
-		return
+		persister.SetIsNewTrackerData(false)
+		// return
 	}
 	tokens := fetcher.GetListToken()
 	persister.SaveMarketData(data, tokens)

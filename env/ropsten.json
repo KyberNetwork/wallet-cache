@@ -208,6 +208,12 @@
       "symbol" : "MOC",
       "address": "0x1742c81075031b8f173d2327e3479d1fc3feaa76",
       "usd_id":"2915"
+    },
+    "MASR": {
+      "name": "MidasProtocol Ropsten",
+      "decimal": 18,
+      "symbol" : "MASR",
+      "address": "0xc2c37d1a2cdd601ce665c4a785074670657f83ac"
     }
   },
   "reserve": "0x0fc1cf3e7dd049f7b42e6823164a64f76fc06be0",
