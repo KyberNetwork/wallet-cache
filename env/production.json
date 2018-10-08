@@ -436,27 +436,6 @@
       "decimal": 18,
       "symbol" : "KCC",
       "address": "0x09677d0175dec51e2215426cddd055a71bf4228d"
-    },
-    "DAT": {
-      "name": "Datum",
-      "decimal": 18,
-      "symbol": "DAT",
-      "address": "0x81c9151de0c8bafcd325a57e3db5a5df1cebf79c",
-      "usd_id": "2283"
-    },
-    "REN": {
-      "name": "Republic",
-      "decimal": 18,
-      "symbol": "REN",
-      "address": "0x408e41876cccdc0f92210600ef50372656052a38",
-      "usd_id": "2539"
-    },
-    "QKC": {
-      "name": "QuarkChain",
-      "decimal": 18,
-      "symbol": "QKC",
-      "address": "0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664",
-      "usd_id": "2840"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
