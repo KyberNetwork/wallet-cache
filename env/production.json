@@ -319,13 +319,6 @@
       "symbol":"PAY", 
       "usd_id":"1758"
     },
-    "CHAT": {
-      "name": "Chatcoin",
-      "decimal": 18,
-      "address": "0x442bc47357919446eabc18c7211e57a13d983469",
-      "symbol":"CHAT", 
-      "usd_id":"2427"
-    },
     "DTA": {
       "name": "Data",
       "decimal": 18,
