@@ -36,7 +36,7 @@ type Token struct {
 	Symbol  string `json:"symbol"`
 	Address string `json:"address"`
 	Decimal int    `json:"decimals"`
-	UsdId   string `json:"usd_id"`
+	UsdId   string `json:"cmc_id"`
 }
 
 type QuoInfo struct {

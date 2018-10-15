@@ -3,13 +3,11 @@ package fetcher
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"math/big"
 	"os"
-	"strings"
 	"sync"
 
 	// "strconv"
@@ -38,9 +36,10 @@ type Connection struct {
 }
 
 type InfoData struct {
-	mu     *sync.RWMutex
-	ApiUsd string                    `json:"api_usd"`
-	Tokens map[string]ethereum.Token `json:"tokens"`
+	mu            *sync.RWMutex
+	ApiUsd        string                    `json:"api_usd"`
+	Tokens        map[string]ethereum.Token `json:"tokens"`
+	TokenSnapshot map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
 	Connections []Connection `json:"connections"`
 
@@ -68,11 +67,19 @@ func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
 	finalListToken := make(map[string]ethereum.Token)
 	for symbol, token := range tokens {
 		if currentToken, ok := currentListToken[symbol]; ok {
-			token.UsdId = currentToken.UsdId
+			if token.UsdId == "" {
+				token.UsdId = currentToken.UsdId
+			}
 		}
 		finalListToken[symbol] = token
 	}
 	self.Tokens = finalListToken
+}
+
+func (self *InfoData) UpdateByBackupToken() {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.Tokens = self.TokenSnapshot
 }
 
 func (self *InfoData) GetListToken() map[string]ethereum.Token {
@@ -163,6 +170,8 @@ func NewFetcher() (*Fetcher, error) {
 		return nil, err
 	}
 
+	infoData.TokenSnapshot = infoData.Tokens
+
 	fetIns := make([]FetcherInterface, 0)
 	for _, connection := range infoData.Connections {
 		newFetcher, err := NewFetcherIns(connection.Type, connection.Endpoint, connection.Apikey)
@@ -186,44 +195,43 @@ func NewFetcher() (*Fetcher, error) {
 		fetIns:   fetIns,
 	}
 
-	err = fetcher.UpdateListToken()
-	if err != nil {
-		panic(err)
-	}
-
-	tickerUpdateToken := time.NewTicker(3600 * time.Second)
-	go func() {
-		for {
-			<-tickerUpdateToken.C
-			fetcher.UpdateListToken()
-		}
-	}()
-
 	return fetcher, nil
+}
+
+func (self *Fetcher) TryUpdateListToken() error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = self.UpdateListToken()
+		if err != nil {
+			log.Println(err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return nil
+	}
+	self.info.UpdateByBackupToken()
+	return nil
 }
 
 func (self *Fetcher) UpdateListToken() error {
 	var err error
-	listToken := make(map[string]ethereum.Token)
+	result := make(map[string]ethereum.Token)
 	for _, fetIns := range self.fetIns {
-		result, err := fetIns.GetListToken(self.info.ConfigEndpoint)
+		result, err = fetIns.GetListToken(self.info.ConfigEndpoint)
 		if err != nil {
 			log.Print(err)
 			continue
 		}
-		listToken = result
 		break
 	}
 	if err == nil {
-		self.info.UpdateListToken(listToken)
-		err = storeConfig(listToken)
-		if err != nil {
-			log.Println("fetch tokens success but write to file js failed")
-		}
-	} else {
-		return err
+		self.info.UpdateListToken(result)
+		// err = storeConfig(listToken)
+		// if err != nil {
+		// 	log.Println("fetch tokens success but write to file js failed")
+		// }
 	}
-	return nil
+	return err
 }
 
 func (self *Fetcher) GetCurrentListToken() map[string]ethereum.Token {
@@ -231,24 +239,24 @@ func (self *Fetcher) GetCurrentListToken() map[string]ethereum.Token {
 }
 
 // store config to a file js
-func storeConfig(tokens map[string]ethereum.Token) error {
-	fileJS, err := os.Create("config/tokens.js")
-	if err != nil {
-		return err
-	}
-	defer fileJS.Close()
-	bytes, err := json.Marshal(tokens)
-	if err != nil {
-		return err
-	}
-	stringFile := fmt.Sprintf("var configTokens = %s;", bytes)
-	stringReader := strings.NewReader(stringFile)
-	_, err = stringReader.WriteTo(fileJS)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+// func storeConfig(tokens map[string]ethereum.Token) error {
+// 	fileJS, err := os.Create("config/tokens.js")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer fileJS.Close()
+// 	bytes, err := json.Marshal(tokens)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	stringFile := fmt.Sprintf("var configTokens = %s;", bytes)
+// 	stringReader := strings.NewReader(stringFile)
+// 	_, err = stringReader.WriteTo(fileJS)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func (self *Fetcher) GetListToken() map[string]ethereum.Token {
 	return self.info.GetListToken()

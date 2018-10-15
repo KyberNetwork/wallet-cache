@@ -50,6 +50,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = fertcherIns.TryUpdateListToken()
+	if err != nil {
+		log.Println(err)
+	}
+
+	tickerUpdateToken := time.NewTicker(3600 * time.Second)
+	go func() {
+		for {
+			<-tickerUpdateToken.C
+			fertcherIns.TryUpdateListToken()
+		}
+	}()
+
 	tokenNum := fertcherIns.GetNumTokens()
 	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
 	//	initRateToken(persisterIns, fertcherIns)

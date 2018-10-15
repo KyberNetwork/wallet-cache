@@ -240,7 +240,6 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getLast7D", self.GetLast7D)
 	self.r.GET("/getRateETH", self.GetRateETH)
 	self.r.GET("/getCacheVersion", self.getCacheVersion)
-	self.r.StaticFile("tokens.js", "config/tokens.js")
 
 	// Update Fetcher
 	self.r.GET("/currentListToken", self.GetCurrentListToken)
