@@ -223,5 +223,6 @@
   "endpoint": "wss://ropsten.infura.io/ws",
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "tracker_endpoint":"https://tracker.kyber.network"
+  "tracker_endpoint":"https://tracker.kyber.network",
+  "config_endpoint": "https://dev-api.knstats.com/trading/getList/ropsten"
 }
