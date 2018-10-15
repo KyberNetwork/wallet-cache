@@ -29,400 +29,400 @@
       "symbol": "ETH",
       "icon": "eth.svg",
       "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "decimal": 18,
-      "usd_id":"1027"
+      "decimals": 18,
+      "cmc_id":"1027"
     },
     "WETH": {
       "name": "Wrapped Ether",
       "symbol" : "WETH",
       "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-      "decimal": 18,
-      "usd_id":"2396"
+      "decimals": 18,
+      "cmc_id":"2396"
     },
     "KNC": {
       "name": "KyberNetwork",
       "symbol": "KNC",
       "address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
-      "decimal": 18,
-      "usd_id":"1982"
+      "decimals": 18,
+      "cmc_id":"1982"
     },
     "DAI": {
       "name" : "DAI",
       "symbol": "DAI",
       "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
-      "decimal": 18,
-      "usd_id":"2308"
+      "decimals": 18,
+      "cmc_id":"2308"
     },
     "OMG": {
       "name": "OmiseGO",
       "symbol": "OMG",
       "address": "0xd26114cd6ee289accf82350c8d8487fedb8a0c07",
-      "decimal": 18,
-      "usd_id":"1808"
+      "decimals": 18,
+      "cmc_id":"1808"
     },
     "SNT": {
       "name":"Status",
       "address": "0x744d70fdbe2ba4cf95131626614a1763df805b9e",
       "symbol": "SNT",
-      "decimal": 18,
-      "usd_id":"1759"
+      "decimals": 18,
+      "cmc_id":"1759"
     },
     "ELF": {
       "name":"Aelf",
       "address": "0xbf2179859fc6d5bee9bf9158632dc51678a4100e",
       "symbol": "ELF",
-      "decimal": 18,
-      "usd_id":"2299"
+      "decimals": 18,
+      "cmc_id":"2299"
     },
     "POWR": {
       "name":"Power Ledger",
       "address": "0x595832f8fc6bf59c85c527fec3740a1b7a361269",
       "symbol": "POWR",
-      "decimal": 6,
-      "usd_id":"2132"
+      "decimals": 6,
+      "cmc_id":"2132"
     },
     "MANA": {
       "name":"Mana",
       "address": "0x0f5d2fb29fb7d3cfee444a200298f468908cc942",
       "symbol": "MANA",
-      "decimal": 18,
-      "usd_id":"1966"
+      "decimals": 18,
+      "cmc_id":"1966"
     },
     "BAT": {
       "name":"Basic Attention Token",
       "address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
       "symbol": "BAT",
-      "decimal": 18,
-      "usd_id":"1697"
+      "decimals": 18,
+      "cmc_id":"1697"
     },
     "REQ": {
       "name":"Request",
       "address": "0x8f8221afbb33998d8584a2b05749ba73c37a938a",
       "symbol": "REQ",
-      "decimal": 18,
-      "usd_id":"2071"
+      "decimals": 18,
+      "cmc_id":"2071"
     },
     "GTO": {
       "name":"Gifto",
       "address": "0xc5bbae50781be1669306b9e001eff57a2957b09d",
       "symbol": "GTO",
-      "decimal": 5,
-      "usd_id":"2289"
+      "decimals": 5,
+      "cmc_id":"2289"
     },
     "RDN": {
       "name":"Raiden",
       "address": "0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6",
       "symbol": "RDN",
-      "decimal": 18,
-      "usd_id":"2161"
+      "decimals": 18,
+      "cmc_id":"2161"
     },
     "APPC": {
       "name":"AppCoins",
       "address": "0x1a7a8bd9106f2b8d977e08582dc7d24c723ab0db",
       "symbol": "APPC",
-      "decimal": 18,
-      "usd_id":"2344"
+      "decimals": 18,
+      "cmc_id":"2344"
     },
     "ENG": {
       "name":"Enigma",
       "address": "0xf0ee6b27b759c9893ce4f094b49ad28fd15a23e4",
       "symbol": "ENG",
-      "decimal": 8,
-      "usd_id":"2044"
+      "decimals": 8,
+      "cmc_id":"2044"
     },
     "SALT": {
       "name":"Salt",
       "address": "0x4156d3342d5c385a87d264f90653733592000581",
       "symbol": "SALT",
-      "decimal": 8,
-      "usd_id":"1996"
+      "decimals": 8,
+      "cmc_id":"1996"
     },
     "BQX": {
       "name" : "Ethos",
       "address": "0x5af2be193a6abca9c8817001f45744777db30756",
       "symbol": "BQX",
-      "decimal": 8,
-      "usd_id":"1817"
+      "decimals": 8,
+      "cmc_id":"1817"
     },
     "ADX": {
       "name": "AdEx",
       "address": "0x4470bb87d77b963a013db939be332f927f2b992e",
       "symbol": "ADX",
-      "decimal": 4,
-      "usd_id": "1768"
+      "decimals": 4,
+      "cmc_id": "1768"
     },
     "AST": {
       "name": "AirSwap",
       "address": "0x27054b13b1b798b345b591a4d22e6562d47ea75a",
       "symbol": "AST",
-      "decimal": 4,
-      "usd_id": "2058"
+      "decimals": 4,
+      "cmc_id": "2058"
     },
     "RCN": {
       "name": "Ripio Credit Network",
       "address": "0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6",
       "symbol": "RCN",
-      "decimal": 18,
-      "usd_id": "2096"
+      "decimals": 18,
+      "cmc_id": "2096"
     },
     "ZIL": {
       "name": "Zilliqa",
       "address": "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
       "symbol": "ZIL",
-      "decimal": 12,
-      "usd_id":"2469"
+      "decimals": 12,
+      "cmc_id":"2469"
     },
     "LINK": {
       "name": "Chain Link",
       "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
       "symbol": "LINK",
-      "decimal": 18,
-      "usd_id":"1975"
+      "decimals": 18,
+      "cmc_id":"1975"
     },
     "DGX": {
       "name" : "Digix Gold Token",
       "address": "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
       "symbol":"DGX",
-      "decimal": 9,
-      "usd_id": "2739"
+      "decimals": 9,
+      "cmc_id": "2739"
     },
     "STORM": {
       "name": "Storm",
       "address": "0xd0a4b8946cb52f0661273bfbc6fd0e0c75fc6433",
       "symbol": "STORM",
-      "decimal": 18,
-      "usd_id":"2297"
+      "decimals": 18,
+      "cmc_id":"2297"
     },
     "IOST": {
       "name": "IOStoken",
       "address": "0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab",
       "symbol": "IOST",
-      "decimal": 18,
-      "usd_id":"2405"
+      "decimals": 18,
+      "cmc_id":"2405"
     },
     "MOT": {
       "name": "Olympus Labs",
       "address": "0x263c618480dbe35c300d8d5ecda19bbb986acaed",
       "symbol": "MOT",
-      "decimal": 18,
-      "usd_id":"2327"
+      "decimals": 18,
+      "cmc_id":"2327"
     },
     "ABT": {
       "name": "ArcBlock",
       "address": "0xb98d4c97425d9908e66e53a6fdf673acca0be986",
-      "decimal": 18,
+      "decimals": 18,
       "symbol":"ABT",        
-      "usd_id":"2545"
+      "cmc_id":"2545"
     },
     "ENJ": {
       "name": "Enjin Coin",
       "address": "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c",
-      "decimal": 18,
+      "decimals": 18,
       "symbol":"ENJ",        
-      "usd_id":"2130"
+      "cmc_id":"2130"
     },
     "AION": {
       "name": "Aion",
-      "decimal": 8,
+      "decimals": 8,
       "symbol":"AION", 
       "address": "0x4ceda7906a5ed2179785cd3a40a69ee8bc99c466",
-      "usd_id": "2062"
+      "cmc_id": "2062"
     },
     "AE": {
       "name": "Aeternity",
-      "decimal": 18,
+      "decimals": 18,
       "symbol":"AE", 
       "address": "0x5ca9a71b1d01849c0a95490cc00559717fcf0d1d",
-      "usd_id": "1700"
+      "cmc_id": "1700"
     },
     "BLZ": {
       "name": "Bluezelle",
-      "decimal": 18,
+      "decimals": 18,
       "symbol":"BLZ", 
       "address": "0x5732046a883704404f284ce41ffadd5b007fd668",
-      "usd_id":"2505"
+      "cmc_id":"2505"
     },
     "PAL": {
       "name": "PolicyPal",
-      "decimal": 18,
+      "decimals": 18,
       "symbol":"PAL", 
       "address": "0xfedae5642668f8636a11987ff386bfd215f942ee",
-      "usd_id":"2718"
+      "cmc_id":"2718"
     },
     "ELEC": {
       "name": "ElectrifyAsia",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0xd49ff13661451313ca1553fd6954bd1d9b6e02b9",
       "symbol": "ELEC",
-      "usd_id":"2573"
+      "cmc_id":"2573"
     },
     "BBO": {
       "name": "Bigbom",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x84f7c44b6fed1080f647e354d552595be2cc602f",
       "symbol":"BBO",
-      "usd_id":"2836"
+      "cmc_id":"2836"
     },
     "POLY": {
       "name": "Polymath",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x9992ec3cf6a55b00978cddf2b27bc6882d88d1ec",
       "symbol":"POLY",
-      "usd_id":"2496"
+      "cmc_id":"2496"
     },
     "LBA": {
       "name": "Libra Credit",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0xfe5f141bf94fe84bc28ded0ab966c16b17490657",
       "symbol":"LBA",
-      "usd_id":"2760"
+      "cmc_id":"2760"
     },
     "EDU": {
       "name": "EduCoin",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0xf263292e14d9d8ecd55b58dad1f1df825a874b7c",
       "symbol":"EDU",
-      "usd_id":"2734"
+      "cmc_id":"2734"
     },
     "CVC": {
       "name": "Civic",
-      "decimal": 8,
+      "decimals": 8,
       "address": "0x41e5560054824ea6b0732e656e3ad64e20e94e45",
       "symbol":"CVC",
-      "usd_id":"1816"
+      "cmc_id":"1816"
     },
     "WAX": {
       "name": "Wax",
-      "decimal": 8,
+      "decimals": 8,
       "address": "0x39bb259f66e1c59d5abef88375979b4d20d98022",
       "symbol":"WAX", 
-      "usd_id":"2300"
+      "cmc_id":"2300"
     },
     "SUB": {
       "name": "Substratum",
-      "decimal": 2,
+      "decimals": 2,
       "address": "0x12480e24eb5bec1a9d4369cab6a80cad3c0a377a",
       "symbol":"SUB", 
-      "usd_id":"1984"
+      "cmc_id":"1984"
     },
     "POE": {
       "name": "Po.et",
-      "decimal": 8,
+      "decimals": 8,
       "address": "0x0e0989b1f9b8a38983c2ba8053269ca62ec9b195",
       "symbol":"POE", 
-      "usd_id":"1937"
+      "cmc_id":"1937"
     },
     "PAY": {
       "name": "TenX",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0xb97048628db6b661d4c2aa833e95dbe1a905b280",
       "symbol":"PAY", 
-      "usd_id":"1758"
+      "cmc_id":"1758"
     },
     "CHAT": {
       "name": "Chatcoin",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x442bc47357919446eabc18c7211e57a13d983469",
       "symbol":"CHAT", 
-      "usd_id":"2427"
+      "cmc_id":"2427"
     },
     "DTA": {
       "name": "Data",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x69b148395ce0015c13e36bffbad63f49ef874e03",
       "symbol":"DTA", 
-      "usd_id":"2446"
+      "cmc_id":"2446"
     },
     "BNT": {
       "name": "Bancor",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c",
       "symbol":"BNT", 
-      "usd_id":"1727"
+      "cmc_id":"1727"
     },
     "TUSD": {
       "name": "TrueUSD",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x8dd5fbce2f6a956c3022ba3663759011dd51e73e",
       "symbol":"TUSD", 
-      "usd_id":"2563"
+      "cmc_id":"2563"
     },
     "TOMO": {
       "name": "Tomocoin",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x8b353021189375591723e7384262f45709a3c3dc",
       "symbol":"TOMO", 
-      "usd_id":"2570"
+      "cmc_id":"2570"
     },
     "MDS": {
       "name": "MediShares",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x66186008c1050627f979d464eabb258860563dbe",
       "symbol":"MDS", 
-      "usd_id":"2274"
+      "cmc_id":"2274"
     },
     "LEND": {
       "name": "EthLend",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x80fb784b7ed66730e8b1dbd9820afd29931aab03",
       "symbol":"LEND", 
-      "usd_id":"2239"
+      "cmc_id":"2239"
     },
     "WINGS": {
       "name": "WINGS",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x667088b212ce3d06a1b553a7221e1fd19000d9af",
       "symbol":"WINGS", 
-      "usd_id":"1500"
+      "cmc_id":"1500"
     },
     "MTL": {
       "name": "Metal",
-      "decimal": 8,
+      "decimals": 8,
       "address": "0xf433089366899d83a9f26a773d59ec7ecf30355e",
       "symbol":"MTL", 
-      "usd_id":"1788"
+      "cmc_id":"1788"
     },
     "WABI": {
       "name": "WaBi",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x286bda1413a2df81731d4930ce2f862a35a609fe",
       "symbol":"WABI", 
-      "usd_id":"2267"
+      "cmc_id":"2267"
     },
     "COFI":{
       "name": "CoinFi",
-      "decimal": 18,
+      "decimals": 18,
       "address": "0x3136ef851592acf49ca4c825131e364170fa32b3",
       "symbol":"COFI", 
-      "usd_id":"2478"
+      "cmc_id":"2478"
     },
     "MOC": {
       "name": "Moss Land",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "MOC",
       "address": "0x865ec58b06bf6305b886793aa20a2da31d034e68",
-      "usd_id":"2915"
+      "cmc_id":"2915"
     },
     "BNB":{
       "name": "Binance Coin",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "BNB",
       "address": "0xb8c77482e45f1f44de1745f52c74426c631bdd52",
-      "usd_id":"1839"
+      "cmc_id":"1839"
     },
     "REP":{
       "name": "Augur",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "REP",
       "address": "0x1985365e9f78359a9b6ad760e32412f4a445e862",
-      "usd_id":"1104"
+      "cmc_id":"1104"
     },
     "ZRX":{
       "name": "0x Protocol",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "ZRX",
       "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
-      "usd_id":"1896"
+      "cmc_id":"1896"
     }
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
@@ -432,5 +432,6 @@
   "endpoint": "wss://mainnet.infura.io/ws",
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "tracker_endpoint":"https://tracker.kyber.network"
+  "tracker_endpoint":"https://tracker.kyber.network",
+  "config_endpoint": "https://dev-api.knstats.com/trading/getL"
 }

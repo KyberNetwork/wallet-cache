@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/big"
 	"os"
+	"sync"
 
 	// "strconv"
 	"time"
@@ -35,8 +36,10 @@ type Connection struct {
 }
 
 type InfoData struct {
-	ApiUsd string                    `json:"api_usd"`
-	Tokens map[string]ethereum.Token `json:"tokens"`
+	mu            *sync.RWMutex
+	ApiUsd        string                    `json:"api_usd"`
+	Tokens        map[string]ethereum.Token `json:"tokens"`
+	TokenSnapshot map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
 	Connections []Connection `json:"connections"`
 
@@ -54,6 +57,35 @@ type InfoData struct {
 	AverageBlockTime int64 `json:"averageBlockTime"`
 
 	TrackerEndpoint string `json:"tracker_endpoint"`
+	ConfigEndpoint  string `json:"config_endpoint"`
+}
+
+func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	currentListToken := self.Tokens
+	finalListToken := make(map[string]ethereum.Token)
+	for symbol, token := range tokens {
+		if currentToken, ok := currentListToken[symbol]; ok {
+			if token.UsdId == "" {
+				token.UsdId = currentToken.UsdId
+			}
+		}
+		finalListToken[symbol] = token
+	}
+	self.Tokens = finalListToken
+}
+
+func (self *InfoData) UpdateByBackupToken() {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.Tokens = self.TokenSnapshot
+}
+
+func (self *InfoData) GetListToken() map[string]ethereum.Token {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.Tokens
 }
 
 type ResultRpc struct {
@@ -67,13 +99,15 @@ type Fetcher struct {
 }
 
 func (self *Fetcher) GetNumTokens() int {
-	return len(self.info.Tokens)
+	listTokens := self.GetListToken()
+	return len(listTokens)
 }
 
 func NewFetcher() (*Fetcher, error) {
 	var file []byte
 	var err error
-	switch os.Getenv("KYBER_ENV") {
+	kyberENV := os.Getenv("KYBER_ENV")
+	switch kyberENV {
 	case "internal_mainnet":
 		file, err = ioutil.ReadFile("env/internal_mainnet.json")
 		if err != nil {
@@ -121,7 +155,10 @@ func NewFetcher() (*Fetcher, error) {
 		break
 	}
 
+	mu := &sync.RWMutex{}
+
 	infoData := InfoData{
+		mu:         mu,
 		WrapperAbi: `[{"constant":true,"inputs":[{"name":"x","type":"bytes14"},{"name":"byteInd","type":"uint256"}],"name":"getInt8FromByte","outputs":[{"name":"","type":"int8"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":true,"inputs":[{"name":"reserve","type":"address"},{"name":"tokens","type":"address[]"}],"name":"getBalances","outputs":[{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"pricingContract","type":"address"},{"name":"tokenList","type":"address[]"}],"name":"getTokenIndicies","outputs":[{"name":"","type":"uint256[]"},{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"x","type":"bytes14"},{"name":"byteInd","type":"uint256"}],"name":"getByteFromBytes14","outputs":[{"name":"","type":"bytes1"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":true,"inputs":[{"name":"network","type":"address"},{"name":"sources","type":"address[]"},{"name":"dests","type":"address[]"},{"name":"qty","type":"uint256[]"}],"name":"getExpectedRates","outputs":[{"name":"expectedRate","type":"uint256[]"},{"name":"slippageRate","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"pricingContract","type":"address"},{"name":"tokenList","type":"address[]"}],"name":"getTokenRates","outputs":[{"name":"","type":"uint256[]"},{"name":"","type":"uint256[]"},{"name":"","type":"int8[]"},{"name":"","type":"int8[]"},{"name":"","type":"uint256[]"}],"payable":false,"stateMutability":"view","type":"function"}]`,
 		EthAdress:  "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
 		EthSymbol:  "ETH",
@@ -132,6 +169,8 @@ func NewFetcher() (*Fetcher, error) {
 		log.Print(err)
 		return nil, err
 	}
+
+	infoData.TokenSnapshot = infoData.Tokens
 
 	fetIns := make([]FetcherInterface, 0)
 	for _, connection := range infoData.Connections {
@@ -155,18 +194,78 @@ func NewFetcher() (*Fetcher, error) {
 		ethereum: ethereum,
 		fetIns:   fetIns,
 	}
-	//reader info from json
 
 	return fetcher, nil
 }
 
+func (self *Fetcher) TryUpdateListToken() error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = self.UpdateListToken()
+		if err != nil {
+			log.Println(err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return nil
+	}
+	self.info.UpdateByBackupToken()
+	return nil
+}
+
+func (self *Fetcher) UpdateListToken() error {
+	var err error
+	result := make(map[string]ethereum.Token)
+	for _, fetIns := range self.fetIns {
+		result, err = fetIns.GetListToken(self.info.ConfigEndpoint)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		break
+	}
+	if err == nil {
+		self.info.UpdateListToken(result)
+		// err = storeConfig(listToken)
+		// if err != nil {
+		// 	log.Println("fetch tokens success but write to file js failed")
+		// }
+	}
+	return err
+}
+
+func (self *Fetcher) GetCurrentListToken() map[string]ethereum.Token {
+	return self.GetListToken()
+}
+
+// store config to a file js
+// func storeConfig(tokens map[string]ethereum.Token) error {
+// 	fileJS, err := os.Create("config/tokens.js")
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer fileJS.Close()
+// 	bytes, err := json.Marshal(tokens)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	stringFile := fmt.Sprintf("var configTokens = %s;", bytes)
+// 	stringReader := strings.NewReader(stringFile)
+// 	_, err = stringReader.WriteTo(fileJS)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
+
 func (self *Fetcher) GetListToken() map[string]ethereum.Token {
-	return self.info.Tokens
+	return self.info.GetListToken()
 }
 
 func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	usdId := make([]string, 0)
-	for _, token := range self.info.Tokens {
+	listTokens := self.GetListToken()
+	for _, token := range listTokens {
 		if token.UsdId != "" {
 			usdId = append(usdId, token.UsdId)
 		}
@@ -185,7 +284,8 @@ func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInfo {
 	generalInfo := map[string]*ethereum.TokenGeneralInfo{}
 	//	usdId := make([]string, 0)
-	for _, token := range self.info.Tokens {
+	listTokens := self.GetListToken()
+	for _, token := range listTokens {
 		if token.UsdId != "" {
 			//usdId = append(usdId, token.UsdId)
 			for _, fetIns := range self.fetIns {
@@ -310,6 +410,7 @@ func getAmountTokenWithMinETH(rate *big.Int, decimal int) *big.Int {
 
 func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	//append rate
+	listTokens := self.GetListToken()
 	sourceAddr := make([]string, 0)
 	sourceSymbol := make([]string, 0)
 	destAddr := make([]string, 0)
@@ -330,12 +431,12 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 				r := big.NewInt(0)
 				r.SetString(rate.Rate, 10)
 				destSym := rate.Dest
-				decimal := self.info.Tokens[destSym].Decimal
+				decimal := listTokens[destSym].Decimal
 				if decimal != 0 || r.Cmp(amountToken) != 0 {
 					amountToken = getAmountTokenWithMinETH(r, decimal)
 				}
 				amount = append(amount, amountToken)
-				tokenAddr := self.info.Tokens[destSym].Address
+				tokenAddr := listTokens[destSym].Address
 				sourceAddr = append(sourceAddr, tokenAddr)
 				sourceSymbol = append(sourceSymbol, destSym)
 			} else {
@@ -351,7 +452,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 		amount = append(amount, minAmountETH)
 		amountETH = append(amountETH, minAmountETH)
 	} else {
-		for _, token := range self.info.Tokens {
+		for _, token := range listTokens {
 			sourceAddr = append(sourceAddr, token.Address)
 			sourceSymbol = append(sourceSymbol, token.Symbol)
 			destAddr = append(destAddr, ethAddr)

@@ -17,201 +17,201 @@
       "symbol": "ETH",
       "icon": "eth.svg",
       "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "decimal": 18,
-      "usd_id":"1027"      
+      "decimals": 18,
+      "cmc_id":"1027"      
     },
     "KNC": {
       "name": "KyberNetwork",
       "symbol": "KNC",
       "address": "0x4e470dc7321e84ca96fcaedd0c8abcebbaeb68c6",
-      "decimal": 18,
-      "usd_id":"1982"
+      "decimals": 18,
+      "cmc_id":"1982"
     },
     "OMG": {
       "name": "OmiseGO",
       "symbol": "OMG",
       "address": "0x4bfba4a8f28755cb2061c413459ee562c6b9c51b",
-      "decimal": 18,
-      "usd_id":"1808"
+      "decimals": 18,
+      "cmc_id":"1808"
     },
     "EOS": {
       "name": "Eos",
       "symbol": "EOS",
       "address": "0xd5b4218b950a53ff07985e2d88346925c335eae7",
-      "decimal": 18,
-      "usd_id":"1765"
+      "decimals": 18,
+      "cmc_id":"1765"
     },
     "SNT": {
       "name":"Status",
       "address": "0xbf5d8683b9be6c43fca607eb2a6f2626a18837a6",
       "symbol": "SNT",
-      "decimal": 18,
-      "usd_id":"1759"
+      "decimals": 18,
+      "cmc_id":"1759"
     },
     "ELF": {
       "name":"Aelf",
       "address": "0x9fcc27c7320703c43368cf1a4bf076402cd0d6b4",
       "symbol": "ELF",
-      "decimal": 18,
-      "usd_id":"2299"
+      "decimals": 18,
+      "cmc_id":"2299"
     },
     "POWR": {
       "name":"Power Ledger",
       "address": "0xa577731515303f0c0d00e236041855a5c4f114dc",
       "symbol": "POWR",
-      "decimal": 6,
-      "usd_id":"2132"
+      "decimals": 6,
+      "cmc_id":"2132"
     },
     "MANA": {
       "name":"Mana",
       "address": "0x72fd6c7c1397040a66f33c2ecc83a0f71ee46d5c",
       "symbol": "MANA",
-      "decimal": 18,
-      "usd_id":"1966"
+      "decimals": 18,
+      "cmc_id":"1966"
     },
     "BAT": {
       "name":"Basic Attention Token",
       "address": "0xdb0040451f373949a4be60dcd7b6b8d6e42658b6",
       "symbol": "BAT",
-      "decimal": 18,
-      "usd_id":"1697"
+      "decimals": 18,
+      "cmc_id":"1697"
     },
     "REQ": {
       "name":"Request",
       "address": "0xb43d10bbe7222519da899b72bf2c7f094b6f79d7",
       "symbol": "REQ",
-      "decimal": 18,
-      "usd_id":"2071"
+      "decimals": 18,
+      "cmc_id":"2071"
     },
     "GTO": {
       "name":"Gifto",
       "address": "0xe55c607d58c53b2b06a8e38f67f4c0fcaeed2c31",
       "symbol": "GTO",
-      "decimal": 5,
-      "usd_id":"2289"
+      "decimals": 5,
+      "cmc_id":"2289"
     },
     "RDN": {
       "name":"Raiden",
       "address": "0x5422ef695ed0b1213e2b953cfa877029637d9d26",
       "symbol": "RDN",
-      "decimal": 18,
-      "usd_id":"2161"
+      "decimals": 18,
+      "cmc_id":"2161"
     },
     "APPC": {
       "name":"AppCoins",
       "address": "0x2799f05b55d56be756ca01af40bf7350787f48d4",
       "symbol": "APPC",
-      "decimal": 18,
-      "usd_id":"2344"
+      "decimals": 18,
+      "cmc_id":"2344"
     },
     "ENG": {
       "name":"Enigma",
       "address": "0x95cc8d8f29d0f7fcc425e8708893e759d1599c97",
       "symbol": "ENG",
-      "decimal": 8,
-      "usd_id":"2044"
+      "decimals": 8,
+      "cmc_id":"2044"
     },
     "SALT": {
       "name":"Salt",
       "address": "0xb47f1a9b121ba114d5e98722a8948e274d0f4042",
       "symbol": "SALT",
-      "decimal": 8,
-      "usd_id":"1996"
+      "decimals": 8,
+      "cmc_id":"1996"
     },
     "BQX": {
       "name" : "Ethos",
       "address": "0x9504a86a881f63da06302fb3639d4582022097db",
       "symbol": "BQX",
-      "decimal": 8,
-      "usd_id":"1817"
+      "decimals": 8,
+      "cmc_id":"1817"
     },
     "ADX": {
       "name": "AdEx",
       "address": "0x499990db50b34687cdafb2c8dabae4e99d6f38a7",
       "symbol": "ADX",
-      "decimal": 4,
-      "usd_id": "1768"
+      "decimals": 4,
+      "cmc_id": "1768"
     },
     "AST": {
       "name": "AirSwap",
       "address": "0xef06f410c26a0ff87b3a43927459cce99268a2ef",
       "symbol": "AST",
-      "decimal": 4,
-      "usd_id": "2058"
+      "decimals": 4,
+      "cmc_id": "2058"
     },
     "RCN": {
       "name": "Ripio Credit Network",
       "address": "0x99338aa9218c6c23aa9d8cc2f3efaf29954ea26b",
       "symbol": "RCN",
-      "decimal": 18,
-      "usd_id": "2096"
+      "decimals": 18,
+      "cmc_id": "2096"
     },
     "ZIL": {
       "name": "Zilliqa",
       "address": "0xad78afbbe48ba7b670fbc54c65708cbc17450167",
       "symbol": "ZIL",
-      "decimal": 12,
-      "usd_id":"2469"
+      "decimals": 12,
+      "cmc_id":"2469"
     },
     "DAI": {
       "name" : "DAI",
       "symbol": "DAI",
       "address": "0xad6d458402f60fd3bd25163575031acdce07538d",
-      "decimal": 18,
-      "usd_id":"2308"
+      "decimals": 18,
+      "cmc_id":"2308"
     },
     "LINK": {
       "name": "Chain Link",
       "address": "0xb4f7332ed719eb4839f091eddb2a3ba309739521",
       "symbol": "LINK",
-      "decimal": 18,
-      "usd_id":"1975"
+      "decimals": 18,
+      "cmc_id":"1975"
     },
     "IOST": {
       "name": "IOStoken",
       "address": "0x27db28a6c4ac3d82a08d490cfb746e6f02bc467c",
       "symbol": "IOST",
-      "decimal": 18,
-      "usd_id":"2405"
+      "decimals": 18,
+      "cmc_id":"2405"
     },
     "STORM": {
       "name": "Storm",
       "address": "0x8fff7de21de8ad9c510704407337542073fdc44b",
       "symbol": "STORM",
-      "decimal": 18,
-      "usd_id":"2297"
+      "decimals": 18,
+      "cmc_id":"2297"
     },
     "BBO" : {
       "name": "BigBom",
       "address": "0xa94758d328af7ef1815e73053e95b5f86588c16d",
       "symbol" : "BBO",
-      "decimal": 18,
-      "usd_id":"2836"
+      "decimals": 18,
+      "cmc_id":"2836"
     },
     "COFI": {
       "name": "ConFi",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "COFI",
       "address": "0xb91786188f8d4e35d6d67799e9f162587bf4da03",
-      "usd_id":"2478"
+      "cmc_id":"2478"
     },
     "BITX": {
       "name": "BitScreenerToken",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "BITX",
       "address": "0x7a17267576318efb728bc4a0833e489a46ba138f",
-      "usd_id":"3011"
+      "cmc_id":"3011"
     },
     "MOC": {
       "name": "Moss Land",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "MOC",
       "address": "0x1742c81075031b8f173d2327e3479d1fc3feaa76",
-      "usd_id":"2915"
+      "cmc_id":"2915"
     },
     "MASR": {
       "name": "MidasProtocol Ropsten",
-      "decimal": 18,
+      "decimals": 18,
       "symbol" : "MASR",
       "address": "0xc2c37d1a2cdd601ce665c4a785074670657f83ac"
     }
@@ -223,5 +223,6 @@
   "endpoint": "wss://ropsten.infura.io/ws",
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "tracker_endpoint":"https://tracker.kyber.network"
+  "tracker_endpoint":"https://tracker.kyber.network",
+  "config_endpoint": "https://dev-api.knstats.com/trading/getList/ropsten"
 }
