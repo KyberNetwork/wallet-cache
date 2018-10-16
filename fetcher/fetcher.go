@@ -128,24 +128,35 @@ func NewFetcher() (*Fetcher, error) {
 			log.Print(err)
 			return nil, err
 		}
+		break		
 	case "kovan":
 		file, err = ioutil.ReadFile("env/kovan.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
+		break		
 	case "ropsten":
 		file, err = ioutil.ReadFile("env/ropsten.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
+		break				
 	case "production_test":
 		file, err = ioutil.ReadFile("env/production_test.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
+		break		
+	case "rinkeby":
+		file, err = ioutil.ReadFile("env/rinkeby.json")
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
+		break		
 	default:
 		file, err = ioutil.ReadFile("env/internal_mainnet.json")
 		if err != nil {
