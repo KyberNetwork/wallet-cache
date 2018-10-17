@@ -108,8 +108,8 @@ func NewFetcher() (*Fetcher, error) {
 	var err error
 	kyberENV := os.Getenv("KYBER_ENV")
 	switch kyberENV {
-	case "internal_mainnet":
-		file, err = ioutil.ReadFile("env/internal_mainnet.json")
+	case "semi_production":
+		file, err = ioutil.ReadFile("env/semi_production.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
@@ -128,28 +128,14 @@ func NewFetcher() (*Fetcher, error) {
 			log.Print(err)
 			return nil, err
 		}
-		break		
-	case "kovan":
-		file, err = ioutil.ReadFile("env/kovan.json")
-		if err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		break		
+		break			
 	case "ropsten":
 		file, err = ioutil.ReadFile("env/ropsten.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
-		break				
-	case "production_test":
-		file, err = ioutil.ReadFile("env/production_test.json")
-		if err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		break		
+		break					
 	case "rinkeby":
 		file, err = ioutil.ReadFile("env/rinkeby.json")
 		if err != nil {
@@ -158,7 +144,7 @@ func NewFetcher() (*Fetcher, error) {
 		}
 		break		
 	default:
-		file, err = ioutil.ReadFile("env/internal_mainnet.json")
+		file, err = ioutil.ReadFile("env/ropsten.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
