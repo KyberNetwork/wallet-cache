@@ -319,13 +319,6 @@
       "symbol":"PAY", 
       "cmc_id":"1758"
     },
-    "CHAT": {
-      "name": "Chatcoin",
-      "decimals": 18,
-      "address": "0x442bc47357919446eabc18c7211e57a13d983469",
-      "symbol":"CHAT", 
-      "cmc_id":"2427"
-    },
     "DTA": {
       "name": "Data",
       "decimals": 18,
@@ -422,7 +415,41 @@
       "decimals": 18,
       "symbol" : "ZRX",
       "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
-      "cmc_id":"1896"
+      "usd_id":"1896"
+    },
+    "MAS":{
+      "name": "MidasProtocol",
+      "decimal": 18,
+      "symbol" : "MAS",
+      "address": "0x23ccc43365d9dd3882eab88f43d515208f832430",
+      "usd_id":"3352"           
+    },
+    "KCC":{
+      "name": "Kyber Community Coupon",
+      "decimal": 18,
+      "symbol" : "KCC",
+      "address": "0x09677d0175dec51e2215426cddd055a71bf4228d"
+    },
+    "DAT": {
+      "name": "Datum",
+      "decimal": 18,
+      "symbol": "DAT",
+      "address": "0x81c9151de0c8bafcd325a57e3db5a5df1cebf79c",
+      "usd_id": "2283"
+    },
+    "REN": {
+      "name": "Republic",
+      "decimal": 18,
+      "symbol": "REN",
+      "address": "0x408e41876cccdc0f92210600ef50372656052a38",
+      "usd_id": "2539"
+    },
+    "QKC": {
+      "name": "QuarkChain",
+      "decimal": 18,
+      "symbol": "QKC",
+      "address": "0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664",
+      "usd_id": "2840"
     },
     "MKR":{
       "name": "Maker",

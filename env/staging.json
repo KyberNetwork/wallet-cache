@@ -421,7 +421,35 @@
       "decimals": 18,
       "symbol" : "ZRX",
       "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
-      "cmc_id":"1896"
+      "usd_id":"1896"
+    },
+    "MAS":{
+      "name": "MidasProtocol",
+      "decimal": 18,
+      "symbol" : "MAS",
+      "address": "0x23ccc43365d9dd3882eab88f43d515208f832430",
+      "usd_id":"3352"               
+    },
+    "DAT": {
+      "name": "Datum",
+      "decimal": 18,
+      "symbol": "DAT",
+      "address": "0x81c9151de0c8bafcd325a57e3db5a5df1cebf79c",
+      "usd_id": "2283"
+    },
+    "REN": {
+      "name": "Republic",
+      "decimal": 18,
+      "symbol": "REN",
+      "address": "0x408e41876cccdc0f92210600ef50372656052a38",
+      "usd_id": "2539"
+    },
+    "QKC": {
+      "name": "QuarkChain",
+      "decimal": 18,
+      "symbol": "QKC",
+      "address": "0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664",
+      "usd_id": "2840"
     },
     "MKR":{
       "name": "Maker",
@@ -429,7 +457,7 @@
       "symbol" : "MKR",
       "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
       "cmc_id":"1518"
-    }
+    }   
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
   "network": "0xc14f34233071543e979f6a79aa272b0ab1b4947d",
