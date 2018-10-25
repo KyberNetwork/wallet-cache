@@ -221,13 +221,6 @@
       "symbol":"ENJ",        
       "usd_id":"2130"
     },
-    "AION": {
-      "name": "Aion",
-      "decimal": 8,
-      "symbol":"AION", 
-      "address": "0x4ceda7906a5ed2179785cd3a40a69ee8bc99c466",
-      "usd_id": "2062"
-    },
     "AE": {
       "name": "Aeternity",
       "decimal": 18,
