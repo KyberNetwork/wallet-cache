@@ -16,9 +16,8 @@ import (
 
 // api_key for tracker.kyber
 const (
-	API_KEY_TRACKER  = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
-	MAX_LISTING_TIME = 9999999999
-	FIVE_HOUR        = 18000
+	API_KEY_TRACKER = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
+	TIME_TO_DELETE  = 18000
 )
 
 type Etherscan struct {
@@ -277,10 +276,7 @@ func (self *Etherscan) GetListToken(configEndpoint string) (map[string]ethereum.
 	}
 	listToken := make(map[string]ethereum.Token)
 	for _, token := range result.Data {
-		if token.DelistTime == MAX_LISTING_TIME {
-			listToken[token.Symbol] = token
-		}
-		if uint64(time.Now().UTC().Unix()) <= (FIVE_HOUR + token.DelistTime) {
+		if token.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+token.DelistTime {
 			listToken[token.Symbol] = token
 		}
 	}
