@@ -14,7 +14,10 @@ import (
 )
 
 // api_key for tracker.kyber
-const API_KEY_TRACKER = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
+const (
+	API_KEY_TRACKER  = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
+	MAX_LISTING_TIME = 9999999999
+)
 
 type Etherscan struct {
 	url      string
@@ -266,13 +269,15 @@ func (self *Etherscan) GetListToken(configEndpoint string) (map[string]ethereum.
 		log.Print(err)
 		return nil, err
 	}
-	if result.Error == true {
+	if result.Success == false {
 		err = errors.New("Cannot get list token")
 		return nil, err
 	}
 	listToken := make(map[string]ethereum.Token)
 	for _, token := range result.Data {
-		listToken[token.Symbol] = token
+		if token.ListingTime != MAX_LISTING_TIME {
+			listToken[token.Symbol] = token
+		}
 	}
 	return listToken, nil
 }
