@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -17,6 +18,7 @@ import (
 const (
 	API_KEY_TRACKER  = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
 	MAX_LISTING_TIME = 9999999999
+	FIVE_HOUR        = 18000
 )
 
 type Etherscan struct {
@@ -275,7 +277,10 @@ func (self *Etherscan) GetListToken(configEndpoint string) (map[string]ethereum.
 	}
 	listToken := make(map[string]ethereum.Token)
 	for _, token := range result.Data {
-		if token.ListingTime != MAX_LISTING_TIME {
+		if token.DelistTime == MAX_LISTING_TIME {
+			listToken[token.Symbol] = token
+		}
+		if uint64(time.Now().UTC().Unix()) <= (FIVE_HOUR + token.DelistTime) {
 			listToken[token.Symbol] = token
 		}
 	}

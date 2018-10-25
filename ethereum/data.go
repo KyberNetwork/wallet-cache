@@ -32,12 +32,12 @@ type GasPrice struct {
 }
 
 type Token struct {
-	Name        string `json:"name"`
-	Symbol      string `json:"symbol"`
-	Address     string `json:"address"`
-	Decimal     int    `json:"decimals"`
-	UsdId       string `json:"cmc_id"`
-	ListingTime uint64 `json:"listing_time"`
+	Name       string `json:"name"`
+	Symbol     string `json:"symbol"`
+	Address    string `json:"address"`
+	Decimal    int    `json:"decimals"`
+	UsdId      string `json:"cmc_id"`
+	DelistTime uint64 `json:"delist_time"`
 }
 
 type QuoInfo struct {
