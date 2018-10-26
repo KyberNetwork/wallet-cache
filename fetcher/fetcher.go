@@ -128,21 +128,21 @@ func NewFetcher() (*Fetcher, error) {
 			log.Print(err)
 			return nil, err
 		}
-		break			
+		break
 	case "ropsten":
 		file, err = ioutil.ReadFile("env/ropsten.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
-		break					
+		break
 	case "rinkeby":
 		file, err = ioutil.ReadFile("env/rinkeby.json")
 		if err != nil {
 			log.Print(err)
 			return nil, err
 		}
-		break		
+		break
 	default:
 		file, err = ioutil.ReadFile("env/ropsten.json")
 		if err != nil {
@@ -418,7 +418,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	ethAddr := self.info.EthAdress
 	minAmountETH := getAmountInWei(MIN_ETH)
 
-	if len(*rates) > 0 {
+	if len(*rates) > 0 && len(*rates) == len(listTokens)*2 {
 		for _, rate := range *rates {
 			if rate.Source == "ETH" && rate.Dest == "ETH" {
 				continue
@@ -428,18 +428,22 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 				r := big.NewInt(0)
 				r.SetString(rate.Rate, 10)
 				destSym := rate.Dest
-				decimal := listTokens[destSym].Decimal
-				if decimal != 0 || r.Cmp(amountToken) != 0 {
-					amountToken = getAmountTokenWithMinETH(r, decimal)
+				if destToken, ok := listTokens[destSym]; ok {
+					decimal := destToken.Decimal
+					if decimal != 0 || r.Cmp(amountToken) != 0 {
+						amountToken = getAmountTokenWithMinETH(r, decimal)
+					}
+					amount = append(amount, amountToken)
+					tokenAddr := destToken.Address
+					sourceAddr = append(sourceAddr, tokenAddr)
+					sourceSymbol = append(sourceSymbol, destSym)
 				}
-				amount = append(amount, amountToken)
-				tokenAddr := listTokens[destSym].Address
-				sourceAddr = append(sourceAddr, tokenAddr)
-				sourceSymbol = append(sourceSymbol, destSym)
 			} else {
-				destAddr = append(destAddr, ethAddr)
-				destSymbol = append(destSymbol, ethSymbol)
-				amountETH = append(amountETH, minAmountETH)
+				if _, ok := listTokens[rate.Source]; ok {
+					destAddr = append(destAddr, ethAddr)
+					destSymbol = append(destSymbol, ethSymbol)
+					amountETH = append(amountETH, minAmountETH)
+				}
 			}
 		}
 		sourceAddr = append(sourceAddr, ethAddr)
