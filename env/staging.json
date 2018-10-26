@@ -457,7 +457,21 @@
       "symbol" : "MKR",
       "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
       "cmc_id":"1518"
-    }   
+    },
+    "MKR":{
+      "name": "Maker",
+      "decimals": 18,
+      "symbol" : "MKR",
+      "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+      "cmc_id":"1518"
+    },
+    "DCC":{
+      "name": "Distributed Credit Chain",
+      "decimals": 18,
+      "symbol" : "DCC",
+      "address": "0xffa93aacf49297d51e211817452839052fdfb961",
+      "cmc_id":"2881"
+    }      
   },
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
   "network": "0xc14f34233071543e979f6a79aa272b0ab1b4947d",
