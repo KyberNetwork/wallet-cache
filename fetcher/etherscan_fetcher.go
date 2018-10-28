@@ -8,13 +8,17 @@ import (
 	"log"
 	"math/big"
 	"net/http"
+	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
 // api_key for tracker.kyber
-const API_KEY_TRACKER = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
+const (
+	API_KEY_TRACKER = "jHGlaMKcGn5cCBxQCGwusS4VcnH0C6tN"
+	TIME_TO_DELETE  = 18000
+)
 
 type Etherscan struct {
 	url      string
@@ -266,13 +270,15 @@ func (self *Etherscan) GetListToken(configEndpoint string) (map[string]ethereum.
 		log.Print(err)
 		return nil, err
 	}
-	if result.Error == true {
+	if result.Success == false {
 		err = errors.New("Cannot get list token")
 		return nil, err
 	}
 	listToken := make(map[string]ethereum.Token)
 	for _, token := range result.Data {
-		listToken[token.Symbol] = token
+		if token.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+token.DelistTime {
+			listToken[token.Symbol] = token
+		}
 	}
 	return listToken, nil
 }
