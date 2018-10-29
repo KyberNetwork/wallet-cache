@@ -2,9 +2,9 @@ version: "3"
 services:
   cached:
     build: ./
-    image: cached-production-test
+    image: cached-production
     container_name: cached
     env_file:
-      - env_production_test.env
+      - env_semi_production.env
     ports:
       - "3001:3001"

@@ -32,11 +32,12 @@ type GasPrice struct {
 }
 
 type Token struct {
-	Name    string `json:"name"`
-	Symbol  string `json:"symbol"`
-	Address string `json:"address"`
-	Decimal int    `json:"decimal"`
-	UsdId   string `json:"usd_id"`
+	Name       string `json:"name"`
+	Symbol     string `json:"symbol"`
+	Address    string `json:"address"`
+	Decimal    int    `json:"decimals"`
+	UsdId      string `json:"cmc_id"`
+	DelistTime uint64 `json:"delist_time"`
 }
 
 type QuoInfo struct {
@@ -103,4 +104,9 @@ func NewMarketInfo(quotes map[string]QuoInfo, rates *Rates) *MarketInfo {
 		Rates:  rates,
 		Quotes: quotes,
 	}
+}
+
+type TokenConfig struct {
+	Success bool    `json:"success"`
+	Data    []Token `json:"data"`
 }

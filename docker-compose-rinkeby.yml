@@ -2,9 +2,7 @@ version: "3"
 services:
   cached:
     build: ./
-    image: cached
-    container_name: cached
     env_file:
-      - env_kovan.env
+      - env_rinkeby.env
     ports:
       - "3001:3001"
