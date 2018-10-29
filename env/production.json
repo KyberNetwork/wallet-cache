@@ -221,6 +221,7 @@
       "symbol":"ENJ",        
       "cmc_id":"2130"
     },
+<<<<<<< HEAD
     "AION": {
       "name": "Aion",
       "decimals": 8,
@@ -228,6 +229,8 @@
       "address": "0x4ceda7906a5ed2179785cd3a40a69ee8bc99c466",
       "cmc_id": "2062"
     },
+=======
+>>>>>>> def486d951e9abad7ffcf7940f20b39165e5e270
     "AE": {
       "name": "Aeternity",
       "decimals": 18,
@@ -319,6 +322,7 @@
       "symbol":"PAY", 
       "cmc_id":"1758"
     },
+<<<<<<< HEAD
     "CHAT": {
       "name": "Chatcoin",
       "decimals": 18,
@@ -326,6 +330,8 @@
       "symbol":"CHAT", 
       "cmc_id":"2427"
     },
+=======
+>>>>>>> def486d951e9abad7ffcf7940f20b39165e5e270
     "DTA": {
       "name": "Data",
       "decimals": 18,
@@ -422,8 +428,56 @@
       "decimals": 18,
       "symbol" : "ZRX",
       "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
-      "cmc_id":"1896"
-    }
+      "usd_id":"1896"
+    },
+    "MAS":{
+      "name": "MidasProtocol",
+      "decimals": 18,
+      "symbol" : "MAS",
+      "address": "0x23ccc43365d9dd3882eab88f43d515208f832430",
+      "usd_id":"3352"           
+    },
+    "KCC":{
+      "name": "Kyber Community Coupon",
+      "decimals": 18,
+      "symbol" : "KCC",
+      "address": "0x09677d0175dec51e2215426cddd055a71bf4228d"
+    },
+    "DAT": {
+      "name": "Datum",
+      "decimals": 18,
+      "symbol": "DAT",
+      "address": "0x81c9151de0c8bafcd325a57e3db5a5df1cebf79c",
+      "usd_id": "2283"
+    },
+    "REN": {
+      "name": "Republic",
+      "decimals": 18,
+      "symbol": "REN",
+      "address": "0x408e41876cccdc0f92210600ef50372656052a38",
+      "usd_id": "2539"
+    },
+    "QKC": {
+      "name": "QuarkChain",
+      "decimals": 18,
+      "symbol": "QKC",
+      "address": "0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664",
+      "usd_id": "2840"
+    },
+    "MKR":{
+      "name": "Maker",
+      "decimals": 18,
+      "symbol" : "MKR",
+      "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
+      "usd_id":"1518"
+    },
+    "DCC":{
+      "name": "Distributed Credit Chain",
+      "decimals": 18,
+      "symbol" : "DCC",
+      "address": "0xffa93aacf49297d51e211817452839052fdfb961",
+      "usd_id":"2881"
+    }   
   },
   "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
   "network": "0x818E6FECD516Ecc3849DAf6845e3EC868087B755",
