@@ -208,10 +208,10 @@
       "address": "0x1742c81075031b8f173d2327e3479d1fc3feaa76",
       "cmc_id":"2915"
     },
-    "MASR": {
+    "MAS": {
       "name": "MidasProtocol Ropsten",
       "decimals": 18,
-      "symbol" : "MASR",
+      "symbol" : "MAS",
       "address": "0xc2c37d1a2cdd601ce665c4a785074670657f83ac"
     }
   },
