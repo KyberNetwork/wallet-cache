@@ -35,16 +35,17 @@ func main() {
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// if os.Getenv("LOG_TO_STDOUT") != "true" {
-	// 	f, err := enableLogToFile()
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	defer f.Close()
-	// }
+	if os.Getenv("LOG_TO_STDOUT") != "true" {
+		f, err := enableLogToFile()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+	}
 
+	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
-	fertcherIns, err := fetcher.NewFetcher()
+	fertcherIns, err := fetcher.NewFetcher(kyberENV)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +75,7 @@ func main() {
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
-	server.Run()
+	server.Run(kyberENV)
 
 	//init fetch data
 

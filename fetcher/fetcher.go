@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"math/big"
-	"os"
 	"strings"
 	"sync"
 
@@ -78,15 +77,15 @@ func (self *InfoData) GetTokenAPI() []ethereum.TokenAPI {
 	return self.TokenAPI
 }
 
-func (self *InfoData) CanDelete(symbol string) (bool, error) {
+func (self *InfoData) CanDelete(symbol string) (bool, string) {
 	var errMsg string
 	for _, t := range self.CanDeleteToken {
 		if t == symbol {
-			return true, nil
+			return true, ""
 		}
 		errMsg += t + ", "
 	}
-	return false, errors.New(errMsg)
+	return false, errMsg
 }
 
 func (self *InfoData) AddToken(symbol, key string) error {
@@ -145,9 +144,9 @@ func (self *InfoData) RemoveToken(symbol, key string) error {
 	newList := []ethereum.TokenAPI{}
 	currentList := self.TokenAPI
 
-	canDelte, err := self.CanDelete(tokenSymbol)
+	canDelte, errMsg := self.CanDelete(tokenSymbol)
 	if canDelte == false {
-		return err
+		return fmt.Errorf("you just can remove these tokens: %s", errMsg)
 	}
 	for _, token := range currentList {
 		if token.Symbol == tokenSymbol {
@@ -179,10 +178,10 @@ func (self *Fetcher) GetNumTokens() int {
 	return len(listTokens)
 }
 
-func NewFetcher() (*Fetcher, error) {
+func NewFetcher(kyberENV string) (*Fetcher, error) {
 	var file []byte
 	var err error
-	kyberENV := os.Getenv("KYBER_ENV")
+
 	switch kyberENV {
 	case "semi_production":
 		file, err = ioutil.ReadFile("env/semi_production.json")
