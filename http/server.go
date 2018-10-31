@@ -217,10 +217,54 @@ func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 
 // Function for fetcher
 func (self *HTTPServer) GetCurrentListToken(c *gin.Context) {
-	listToken := self.fetcher.GetCurrentListToken()
+	listToken := self.fetcher.GetListToken()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": listToken},
+	)
+}
+
+func (self *HTTPServer) GetListTokenAPI(c *gin.Context) {
+	listToken := self.fetcher.GetListTokenAPI()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": listToken},
+	)
+}
+
+func (self *HTTPServer) AddToken(c *gin.Context) {
+	token := c.Param("token")
+	key := c.Param("key")
+
+	err := self.fetcher.AddToken(token, key)
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "error": err.Error()},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true},
+	)
+}
+
+func (self *HTTPServer) RemoveToken(c *gin.Context) {
+	token := c.Param("token")
+	key := c.Param("key")
+
+	err := self.fetcher.AddToken(token, key)
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "error": err.Error()},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true},
 	)
 }
 
@@ -248,6 +292,10 @@ func (self *HTTPServer) Run() {
 	if os.Getenv("KYBER_ENV") != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
 	}
+
+	self.r.GET("/currencies", self.GetListTokenAPI)
+	self.r.GET("/token/add/:token/:key", self.AddToken)
+	self.r.GET("/token/remove/:token/:key", self.RemoveToken)
 
 	self.r.Run(self.host)
 }

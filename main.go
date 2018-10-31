@@ -35,32 +35,19 @@ func main() {
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	if os.Getenv("LOG_TO_STDOUT") != "true" {
-		f, err := enableLogToFile()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-	}
+	// if os.Getenv("LOG_TO_STDOUT") != "true" {
+	// 	f, err := enableLogToFile()
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	defer f.Close()
+	// }
 
 	persisterIns, _ := persister.NewPersister("ram")
 	fertcherIns, err := fetcher.NewFetcher()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	err = fertcherIns.TryUpdateListToken()
-	if err != nil {
-		log.Println(err)
-	}
-
-	tickerUpdateToken := time.NewTicker(3600 * time.Second)
-	go func() {
-		for {
-			<-tickerUpdateToken.C
-			fertcherIns.TryUpdateListToken()
-		}
-	}()
 
 	tokenNum := fertcherIns.GetNumTokens()
 	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)

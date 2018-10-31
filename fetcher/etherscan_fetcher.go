@@ -8,7 +8,6 @@ import (
 	"log"
 	"math/big"
 	"net/http"
-	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -250,35 +249,4 @@ func (self *Etherscan) GetTrackerData(trackerEndpoint string) (map[string]*ether
 		return nil, err
 	}
 	return trackerData, nil
-}
-
-func (self *Etherscan) GetListToken(configEndpoint string) (map[string]ethereum.Token, error) {
-	response, err := http.Get(configEndpoint)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	var result ethereum.TokenConfig
-	err = json.Unmarshal(b, &result)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	if result.Success == false {
-		err = errors.New("Cannot get list token")
-		return nil, err
-	}
-	listToken := make(map[string]ethereum.Token)
-	for _, token := range result.Data {
-		if token.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+token.DelistTime {
-			listToken[token.Symbol] = token
-		}
-	}
-	return listToken, nil
 }

@@ -40,6 +40,27 @@ type Token struct {
 	DelistTime uint64 `json:"delist_time"`
 }
 
+type TokenAPI struct {
+	Symbol      string `json:"symbol"`
+	Name        string `json:"name"`
+	Address     string `json:"address"`
+	Decimals    int    `json:"decimals"`
+	UsdID       string `json:"cmc_id"`
+	TimeListing uint64 `json:"listing_time,omitempty"`
+	DelistTime  uint64 `json:"delist_time,omitempty"`
+}
+
+func TokenAPIToToken(tokenAPI TokenAPI) Token {
+	return Token{
+		Name:       tokenAPI.Name,
+		Symbol:     tokenAPI.Symbol,
+		Address:    tokenAPI.Address,
+		Decimal:    tokenAPI.Decimals,
+		UsdId:      tokenAPI.UsdID,
+		DelistTime: tokenAPI.DelistTime,
+	}
+}
+
 type QuoInfo struct {
 	MarketCap float64 `json:"market_cap"`
 	Volume24h float64 `json:"volume_24h"`
