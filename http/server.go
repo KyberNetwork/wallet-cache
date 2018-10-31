@@ -214,15 +214,6 @@ func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 // 	return
 // }
 
-// Function for fetcher
-func (self *HTTPServer) GetCurrentListToken(c *gin.Context) {
-	listToken := self.fetcher.GetListToken()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": listToken},
-	)
-}
-
 func (self *HTTPServer) GetListTokenAPI(c *gin.Context) {
 	listToken := self.fetcher.GetListTokenAPI()
 	c.JSON(
@@ -283,9 +274,6 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/getLast7D", self.GetLast7D)
 	self.r.GET("/getRateETH", self.GetRateETH)
 	self.r.GET("/getCacheVersion", self.getCacheVersion)
-
-	// Update Fetcher
-	self.r.GET("/currentListToken", self.GetCurrentListToken)
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if kyberENV != "production" {
