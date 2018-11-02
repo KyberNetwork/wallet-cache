@@ -51,6 +51,7 @@ type TokenAPI struct {
 	Decimals    int    `json:"decimals"`
 	UsdID       string `json:"cmc_id"`
 	TimeListing uint64 `json:"listing_time,omitempty"`
+	CGId        string `json:"cg_id"`
 	// DelistTime  uint64 `json:"delist_time,omitempty"`
 }
 
@@ -62,6 +63,7 @@ func TokenAPIToToken(tokenAPI TokenAPI) Token {
 		Address: tokenAPI.Address,
 		Decimal: tokenAPI.Decimals,
 		UsdId:   tokenAPI.UsdID,
+		CGId:    tokenAPI.CGId,
 	}
 	// }
 	// return nil
