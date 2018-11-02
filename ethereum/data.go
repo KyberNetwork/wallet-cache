@@ -41,6 +41,7 @@ type Token struct {
 	Address string `json:"address"`
 	Decimal int    `json:"decimals"`
 	UsdId   string `json:"cmc_id"`
+	CGId    string `json:"cg_id"`
 }
 
 type TokenAPI struct {
@@ -104,6 +105,23 @@ func TokenInfoCGToCMC(tokenInfo TokenInfoCoinGecko) TokenGeneralInfo {
 	return TokenGeneralInfo{
 		Quotes: quotes,
 	}
+}
+
+type RateUSDCG struct {
+	MarketData struct {
+		CurrentPrice struct {
+			USD float64 `json:"usd"`
+		} `json:"current_price"`
+	} `json:"market_data"`
+}
+
+type RateUSD struct {
+	Symbol   string `json:"symbol"`
+	PriceUsd string `json:"price_usd"`
+}
+
+type ResultRpc struct {
+	Result string `json:"result"`
 }
 
 // type TokenInfoData struct {

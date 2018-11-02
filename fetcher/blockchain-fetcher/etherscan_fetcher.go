@@ -43,7 +43,7 @@ func (self *Etherscan) EthCall(to string, data string) (string, error) {
 		log.Print(err)
 		return "", err
 	}
-	result := ResultRpc{}
+	result := ethereum.ResultRpc{}
 	err = json.Unmarshal(b, &result)
 	if err != nil {
 		log.Print(err)
@@ -61,7 +61,7 @@ func (self *Etherscan) GetLatestBlock() (string, error) {
 		log.Print(err)
 		return "", err
 	}
-	blockNum := ResultRpc{}
+	blockNum := ethereum.ResultRpc{}
 	err = json.Unmarshal(b, &blockNum)
 	if err != nil {
 		return "", err
@@ -132,7 +132,7 @@ func (self *Etherscan) GetGasPrice() (*ethereum.GasPrice, error) {
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
-		return "", err
+		return nil, err
 	}
 	var gasPrice GasStation
 	err = json.Unmarshal(b, &gasPrice)

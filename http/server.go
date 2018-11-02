@@ -81,6 +81,22 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) GetRateUSDCG(c *gin.Context) {
+	if !self.persister.GetIsNewRateUSDCG() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+
+	rates := self.persister.GetRateUSDCG()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": rates},
+	)
+}
+
 func (self *HTTPServer) GetRateETH(c *gin.Context) {
 	if !self.persister.GetIsNewRateUSD() {
 		c.JSON(
@@ -91,6 +107,22 @@ func (self *HTTPServer) GetRateETH(c *gin.Context) {
 	}
 
 	ethRate := self.persister.GetRateETH()
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": ethRate},
+	)
+}
+
+func (self *HTTPServer) GetRateETHCG(c *gin.Context) {
+	if !self.persister.GetIsNewRateUSDCG() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+
+	ethRate := self.persister.GetRateETHCG()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": ethRate},
@@ -171,6 +203,21 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
 	data := self.persister.GetRightMarketData()
 	if self.persister.GetIsNewMarketInfo() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": true, "data": data, "status": "latest"},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "data": data, "status": "old"},
+	)
+}
+
+func (self *HTTPServer) GetRightMarketInfoCG(c *gin.Context) {
+	data := self.persister.GetRightMarketDataCG()
+	if self.persister.GetIsNewMarketInfoCG() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": true, "data": data, "status": "latest"},
@@ -274,6 +321,10 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/getLast7D", self.GetLast7D)
 	self.r.GET("/getRateETH", self.GetRateETH)
 	self.r.GET("/getCacheVersion", self.getCacheVersion)
+
+	self.r.GET("/coingecko/getRightMarketInfo", self.GetRightMarketInfoCG)
+	self.r.GET("/coingecko/getRateUSD/", self.GetRateUSDCG)
+	self.r.GET("/coingecko/getRateETH", self.GetRateETHCG)
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if kyberENV != "production" {

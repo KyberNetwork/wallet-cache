@@ -22,9 +22,9 @@ type FetcherInterface interface {
 
 	GetTypeName() string
 
-	GetRateUsdEther() (string, error)
+	// GetRateUsdEther() (string, error)
 
-	GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
+	// GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
 
 	// get data from tracker
 	GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error)

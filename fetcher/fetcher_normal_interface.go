@@ -2,26 +2,26 @@ package fetcher
 
 import (
 	"github.com/KyberNetwork/server-go/ethereum"
-	bFetcher "github.com/KyberNetwork/server-go/fetcher/blockchain-fetcher"
+	nFetcher "github.com/KyberNetwork/server-go/fetcher/normal-fetcher"
 )
 
 type FetcherNormalInterface interface {
-	GetRateUsdEther() (string, error)
+	GetRateUsdEther() (string, string, error)
 	GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
+	GetTypeMarket() string
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
 
-func NewFetcherNormalIns(typeName string, endpoint string, apiKey string) (FetcherNormalInterface, error) {
-	var fetcher FetcherInterface
-	var err error
+func NewFetcherNormalIns(typeName string) FetcherNormalInterface {
+	var fetcher FetcherNormalInterface
 	switch typeName {
-	case "etherscan":
-		fetcher, err = bFetcher.NewEtherScan(typeName, endpoint, apiKey)
+	case "cmc":
+		fetcher = nFetcher.NewCMCFetcher()
 		break
-	case "node":
-		fetcher, err = bFetcher.NewBlockchainFetcher(typeName, endpoint, apiKey)
+	case "coingecko":
+		fetcher = nFetcher.NewCGFetcher()
 		break
 	}
-	return fetcher, err
+	return fetcher
 }

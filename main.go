@@ -137,13 +137,24 @@ func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) 
 }
 
 func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	rateUSD, err := fetcher.GetRateUsdEther()
+	rateUSDCMC, rateUSDCG, err := fetcher.GetRateUsdEther()
 	if err != nil {
 		log.Print(err)
 		persister.SetNewRateUSD(false)
 		return
 	}
-	err = persister.SaveRateUSD(rateUSD)
+
+	if rateUSDCG == "" {
+		persister.SetNewRateUSDCG(false)
+		return
+	}
+
+	if rateUSDCMC == "" {
+		persister.SetNewRateUSD(false)
+		return
+	}
+
+	err = persister.SaveRateUSD(rateUSDCMC, rateUSDCG)
 	if err != nil {
 		log.Print(err)
 		persister.SetNewRateUSD(false)
@@ -205,8 +216,8 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 // }
 
 func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	generalInfo := fetcher.GetGeneralInfoTokens()
-	persister.SaveGeneralInfoTokens(generalInfo)
+	generalInfo, generalInfoCG := fetcher.GetGeneralInfoTokens()
+	persister.SaveGeneralInfoTokens(generalInfo, generalInfoCG)
 
 	// if err != nil {
 	// 	log.Print(err)

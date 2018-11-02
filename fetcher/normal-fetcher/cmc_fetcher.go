@@ -10,31 +10,34 @@ import (
 )
 
 type CMCFetcher struct {
-	APIV1 string
-	APIV2 string
+	APIV1      string
+	APIV2      string
+	typeMarket string
 }
 
 func NewCMCFetcher() *CMCFetcher {
 	return &CMCFetcher{
-		APIV1: "https://api.coinmarketcap.com/v1",
-		APIV2: "https://api.coinmarketcap.com/v2",
+		APIV1:      "https://api.coinmarketcap.com/v1",
+		APIV2:      "https://api.coinmarketcap.com/v2",
+		typeMarket: "cmc",
 	}
 }
 
-func (self *CMCFetcher) GetRateUsdEther() (string, error) {
+func (self *CMCFetcher) GetRateUsdEther() (string, string, error) {
+	typeMarket := self.typeMarket
 	url := self.APIV1 + "/ticker/ethereum"
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
-		return "", err
+		return "", typeMarket, err
 	}
-	rateItem := make([]RateUSD, 0)
+	rateItem := make([]ethereum.RateUSD, 0)
 	err = json.Unmarshal(b, &rateItem)
 	if err != nil {
 		log.Print(err)
-		return "", err
+		return "", typeMarket, err
 	}
-	return rateItem[0].PriceUsd, nil
+	return rateItem[0].PriceUsd, typeMarket, nil
 }
 
 func (self *CMCFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo, error) {
@@ -58,4 +61,8 @@ func (self *CMCFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo
 	err = errors.New("Cannot find data key in return quotes of ticker")
 	log.Print(err)
 	return nil, err
+}
+
+func (self *CMCFetcher) GetTypeMarket() string {
+	return self.typeMarket
 }
