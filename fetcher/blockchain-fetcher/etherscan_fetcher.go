@@ -1,15 +1,14 @@
-package fetcher
+package bfetcher
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/big"
 	"net/http"
 
 	"github.com/KyberNetwork/server-go/ethereum"
+	fCommon "github.com/KyberNetwork/server-go/fetcher/fetcher-common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
@@ -39,18 +38,7 @@ func NewEtherScan(typeName string, url string, apiKey string) (*Etherscan, error
 func (self *Etherscan) EthCall(to string, data string) (string, error) {
 	url := self.url + "/api?module=proxy&action=eth_call&to=" +
 		to + "&data=" + data + "&tag=latest&apikey=" + self.apiKey
-	response, err := http.Get(url)
-
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-	if response.StatusCode != 200 {
-		return "", errors.New("Status code is 200")
-	}
-
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
+	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
 		return "", err
@@ -67,17 +55,10 @@ func (self *Etherscan) EthCall(to string, data string) (string, error) {
 }
 
 func (self *Etherscan) GetLatestBlock() (string, error) {
-	response, err := http.Get(self.url + "/api?module=proxy&action=eth_blockNumber")
+	url := self.url + "/api?module=proxy&action=eth_blockNumber"
+	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
-		return "", err
-	}
-	if response.StatusCode != 200 {
-		return "", errors.New("Status code is 200")
-	}
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
 		return "", err
 	}
 	blockNum := ResultRpc{}
@@ -146,21 +127,13 @@ type GasStation struct {
 }
 
 func (self *Etherscan) GetGasPrice() (*ethereum.GasPrice, error) {
-	response, err := http.Get("https://ethgasstation.info/json/ethgasAPI.json")
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	if response.StatusCode != 200 {
-		return nil, errors.New("Status code is 200")
-	}
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
+	url := "https://ethgasstation.info/json/ethgasAPI.json"
 
+	b, err := fCommon.HTTPCall(url)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
 	var gasPrice GasStation
 	err = json.Unmarshal(b, &gasPrice)
 	if err != nil {
@@ -178,66 +151,11 @@ func (self *Etherscan) GetGasPrice() (*ethereum.GasPrice, error) {
 	}, nil
 }
 
-func (self *Etherscan) GetRateUsdEther() (string, error) {
-	response, err := http.Get("https://api.coinmarketcap.com/v1/ticker/ethereum")
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-	rateItem := make([]RateUSD, 0)
-	err = json.Unmarshal(b, &rateItem)
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-	return rateItem[0].PriceUsd, nil
-}
-
-func (self *Etherscan) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo, error) {
-	response, err := http.Get("https://api.coinmarketcap.com/v2/ticker/" + usdId + "/?convert=ETH")
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	tokenItem := map[string]ethereum.TokenGeneralInfo{}
-	err = json.Unmarshal(b, &tokenItem)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	if data, ok := tokenItem["data"]; ok {
-		data.MarketCap = data.Quotes["ETH"].MarketCap
-		return &data, nil
-	}
-	err = errors.New("Cannot find data key in return quotes of ticker")
-	log.Print(err)
-	return nil, err
-}
-
 // get data from tracker.kyber
 
 func (self *Etherscan) GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error) {
 	trackerAPI := trackerEndpoint + "/api/tokens/rates?api_key=" + API_KEY_TRACKER
-	response, err := http.Get(trackerAPI)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
+	b, err := fCommon.HTTPCall(trackerAPI)
 	if err != nil {
 		log.Print(err)
 		return nil, err

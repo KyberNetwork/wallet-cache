@@ -79,6 +79,33 @@ type TokenGeneralInfo struct {
 	Quotes            map[string]QuoInfo `json:"quotes`
 }
 
+type CurrencyData struct {
+	ETH float64 `json:"eth"`
+	USD float64 `json:"usd"`
+}
+
+type TokenInfoCoinGecko struct {
+	MarketData struct {
+		MarketCap CurrencyData `json:"market_cap"`
+		Volume24H CurrencyData `json:"total_volume"`
+	} `json:"market_data"`
+}
+
+func TokenInfoCGToCMC(tokenInfo TokenInfoCoinGecko) TokenGeneralInfo {
+	quotes := make(map[string]QuoInfo)
+	quotes["ETH"] = QuoInfo{
+		MarketCap: tokenInfo.MarketData.MarketCap.ETH,
+		Volume24h: tokenInfo.MarketData.Volume24H.ETH,
+	}
+	quotes["USD"] = QuoInfo{
+		MarketCap: tokenInfo.MarketData.MarketCap.USD,
+		Volume24h: tokenInfo.MarketData.Volume24H.USD,
+	}
+	return TokenGeneralInfo{
+		Quotes: quotes,
+	}
+}
+
 // type TokenInfoData struct {
 // 	Data TokenGeneralInfo `data`
 // }
