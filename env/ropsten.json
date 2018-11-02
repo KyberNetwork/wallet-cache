@@ -255,8 +255,7 @@
       "name": "MidasProtocol Ropsten",
       "decimals": 18,
       "symbol" : "MAS",
-      "address": "0xc2c37d1a2cdd601ce665c4a785074670657f83ac",
-      "cg_id": "midas-protocol"
+      "address": "0xc2c37d1a2cdd601ce665c4a785074670657f83ac"
     }
   ]
 }
