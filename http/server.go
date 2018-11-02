@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/KyberNetwork/server-go/fetcher"
 	persister "github.com/KyberNetwork/server-go/persister"
@@ -215,16 +214,51 @@ func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 // 	return
 // }
 
-// Function for fetcher
-func (self *HTTPServer) GetCurrentListToken(c *gin.Context) {
-	listToken := self.fetcher.GetCurrentListToken()
+func (self *HTTPServer) GetListTokenAPI(c *gin.Context) {
+	listToken := self.fetcher.GetListTokenAPI()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": listToken},
 	)
 }
 
-func (self *HTTPServer) Run() {
+func (self *HTTPServer) AddToken(c *gin.Context) {
+	token := c.Param("token")
+	key := c.Param("key")
+
+	err := self.fetcher.AddToken(token, key)
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false, "error": err.Error()},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true},
+	)
+}
+
+func (self *HTTPServer) RemoveToken(c *gin.Context) {
+	token := c.Param("token")
+	key := c.Param("key")
+
+	err := self.fetcher.RemoveToken(token, key)
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false, "error": err.Error()},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true},
+	)
+}
+
+func (self *HTTPServer) Run(kyberENV string) {
 	//self.r.GET("/getRate", self.GetRate)
 	// self.r.GET("/getHistoryOneColumn", self.GetEvent)
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
@@ -241,12 +275,15 @@ func (self *HTTPServer) Run() {
 	self.r.GET("/getRateETH", self.GetRateETH)
 	self.r.GET("/getCacheVersion", self.getCacheVersion)
 
-	// Update Fetcher
-	self.r.GET("/currentListToken", self.GetCurrentListToken)
-
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
-	if os.Getenv("KYBER_ENV") != "production" {
+	if kyberENV != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
+	}
+
+	self.r.GET("/currencies", self.GetListTokenAPI)
+	if kyberENV == "ropsten" || kyberENV == "rinkeby" || kyberENV == "staging" {
+		self.r.GET("/tokens/add/:token/:key", self.AddToken)
+		self.r.GET("/tokens/remove/:token/:key", self.RemoveToken)
 	}
 
 	self.r.Run(self.host)

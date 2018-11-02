@@ -3,11 +3,12 @@ package fetcher
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"math/big"
-	"os"
+	"strings"
 	"sync"
 
 	// "strconv"
@@ -19,6 +20,7 @@ import (
 const (
 	ETH_TO_WEI = 1000000000000000000
 	MIN_ETH    = 0.001
+	KEY        = "kybersecret"
 )
 
 // type Token struct {
@@ -36,10 +38,13 @@ type Connection struct {
 }
 
 type InfoData struct {
-	mu            *sync.RWMutex
-	ApiUsd        string                    `json:"api_usd"`
-	Tokens        map[string]ethereum.Token `json:"tokens"`
-	TokenSnapshot map[string]ethereum.Token
+	mu             *sync.RWMutex
+	ApiUsd         string              `json:"api_usd"`
+	TokenAPI       []ethereum.TokenAPI `json:"tokens"`
+	CanDeleteToken []string            `json:"can_delete"`
+
+	OriginalToken []ethereum.TokenAPI
+	Tokens        map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
 	Connections []Connection `json:"connections"`
 
@@ -60,32 +65,102 @@ type InfoData struct {
 	ConfigEndpoint  string `json:"config_endpoint"`
 }
 
-func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	currentListToken := self.Tokens
-	finalListToken := make(map[string]ethereum.Token)
-	for symbol, token := range tokens {
-		if currentToken, ok := currentListToken[symbol]; ok {
-			if token.UsdId == "" {
-				token.UsdId = currentToken.UsdId
-			}
-		}
-		finalListToken[symbol] = token
-	}
-	self.Tokens = finalListToken
-}
-
-func (self *InfoData) UpdateByBackupToken() {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	self.Tokens = self.TokenSnapshot
-}
-
 func (self *InfoData) GetListToken() map[string]ethereum.Token {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	return self.Tokens
+}
+
+func (self *InfoData) GetTokenAPI() []ethereum.TokenAPI {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.TokenAPI
+}
+
+func (self *InfoData) CanDelete(symbol string) (bool, string) {
+	var errMsg string
+	for _, t := range self.CanDeleteToken {
+		if t == symbol {
+			return true, ""
+		}
+		errMsg += t + ", "
+	}
+	return false, errMsg
+}
+
+func (self *InfoData) AddToken(symbol, key string) error {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
+	if key != KEY {
+		return errors.New("you don't have permission to execute this action")
+	}
+	newListToken := make(map[string]ethereum.Token)
+	newList := []ethereum.TokenAPI{}
+	countIndex := 0
+	originalToken := self.OriginalToken
+	currentList := self.TokenAPI
+	tokenSymbol := strings.ToUpper(symbol)
+
+	for _, token := range originalToken {
+		if countIndex == len(currentList) {
+			if token.Symbol == tokenSymbol {
+				newList = append(newList, token)
+				newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
+			}
+			continue
+		}
+		if token.Symbol == currentList[countIndex].Symbol {
+			if token.Symbol == tokenSymbol {
+				return errors.New("Already had this token")
+			}
+			newList = append(newList, token)
+			newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
+			countIndex++
+		} else {
+			if token.Symbol == tokenSymbol {
+				newList = append(newList, token)
+				newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
+			}
+		}
+	}
+	if len(newList) == len(currentList) {
+		return fmt.Errorf("%s is not supported", tokenSymbol)
+	}
+	self.TokenAPI = newList
+	self.Tokens = newListToken
+	return nil
+}
+
+func (self *InfoData) RemoveToken(symbol, key string) error {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
+	if key != KEY {
+		return errors.New("you don't have permission to execute this action")
+	}
+	tokenSymbol := strings.ToUpper(symbol)
+	newListToken := make(map[string]ethereum.Token)
+	newList := []ethereum.TokenAPI{}
+	currentList := self.TokenAPI
+
+	canDelte, errMsg := self.CanDelete(tokenSymbol)
+	if canDelte == false {
+		return fmt.Errorf("you just can remove these tokens: %s", errMsg)
+	}
+	for _, token := range currentList {
+		if token.Symbol == tokenSymbol {
+			continue
+		}
+		newList = append(newList, token)
+		newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
+	}
+	if len(newList) == len(currentList) {
+		return fmt.Errorf("%s is not supported or already removed", tokenSymbol)
+	}
+	self.TokenAPI = newList
+	self.Tokens = newListToken
+	return nil
 }
 
 type ResultRpc struct {
@@ -103,10 +178,10 @@ func (self *Fetcher) GetNumTokens() int {
 	return len(listTokens)
 }
 
-func NewFetcher() (*Fetcher, error) {
+func NewFetcher(kyberENV string) (*Fetcher, error) {
 	var file []byte
 	var err error
-	kyberENV := os.Getenv("KYBER_ENV")
+
 	switch kyberENV {
 	case "semi_production":
 		file, err = ioutil.ReadFile("env/semi_production.json")
@@ -167,7 +242,14 @@ func NewFetcher() (*Fetcher, error) {
 		return nil, err
 	}
 
-	infoData.TokenSnapshot = infoData.Tokens
+	listToken := make(map[string]ethereum.Token)
+	originalToken := []ethereum.TokenAPI{}
+	for _, t := range infoData.TokenAPI {
+		originalToken = append(originalToken, t)
+		listToken[t.Symbol] = ethereum.TokenAPIToToken(t)
+	}
+	infoData.Tokens = listToken
+	infoData.OriginalToken = originalToken
 
 	fetIns := make([]FetcherInterface, 0)
 	for _, connection := range infoData.Connections {
@@ -195,68 +277,22 @@ func NewFetcher() (*Fetcher, error) {
 	return fetcher, nil
 }
 
-func (self *Fetcher) TryUpdateListToken() error {
-	var err error
-	for i := 0; i < 3; i++ {
-		err = self.UpdateListToken()
-		if err != nil {
-			log.Println(err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		return nil
-	}
-	self.info.UpdateByBackupToken()
-	return nil
+// api to get config token
+func (self *Fetcher) GetListTokenAPI() []ethereum.TokenAPI {
+	return self.info.GetTokenAPI()
 }
-
-func (self *Fetcher) UpdateListToken() error {
-	var err error
-	result := make(map[string]ethereum.Token)
-	for _, fetIns := range self.fetIns {
-		result, err = fetIns.GetListToken(self.info.ConfigEndpoint)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		break
-	}
-	if err == nil {
-		self.info.UpdateListToken(result)
-		// err = storeConfig(listToken)
-		// if err != nil {
-		// 	log.Println("fetch tokens success but write to file js failed")
-		// }
-	}
-	return err
-}
-
-func (self *Fetcher) GetCurrentListToken() map[string]ethereum.Token {
-	return self.GetListToken()
-}
-
-// store config to a file js
-// func storeConfig(tokens map[string]ethereum.Token) error {
-// 	fileJS, err := os.Create("config/tokens.js")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer fileJS.Close()
-// 	bytes, err := json.Marshal(tokens)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	stringFile := fmt.Sprintf("var configTokens = %s;", bytes)
-// 	stringReader := strings.NewReader(stringFile)
-// 	_, err = stringReader.WriteTo(fileJS)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
 
 func (self *Fetcher) GetListToken() map[string]ethereum.Token {
 	return self.info.GetListToken()
+}
+
+// api for dev
+func (self *Fetcher) AddToken(symbol, key string) error {
+	return self.info.AddToken(symbol, key)
+}
+
+func (self *Fetcher) RemoveToken(symbol, key string) error {
+	return self.info.RemoveToken(symbol, key)
 }
 
 func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {

@@ -180,9 +180,3 @@ func (self *BlockchainFetcher) GetTrackerData(trackerEndpoint string) (map[strin
 	//log.Print(err)
 	return trackerData, err
 }
-
-func (self *BlockchainFetcher) GetListToken(configEndpoint string) (map[string]ethereum.Token, error) {
-	listToken := make(map[string]ethereum.Token)
-	err := errors.New("Blockchain is not support this api")
-	return listToken, err
-}

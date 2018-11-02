@@ -43,24 +43,12 @@ func main() {
 		defer f.Close()
 	}
 
+	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
-	fertcherIns, err := fetcher.NewFetcher()
+	fertcherIns, err := fetcher.NewFetcher(kyberENV)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	err = fertcherIns.TryUpdateListToken()
-	if err != nil {
-		log.Println(err)
-	}
-
-	tickerUpdateToken := time.NewTicker(3600 * time.Second)
-	go func() {
-		for {
-			<-tickerUpdateToken.C
-			fertcherIns.TryUpdateListToken()
-		}
-	}()
 
 	tokenNum := fertcherIns.GetNumTokens()
 	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
@@ -87,7 +75,7 @@ func main() {
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
-	server.Run()
+	server.Run(kyberENV)
 
 	//init fetch data
 

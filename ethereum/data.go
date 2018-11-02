@@ -1,5 +1,9 @@
 package ethereum
 
+// const (
+// 	TIME_TO_DELETE = 18000
+// )
+
 type EventRaw struct {
 	Timestamp   string `json:"timestamp"`
 	BlockNumber string `json:"blockNumber"`
@@ -32,12 +36,34 @@ type GasPrice struct {
 }
 
 type Token struct {
-	Name       string `json:"name"`
-	Symbol     string `json:"symbol"`
-	Address    string `json:"address"`
-	Decimal    int    `json:"decimals"`
-	UsdId      string `json:"cmc_id"`
-	DelistTime uint64 `json:"delist_time"`
+	Name    string `json:"name"`
+	Symbol  string `json:"symbol"`
+	Address string `json:"address"`
+	Decimal int    `json:"decimals"`
+	UsdId   string `json:"cmc_id"`
+}
+
+type TokenAPI struct {
+	Symbol      string `json:"symbol"`
+	Name        string `json:"name"`
+	Address     string `json:"address"`
+	Decimals    int    `json:"decimals"`
+	UsdID       string `json:"cmc_id"`
+	TimeListing uint64 `json:"listing_time,omitempty"`
+	// DelistTime  uint64 `json:"delist_time,omitempty"`
+}
+
+func TokenAPIToToken(tokenAPI TokenAPI) Token {
+	// if tokenAPI.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+tokenAPI.DelistTime {
+	return Token{
+		Name:    tokenAPI.Name,
+		Symbol:  tokenAPI.Symbol,
+		Address: tokenAPI.Address,
+		Decimal: tokenAPI.Decimals,
+		UsdId:   tokenAPI.UsdID,
+	}
+	// }
+	// return nil
 }
 
 type QuoInfo struct {
