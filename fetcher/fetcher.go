@@ -40,6 +40,7 @@ type Connection struct {
 type InfoData struct {
 	mu             *sync.RWMutex
 	ApiUsd         string              `json:"api_usd"`
+	CoinMarket     []string            `json:"coin_market"`
 	TokenAPI       []ethereum.TokenAPI `json:"tokens"`
 	CanDeleteToken []string            `json:"can_delete"`
 
@@ -163,14 +164,11 @@ func (self *InfoData) RemoveToken(symbol, key string) error {
 	return nil
 }
 
-type ResultRpc struct {
-	Result string `json:"result"`
-}
-
 type Fetcher struct {
-	info     *InfoData
-	ethereum *Ethereum
-	fetIns   []FetcherInterface
+	info         *InfoData
+	ethereum     *Ethereum
+	fetIns       []FetcherInterface
+	fetNormalIns []FetcherNormalInterface
 }
 
 func (self *Fetcher) GetNumTokens() int {
@@ -261,6 +259,12 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		}
 	}
 
+	fetNormalIns := make([]FetcherNormalInterface, 0)
+	for _, market := range infoData.CoinMarket {
+		f := NewFetcherNormalIns(market)
+		fetNormalIns = append(fetNormalIns, f)
+	}
+
 	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi, infoData.TradeTopic,
 		infoData.Wapper, infoData.WrapperAbi, infoData.AverageBlockTime)
 	if err != nil {
@@ -269,9 +273,10 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	}
 
 	fetcher := &Fetcher{
-		info:     &infoData,
-		ethereum: ethereum,
-		fetIns:   fetIns,
+		info:         &infoData,
+		ethereum:     ethereum,
+		fetIns:       fetIns,
+		fetNormalIns: fetNormalIns,
 	}
 
 	return fetcher, nil
@@ -314,28 +319,38 @@ func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	return nil, errors.New("Cannot get rate USD")
 }
 
-func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInfo {
+func (self *Fetcher) GetGeneralInfoTokens() (map[string]*ethereum.TokenGeneralInfo, map[string]*ethereum.TokenGeneralInfo) {
 	generalInfo := map[string]*ethereum.TokenGeneralInfo{}
+	generalInfoCG := map[string]*ethereum.TokenGeneralInfo{}
 	//	usdId := make([]string, 0)
 	listTokens := self.GetListToken()
 	for _, token := range listTokens {
 		if token.UsdId != "" {
 			//usdId = append(usdId, token.UsdId)
-			for _, fetIns := range self.fetIns {
-				result, err := fetIns.GetGeneralInfo(token.UsdId)
-				if err != nil {
-					log.Print(err)
-					continue
+			for _, fetIns := range self.fetNormalIns {
+				typeMarket := fetIns.GetTypeMarket()
+
+				if typeMarket == "cmc" {
+					result, err := fetIns.GetGeneralInfo(token.UsdId)
+					if err != nil {
+						log.Print(err)
+						continue
+					}
+					generalInfo[token.Symbol] = result
+				} else {
+					result, err := fetIns.GetGeneralInfo(token.CGId)
+					if err != nil {
+						log.Print(err)
+						continue
+					}
+					generalInfoCG[token.Symbol] = result
 				}
-				//return result, nil
-				generalInfo[token.Symbol] = result
-				break
 			}
 			time.Sleep(5 * time.Second)
 		}
 	}
 
-	return generalInfo
+	return generalInfo, generalInfoCG
 	// for _, fetIns := range self.fetIns {
 	// 	result, err := fetIns.GetGeneralInfo(usdId)
 	// 	if err != nil {
@@ -347,23 +362,32 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 	// return nil, errors.New("Cannot get rate USD")
 }
 
-func (self *Fetcher) GetRateUsdEther() (string, error) {
+func (self *Fetcher) GetRateUsdEther() (string, string, error) {
 	//rateUsd, err := fetIns.GetRateUsdEther()
 
 	// usdId := make([]string, 0)
 	// for _, token := range self.info.Tokens {
 	// 	usdId = append(usdId, token.UsdId)
 	// }
-	for _, fetIns := range self.fetIns {
-		rateUsd, err := fetIns.GetRateUsdEther()
+	var rateETHCMC, rateETHCG string
+	for _, fetIns := range self.fetNormalIns {
+		rateUsd, typeMarket, err := fetIns.GetRateUsdEther()
 		//fmt.Print(rateUsd)
 		if err != nil {
 			log.Print(err)
 			continue
 		}
-		return rateUsd, nil
+		if typeMarket == "cmc" {
+			rateETHCMC = rateUsd
+		}
+		if typeMarket == "coingecko" {
+			rateETHCG = rateUsd
+		}
 	}
-	return "", errors.New("Cannot get rate USD")
+	// if err != nil {
+	// 	err = errors.New("Cannot get rate USD")
+	// }
+	return rateETHCMC, rateETHCG, nil
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {

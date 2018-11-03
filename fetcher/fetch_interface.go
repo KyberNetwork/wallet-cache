@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/KyberNetwork/server-go/ethereum"
+	bFetcher "github.com/KyberNetwork/server-go/fetcher/blockchain-fetcher"
 )
 
 type RateUSD struct {
@@ -21,9 +22,9 @@ type FetcherInterface interface {
 
 	GetTypeName() string
 
-	GetRateUsdEther() (string, error)
+	// GetRateUsdEther() (string, error)
 
-	GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
+	// GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
 
 	// get data from tracker
 	GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error)
@@ -36,10 +37,10 @@ func NewFetcherIns(typeName string, endpoint string, apiKey string) (FetcherInte
 	var err error
 	switch typeName {
 	case "etherscan":
-		fetcher, err = NewEtherScan(typeName, endpoint, apiKey)
+		fetcher, err = bFetcher.NewEtherScan(typeName, endpoint, apiKey)
 		break
 	case "node":
-		fetcher, err = NewBlockchainFetcher(typeName, endpoint, apiKey)
+		fetcher, err = bFetcher.NewBlockchainFetcher(typeName, endpoint, apiKey)
 		break
 	}
 	return fetcher, err
