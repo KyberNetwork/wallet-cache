@@ -54,6 +54,9 @@ func main() {
 	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
 	//	initRateToken(persisterIns, fertcherIns)
 
+	// run update list reserve
+	runFetchData(persisterIns, fetchListReserve, fertcherIns, 86400)
+
 	//run fetch data
 	runFetchData(persisterIns, fetchKyberEnabled, fertcherIns, 10)
 	runFetchData(persisterIns, fetchMaxGasPrice, fertcherIns, 60)
@@ -249,4 +252,8 @@ func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	tokens := fetcher.GetListToken()
 	persister.SaveMarketData(data, tokens)
 	persister.SetIsNewMarketInfo(true)
+}
+
+func fetchListReserve(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	fetcher.UpdateListReserve()
 }

@@ -20,15 +20,19 @@ type RateWrapper struct {
 }
 
 type Ethereum struct {
-	network          string
-	networkAbi       abi.ABI
-	tradeTopic       string
-	wrapper          string
-	wrapperAbi       abi.ABI
-	averageBlockTime int64
+	network            string
+	networkAbi         abi.ABI
+	tradeTopic         string
+	wrapper            string
+	wrapperAbi         abi.ABI
+	internalNetwork    string
+	internalNetworkAbi abi.ABI
+	averageBlockTime   int64
 }
 
-func NewEthereum(network string, networkAbiStr string, tradeTopic string, wrapper string, wrapperAbiStr string, averageBlockTime int64) (*Ethereum, error) {
+func NewEthereum(network string, networkAbiStr string, tradeTopic string,
+	wrapper string, wrapperAbiStr string, averageBlockTime int64,
+	internalNetwork, internalNetworkAbiString string) (*Ethereum, error) {
 
 	networkAbi, err := abi.JSON(strings.NewReader(networkAbiStr))
 	if err != nil {
@@ -42,10 +46,22 @@ func NewEthereum(network string, networkAbiStr string, tradeTopic string, wrappe
 		return nil, err
 	}
 
-	ethereum := &Ethereum{
-		network, networkAbi, tradeTopic, wrapper, wrapperAbi, averageBlockTime,
+	internalNetworkAbi, err := abi.JSON(strings.NewReader(internalNetworkAbiString))
+	if err != nil {
+		log.Print(err)
+		return nil, err
 	}
 
+	ethereum := &Ethereum{
+		network:            network,
+		networkAbi:         networkAbi,
+		tradeTopic:         tradeTopic,
+		wrapper:            wrapper,
+		wrapperAbi:         wrapperAbi,
+		internalNetwork:    internalNetwork,
+		internalNetworkAbi: internalNetworkAbi,
+		averageBlockTime:   averageBlockTime,
+	}
 	return ethereum, nil
 }
 
@@ -104,6 +120,60 @@ func (self *Ethereum) EncodeMaxGasPrice() (string, error) {
 		return "", err
 	}
 	return common.Bytes2Hex(encodedData), nil
+}
+
+func (self *Ethereum) EncodeReservesPerTokenSrcData(tokenAddrString string, numInt int) (string, error) {
+	tokenAddr := common.HexToAddress(tokenAddrString)
+	num := big.NewInt(int64(numInt))
+	encodedData, err := self.internalNetworkAbi.Pack("reservesPerTokenSrc", tokenAddr, num)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	return common.Bytes2Hex(encodedData), nil
+}
+
+func (self *Ethereum) EncodeReservesPerTokenDestData(tokenAddrString string, numInt int) (string, error) {
+	tokenAddr := common.HexToAddress(tokenAddrString)
+	num := big.NewInt(int64(numInt))
+	encodedData, err := self.internalNetworkAbi.Pack("reservesPerTokenDest", tokenAddr, num)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	return common.Bytes2Hex(encodedData), nil
+}
+
+// ********************* ExtractData ************************************
+
+func (self *Ethereum) ExtractReservesPerTokenSrcData(reserveAddrHex string) (string, error) {
+	reserveAddrByte, err := hexutil.Decode(reserveAddrHex)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	var reserveAddr common.Address
+	err = self.internalNetworkAbi.Unpack(&reserveAddr, "reservesPerTokenSrc", reserveAddrByte)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	return reserveAddr.String(), nil
+}
+
+func (self *Ethereum) ExtractReservesPerTokenDestData(reserveAddrHex string) (string, error) {
+	reserveAddrByte, err := hexutil.Decode(reserveAddrHex)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	var reserveAddr common.Address
+	err = self.internalNetworkAbi.Unpack(&reserveAddr, "reservesPerTokenDest", reserveAddrByte)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	return reserveAddr.String(), nil
 }
 
 func (self *Ethereum) ExtractMaxGasPrice(result string) (string, error) {
