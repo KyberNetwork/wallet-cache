@@ -53,8 +53,8 @@ type TokenAPI struct {
 	TimeListing uint64 `json:"listing_time,omitempty"`
 	CGId        string `json:"cg_id"`
 	// DelistTime  uint64 `json:"delist_time,omitempty"`
-	ReserveSrc  []string `json:"reserves_src"`
-	ReserveDest []string `json:"reserves_dest"`
+	ReserveSrc  []string `json:"reserves_src,omitempty"`
+	ReserveDest []string `json:"reserves_dest,omitempty"`
 }
 
 func TokenAPIToToken(tokenAPI TokenAPI) Token {
