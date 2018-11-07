@@ -543,6 +543,38 @@
       "address": "0xffa93aacf49297d51e211817452839052fdfb961",
       "cmc_id":"2881",
       "cg_id": "distributed-credit-chain"
+    },
+    {
+      "name": "CNN Token",
+      "symbol": "CNN",
+      "decimals": 18,
+      "address": "0x8713d26637CF49e1b6B4a7Ce57106AaBc9325343",
+      "cmc_id": "2735",
+      "cg_id": "cnn"
+    },
+    {
+      "name": "Smartshare Token",
+      "symbol": "SSP",
+      "decimals": 4,
+      "address": "0x624d520BAB2E4aD83935Fa503fB130614374E850",
+      "cmc_id": "2862",
+      "cg_id": "smartshare"
+    },
+    {
+      "name": "Propy",
+      "symbol": "PRO",
+      "decimals": 8,
+      "address": "0x226bb599a12C826476e3A771454697EA52E9E220",
+      "cmc_id": "1974",
+      "cg_id": "propy"
+    },
+    {
+      "name": "OCoin",
+      "symbol": "OCN",
+      "decimals": 18,
+      "address": "0x4092678e4E78230F46A1534C0fbc8fA39780892B",
+      "cmc_id": "2458",
+      "cg_id": "odyssey"
     }
   ]
 }
