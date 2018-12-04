@@ -54,7 +54,7 @@ func main() {
 		log.Println(err)
 	}
 
-	tickerUpdateToken := time.NewTicker(3600 * time.Second)
+	tickerUpdateToken := time.NewTicker(300 * time.Second)
 	go func() {
 		for {
 			<-tickerUpdateToken.C
