@@ -6,7 +6,7 @@ import (
 )
 
 type FetcherNormalInterface interface {
-	GetRateUsdEther() (string, string, error)
+	GetRateUsdEther() (string, error)
 	GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
 	GetTypeMarket() string
 }

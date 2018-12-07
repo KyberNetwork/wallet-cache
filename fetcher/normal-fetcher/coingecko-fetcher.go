@@ -22,22 +22,22 @@ func NewCGFetcher() *CGFetcher {
 	}
 }
 
-func (self *CGFetcher) GetRateUsdEther() (string, string, error) {
-	typeMarket := self.typeMarket
+func (self *CGFetcher) GetRateUsdEther() (string, error) {
+	// typeMarket := self.typeMarket
 	url := self.API + "/coins/ethereum"
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
-		return "", typeMarket, err
+		return "", err
 	}
 	rateItem := ethereum.RateUSDCG{}
 	err = json.Unmarshal(b, &rateItem)
 	if err != nil {
 		log.Print(err)
-		return "", typeMarket, err
+		return "", err
 	}
 	rateString := fmt.Sprintf("%.6f", rateItem.MarketData.CurrentPrice.USD)
-	return rateString, typeMarket, nil
+	return rateString, nil
 }
 
 func (self *CGFetcher) GetGeneralInfo(coinID string) (*ethereum.TokenGeneralInfo, error) {
@@ -54,7 +54,7 @@ func (self *CGFetcher) GetGeneralInfo(coinID string) (*ethereum.TokenGeneralInfo
 		return nil, err
 	}
 
-	tokenGenalInfo := ethereum.TokenInfoCGToCMC(tokenItem)
+	tokenGenalInfo := tokenItem.ToTokenInfoCMC()
 	return &tokenGenalInfo, nil
 	err = errors.New("Cannot find data key in return quotes of ticker")
 	log.Print(err)

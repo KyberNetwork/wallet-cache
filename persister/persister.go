@@ -34,7 +34,7 @@ type Persister interface {
 
 	SaveRate(*[]ethereum.Rate)
 
-	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo, map[string]*ethereum.TokenGeneralInfo)
+	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
 	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
 
 	GetLatestBlock() string
@@ -45,7 +45,7 @@ type Persister interface {
 	GetRateUSD() []RateUSD
 	GetRateETH() string
 	GetIsNewRateUSD() bool
-	SaveRateUSD(string, string) error
+	SaveRateUSD(string) error
 	SetNewRateUSD(bool)
 
 	GetRateUSDCG() []RateUSD

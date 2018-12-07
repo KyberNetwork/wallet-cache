@@ -319,38 +319,38 @@ func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
 	return nil, errors.New("Cannot get rate USD")
 }
 
-func (self *Fetcher) GetGeneralInfoTokens() (map[string]*ethereum.TokenGeneralInfo, map[string]*ethereum.TokenGeneralInfo) {
+func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInfo {
 	generalInfo := map[string]*ethereum.TokenGeneralInfo{}
-	generalInfoCG := map[string]*ethereum.TokenGeneralInfo{}
+	// generalInfoCG := map[string]*ethereum.TokenGeneralInfo{}
 	//	usdId := make([]string, 0)
 	listTokens := self.GetListToken()
 	for _, token := range listTokens {
 		if token.UsdId != "" {
 			//usdId = append(usdId, token.UsdId)
 			for _, fetIns := range self.fetNormalIns {
-				typeMarket := fetIns.GetTypeMarket()
+				// typeMarket := fetIns.GetTypeMarket()
 
-				if typeMarket == "cmc" {
-					result, err := fetIns.GetGeneralInfo(token.UsdId)
-					if err != nil {
-						log.Print(err)
-						continue
-					}
-					generalInfo[token.Symbol] = result
-				} else {
-					result, err := fetIns.GetGeneralInfo(token.CGId)
-					if err != nil {
-						log.Print(err)
-						continue
-					}
-					generalInfoCG[token.Symbol] = result
+				// if typeMarket == "cmc" {
+				result, err := fetIns.GetGeneralInfo(token.CGId)
+				if err != nil {
+					log.Print(err)
+					continue
 				}
+				generalInfo[token.Symbol] = result
+				// } else {
+				// 	result, err := fetIns.GetGeneralInfo(token.CGId)
+				// 	if err != nil {
+				// 		log.Print(err)
+				// 		continue
+				// 	}
+				// 	generalInfoCG[token.Symbol] = result
+				// }
 			}
 			time.Sleep(5 * time.Second)
 		}
 	}
 
-	return generalInfo, generalInfoCG
+	return generalInfo
 	// for _, fetIns := range self.fetIns {
 	// 	result, err := fetIns.GetGeneralInfo(usdId)
 	// 	if err != nil {
@@ -362,32 +362,18 @@ func (self *Fetcher) GetGeneralInfoTokens() (map[string]*ethereum.TokenGeneralIn
 	// return nil, errors.New("Cannot get rate USD")
 }
 
-func (self *Fetcher) GetRateUsdEther() (string, string, error) {
-	//rateUsd, err := fetIns.GetRateUsdEther()
-
-	// usdId := make([]string, 0)
-	// for _, token := range self.info.Tokens {
-	// 	usdId = append(usdId, token.UsdId)
-	// }
-	var rateETHCMC, rateETHCG string
+func (self *Fetcher) GetRateUsdEther() (string, error) {
 	for _, fetIns := range self.fetNormalIns {
-		rateUsd, typeMarket, err := fetIns.GetRateUsdEther()
+		rateUsd, err := fetIns.GetRateUsdEther()
 		//fmt.Print(rateUsd)
 		if err != nil {
 			log.Print(err)
 			continue
 		}
-		if typeMarket == "cmc" {
-			rateETHCMC = rateUsd
-		}
-		if typeMarket == "coingecko" {
-			rateETHCG = rateUsd
-		}
+		return "", rateUsd
 	}
-	// if err != nil {
-	// 	err = errors.New("Cannot get rate USD")
-	// }
-	return rateETHCMC, rateETHCG, nil
+
+	return "", errors.New("Can not get rate eth usd")
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {

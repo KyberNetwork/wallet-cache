@@ -94,7 +94,7 @@ type TokenInfoCoinGecko struct {
 	} `json:"market_data"`
 }
 
-func TokenInfoCGToCMC(tokenInfo TokenInfoCoinGecko) TokenGeneralInfo {
+func (tokenInfo TokenInfoCoinGecko) ToTokenInfoCMC() TokenGeneralInfo {
 	quotes := make(map[string]QuoInfo)
 	quotes["ETH"] = QuoInfo{
 		MarketCap: tokenInfo.MarketData.MarketCap.ETH,
