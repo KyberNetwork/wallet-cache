@@ -31,6 +31,7 @@
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
   "tracker_endpoint":"https://staging-tracker.knstats.com",
+  "config_endpoint": "https://staging-api.knstats.com/internal/currencies",
 
   "can_delete": ["BBO", "COFI", "WABI", "MOC", "MAS"],
 

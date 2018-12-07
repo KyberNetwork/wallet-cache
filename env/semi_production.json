@@ -32,6 +32,7 @@
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
   "tracker_endpoint":"https://tracker.kyber.network",
+  "config_endpoint": "https://api.kyber.network/internal/currencies",
 
   "tokens": [
     {
