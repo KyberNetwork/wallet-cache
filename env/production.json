@@ -23,19 +23,8 @@
     }
   ],
   "api_usd":"https://api.coinmarketcap.com",
-  "coin_market": ["cmc", "coingecko"],
-  "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
-  "network": "0x818E6FECD516Ecc3849DAf6845e3EC868087B755",
-  "wrapper": "0x6172afc8c00c46e0d07ce3af203828198194620a",
-  "trade_topic":"0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
-  "endpoint": "wss://mainnet.infura.io/ws",
-  "averageBlockTime": 15000,
-  "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "tracker_endpoint":"https://tracker.kyber.network",
-  "config_endpoint": "https://api.kyber.network/internal/currencies",
-  
-  "tokens": [
-    {
+  "tokens": {
+    "ETH": {
       "name": "Ethereum",
       "symbol": "ETH",
       "icon": "eth.svg",
@@ -44,7 +33,7 @@
       "cmc_id":"1027",
       "cg_id": "ethereum"
     },
-    {
+    "WETH": {
       "name": "Wrapped Ether",
       "symbol" : "WETH",
       "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
@@ -52,7 +41,7 @@
       "cmc_id":"2396",
       "cg_id": "weth"
     },
-    {
+    "KNC": {
       "name": "KyberNetwork",
       "symbol": "KNC",
       "address": "0xdd974d5c2e2928dea5f71b9825b8b646686bd200",
@@ -60,7 +49,7 @@
       "cmc_id":"1982",
       "cg_id": "kyber-network"
     },
-    {
+    "DAI": {
       "name" : "DAI",
       "symbol": "DAI",
       "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
@@ -68,16 +57,15 @@
       "cmc_id":"2308",
       "cg_id": "dai"
     },
-    {
+    "OMG": {
       "name": "OmiseGO",
       "symbol": "OMG",
       "address": "0xd26114cd6ee289accf82350c8d8487fedb8a0c07",
       "decimals": 18,
       "cmc_id":"1808",
-      "is_not_erc20": true,
       "cg_id": "omisego"
     },
-    {
+    "SNT": {
       "name":"Status",
       "address": "0x744d70fdbe2ba4cf95131626614a1763df805b9e",
       "symbol": "SNT",
@@ -85,7 +73,7 @@
       "cmc_id":"1759",
       "cg_id": "status"
     },
-    {
+    "ELF": {
       "name":"Aelf",
       "address": "0xbf2179859fc6d5bee9bf9158632dc51678a4100e",
       "symbol": "ELF",
@@ -93,7 +81,7 @@
       "cmc_id":"2299",
       "cg_id": "aelf"
     },
-    {
+    "POWR": {
       "name":"Power Ledger",
       "address": "0x595832f8fc6bf59c85c527fec3740a1b7a361269",
       "symbol": "POWR",
@@ -101,7 +89,7 @@
       "cmc_id":"2132",
       "cg_id": "power-ledger"
     },
-    {
+    "MANA": {
       "name":"Mana",
       "address": "0x0f5d2fb29fb7d3cfee444a200298f468908cc942",
       "symbol": "MANA",
@@ -109,7 +97,7 @@
       "cmc_id":"1966",
       "cg_id": "decentraland"
     },
-    {
+    "BAT": {
       "name":"Basic Attention Token",
       "address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
       "symbol": "BAT",
@@ -117,7 +105,7 @@
       "cmc_id":"1697",
       "cg_id": "basic-attention-token"
     },
-    {
+    "REQ": {
       "name":"Request",
       "address": "0x8f8221afbb33998d8584a2b05749ba73c37a938a",
       "symbol": "REQ",
@@ -125,422 +113,364 @@
       "cmc_id":"2071",
       "cg_id": "request-network"
     },
-    {
+    "GTO": {
       "name":"Gifto",
       "address": "0xc5bbae50781be1669306b9e001eff57a2957b09d",
       "symbol": "GTO",
       "decimals": 5,
-      "cmc_id":"2289",
-      "cg_id": "gifto"
+      "cmc_id":"2289"
     },
-    {
+    "RDN": {
       "name":"Raiden",
       "address": "0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6",
       "symbol": "RDN",
       "decimals": 18,
-      "cmc_id":"2161",
-      "cg_id": "raiden-network"
+      "cmc_id":"2161"
     },
-    {
+    "APPC": {
       "name":"AppCoins",
       "address": "0x1a7a8bd9106f2b8d977e08582dc7d24c723ab0db",
       "symbol": "APPC",
       "decimals": 18,
-      "cmc_id":"2344",
-      "cg_id": "appcoins"
+      "cmc_id":"2344"
     },
-    {
+    "ENG": {
       "name":"Enigma",
       "address": "0xf0ee6b27b759c9893ce4f094b49ad28fd15a23e4",
       "symbol": "ENG",
       "decimals": 8,
-      "cmc_id":"2044",
-      "cg_id": "enigma"
+      "cmc_id":"2044"
     },
-    {
+    "SALT": {
       "name":"Salt",
       "address": "0x4156d3342d5c385a87d264f90653733592000581",
       "symbol": "SALT",
       "decimals": 8,
-      "cmc_id":"1996",
-      "cg_id": "salt"
+      "cmc_id":"1996"
     },
-    {
+    "BQX": {
       "name" : "Ethos",
       "address": "0x5af2be193a6abca9c8817001f45744777db30756",
       "symbol": "BQX",
       "decimals": 8,
-      "cmc_id":"1817",
-      "cg_id": "ethos"
+      "cmc_id":"1817"
     },
-    {
+    "ADX": {
       "name": "AdEx",
       "address": "0x4470bb87d77b963a013db939be332f927f2b992e",
       "symbol": "ADX",
       "decimals": 4,
-      "cmc_id": "1768",
-      "is_not_erc20": true,
-      "cg_id": "adex"
+      "cmc_id": "1768"
     },
-    {
+    "AST": {
       "name": "AirSwap",
       "address": "0x27054b13b1b798b345b591a4d22e6562d47ea75a",
       "symbol": "AST",
       "decimals": 4,
-      "cmc_id": "2058",
-      "cg_id": "airswap"
+      "cmc_id": "2058"
     },
-    {
+    "RCN": {
       "name": "Ripio Credit Network",
       "address": "0xf970b8e36e23f7fc3fd752eea86f8be8d83375a6",
       "symbol": "RCN",
       "decimals": 18,
-      "cmc_id": "2096",
-      "cg_id": "ripio-credit-network"
+      "cmc_id": "2096"
     },
-    {
+    "ZIL": {
       "name": "Zilliqa",
       "address": "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
       "symbol": "ZIL",
       "decimals": 12,
-      "cmc_id":"2469",
-      "cg_id": "zilliqa"
+      "cmc_id":"2469"
     },
-    {
+    "LINK": {
       "name": "Chain Link",
       "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
       "symbol": "LINK",
       "decimals": 18,
-      "cmc_id":"1975",
-      "cg_id": "chainlink"
+      "cmc_id":"1975"
     },
-    {
+    "DGX": {
       "name" : "Digix Gold Token",
       "address": "0x4f3afec4e5a3f2a6a1a411def7d7dfe50ee057bf",
       "symbol":"DGX",
       "decimals": 9,
-      "cmc_id": "2739",
-      "cg_id": "digix-gold"
+      "cmc_id": "2739"
     },
-    {
+    "STORM": {
       "name": "Storm",
       "address": "0xd0a4b8946cb52f0661273bfbc6fd0e0c75fc6433",
       "symbol": "STORM",
       "decimals": 18,
-      "cmc_id":"2297",
-      "cg_id": "storm"
+      "cmc_id":"2297"
     },
-    {
+    "IOST": {
       "name": "IOStoken",
       "address": "0xfa1a856cfa3409cfa145fa4e20eb270df3eb21ab",
       "symbol": "IOST",
       "decimals": 18,
-      "cmc_id":"2405",
-      "cg_id": "iostoken"
+      "cmc_id":"2405"
     },
-    {
+    "MOT": {
       "name": "Olympus Labs",
       "address": "0x263c618480dbe35c300d8d5ecda19bbb986acaed",
       "symbol": "MOT",
       "decimals": 18,
-      "cmc_id":"2327",
-      "cg_id": "olympus-labs"
+      "cmc_id":"2327"
     },
-    {
+    "ABT": {
       "name": "ArcBlock",
       "address": "0xb98d4c97425d9908e66e53a6fdf673acca0be986",
       "decimals": 18,
       "symbol":"ABT",        
-      "cmc_id":"2545",
-      "cg_id": "arcblock"
+      "cmc_id":"2545"
     },
-    {
+    "ENJ": {
       "name": "Enjin Coin",
       "address": "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c",
       "decimals": 18,
       "symbol":"ENJ",        
-<<<<<<< HEAD
-      "cmc_id":"2130",
-      "cg_id": "enjincoin"
-    },
-    {
-=======
       "cmc_id":"2130"
     },
     "AE": {
->>>>>>> 294760895d68c174f66bf87f220195238be7a561
       "name": "Aeternity",
       "decimals": 18,
       "symbol":"AE", 
       "address": "0x5ca9a71b1d01849c0a95490cc00559717fcf0d1d",
-      "cmc_id": "aeternity"
+      "cmc_id": "1700"
     },
-    {
+    "BLZ": {
       "name": "Bluezelle",
       "decimals": 18,
       "symbol":"BLZ", 
       "address": "0x5732046a883704404f284ce41ffadd5b007fd668",
-      "cmc_id":"2505",
-      "cg_id": "bluzelle"
+      "cmc_id":"2505"
     },
-    {
+    "PAL": {
       "name": "PolicyPal",
       "decimals": 18,
       "symbol":"PAL", 
       "address": "0xfedae5642668f8636a11987ff386bfd215f942ee",
-      "cmc_id":"2718",
-      "cg_id": "policypal"
+      "cmc_id":"2718"
     },
-    {
+    "ELEC": {
       "name": "ElectrifyAsia",
       "decimals": 18,
       "address": "0xd49ff13661451313ca1553fd6954bd1d9b6e02b9",
       "symbol": "ELEC",
-      "cmc_id":"2573",
-      "cg_id": "electrify-asia"
+      "cmc_id":"2573"
     },
-    {
+    "BBO": {
       "name": "Bigbom",
       "decimals": 18,
       "address": "0x84f7c44b6fed1080f647e354d552595be2cc602f",
       "symbol":"BBO",
-      "cmc_id":"2836",
-      "cg_id": "bigbom-eco"
+      "cmc_id":"2836"
     },
-    {
+    "POLY": {
       "name": "Polymath",
       "decimals": 18,
       "address": "0x9992ec3cf6a55b00978cddf2b27bc6882d88d1ec",
       "symbol":"POLY",
-      "cmc_id":"2496",
-      "cg_id": "polymath-network"
+      "cmc_id":"2496"
     },
-    {
+    "LBA": {
       "name": "Libra Credit",
       "decimals": 18,
       "address": "0xfe5f141bf94fe84bc28ded0ab966c16b17490657",
       "symbol":"LBA",
-      "cmc_id":"2760",
-      "cg_id": "libra-credit"
+      "cmc_id":"2760"
     },
-    {
+    "EDU": {
       "name": "EduCoin",
       "decimals": 18,
       "address": "0xf263292e14d9d8ecd55b58dad1f1df825a874b7c",
       "symbol":"EDU",
-      "cmc_id":"2734",
-      "cg_id": "educoin"
+      "cmc_id":"2734"
     },
-    {
+    "CVC": {
       "name": "Civic",
       "decimals": 8,
       "address": "0x41e5560054824ea6b0732e656e3ad64e20e94e45",
       "symbol":"CVC",
-      "cmc_id":"1816",
-      "cg_id": "civic"
+      "cmc_id":"1816"
     },
-    {
+    "WAX": {
       "name": "Wax",
       "decimals": 8,
       "address": "0x39bb259f66e1c59d5abef88375979b4d20d98022",
       "symbol":"WAX", 
-      "cmc_id":"2300",
-      "cg_id": "wax"
+      "cmc_id":"2300"
     },
-    {
+    "SUB": {
       "name": "Substratum",
       "decimals": 2,
       "address": "0x12480e24eb5bec1a9d4369cab6a80cad3c0a377a",
       "symbol":"SUB", 
-      "cmc_id":"1984",
-      "cg_id": "substratum",
-      "is_not_erc20": true
+      "cmc_id":"1984"
     },
-    {
+    "POE": {
       "name": "Po.et",
       "decimals": 8,
       "address": "0x0e0989b1f9b8a38983c2ba8053269ca62ec9b195",
       "symbol":"POE", 
-      "cmc_id":"1937",
-      "cg_id": "poet"
+      "cmc_id":"1937"
     },
-    {
+    "PAY": {
       "name": "TenX",
       "decimals": 18,
       "address": "0xb97048628db6b661d4c2aa833e95dbe1a905b280",
       "symbol":"PAY", 
-<<<<<<< HEAD
-      "cmc_id":"1758",
-      "cg_id": "tenx",
-      "is_not_erc20": true
-    },
-    {
-=======
       "cmc_id":"1758"
     },
     "DTA": {
->>>>>>> 294760895d68c174f66bf87f220195238be7a561
       "name": "Data",
       "decimals": 18,
       "address": "0x69b148395ce0015c13e36bffbad63f49ef874e03",
       "symbol":"DTA", 
-      "cmc_id":"2446",
-      "cg_id": "data"
+      "cmc_id":"2446"
     },
-    {
+    "BNT": {
       "name": "Bancor",
       "decimals": 18,
       "address": "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c",
       "symbol":"BNT", 
-      "cmc_id":"1727",
-      "cg_id": "bancor"
+      "cmc_id":"1727"
     },
-    {
+    "TUSD": {
       "name": "TrueUSD",
       "decimals": 18,
       "address": "0x8dd5fbce2f6a956c3022ba3663759011dd51e73e",
       "symbol":"TUSD", 
-      "cmc_id":"2563",
-      "cg_id": "true-usd"
+      "cmc_id":"2563"
     },
-    {
+    "TOMO": {
       "name": "Tomocoin",
       "decimals": 18,
       "address": "0x8b353021189375591723e7384262f45709a3c3dc",
       "symbol":"TOMO", 
-      "cmc_id":"2570",
-      "cg_id": "tomochain"
+      "cmc_id":"2570"
     },
-    {
+    "MDS": {
       "name": "MediShares",
       "decimals": 18,
       "address": "0x66186008c1050627f979d464eabb258860563dbe",
       "symbol":"MDS", 
-      "cmc_id":"2274",
-      "cg_id": "medishares"
+      "cmc_id":"2274"
     },
-    {
+    "LEND": {
       "name": "EthLend",
       "decimals": 18,
       "address": "0x80fb784b7ed66730e8b1dbd9820afd29931aab03",
       "symbol":"LEND", 
-      "cmc_id":"2239",
-      "cg_id": "ethlend"
+      "cmc_id":"2239"
     },
-    {
+    "WINGS": {
       "name": "WINGS",
       "decimals": 18,
       "address": "0x667088b212ce3d06a1b553a7221e1fd19000d9af",
       "symbol":"WINGS", 
-      "cmc_id":"1500",
-      "cg_id": "wings"
+      "cmc_id":"1500"
     },
-    {
+    "MTL": {
       "name": "Metal",
       "decimals": 8,
       "address": "0xf433089366899d83a9f26a773d59ec7ecf30355e",
       "symbol":"MTL", 
-      "cmc_id":"1788",
-      "cg_id": "metal",
-      "is_not_erc20": true
+      "cmc_id":"1788"
     },
-    {
+    "WABI": {
       "name": "WaBi",
       "decimals": 18,
       "address": "0x286bda1413a2df81731d4930ce2f862a35a609fe",
       "symbol":"WABI", 
-      "cmc_id":"2267",
-      "cg_id": "wabi"
+      "cmc_id":"2267"
     },
-    {
+    "COFI":{
       "name": "CoinFi",
       "decimals": 18,
       "address": "0x3136ef851592acf49ca4c825131e364170fa32b3",
       "symbol":"COFI", 
-      "cmc_id":"2478",
-      "cg_id": "coinfi"
+      "cmc_id":"2478"
     },
-    {
+    "MOC": {
       "name": "Moss Land",
       "decimals": 18,
       "symbol" : "MOC",
       "address": "0x865ec58b06bf6305b886793aa20a2da31d034e68",
-      "cmc_id":"2915",
-      "cg_id": "mossland"
+      "cmc_id":"2915"
     },
-    {
+    "BNB":{
       "name": "Binance Coin",
       "decimals": 18,
       "symbol" : "BNB",
       "address": "0xb8c77482e45f1f44de1745f52c74426c631bdd52",
-      "cmc_id":"1839",
-      "cg_id": "binancecoin",
-      "is_not_erc20": true
+      "cmc_id":"1839"
     },
-    {
+    "REP":{
       "name": "Augur",
       "decimals": 18,
       "symbol" : "REP",
       "address": "0x1985365e9f78359a9b6ad760e32412f4a445e862",
-      "cmc_id":"1104",
-      "cg_id": "augur"
+      "cmc_id":"1104"
     },
-    {
+    "ZRX":{
       "name": "0x Protocol",
       "decimals": 18,
       "symbol" : "ZRX",
       "address": "0xe41d2489571d322189246dafa5ebde1f4699f498",
-      "cmc_id":"1896",
-      "cg_id": "0x"
+      "usd_id":"1896"
     },
-    {
+    "MAS":{
       "name": "MidasProtocol",
       "decimals": 18,
       "symbol" : "MAS",
       "address": "0x23ccc43365d9dd3882eab88f43d515208f832430",
-      "cmc_id":"3352",
-      "cg_id": "midas-protocol"           
+      "usd_id":"3352"           
     },
     "DAT": {
       "name": "Datum",
       "decimals": 18,
       "symbol": "DAT",
       "address": "0x81c9151de0c8bafcd325a57e3db5a5df1cebf79c",
-      "cmc_id": "2283",
-      "cg_id": "datum",
-      "is_not_erc20": true
+      "usd_id": "2283"
     },
-    {
+    "REN": {
       "name": "Republic",
       "decimals": 18,
       "symbol": "REN",
       "address": "0x408e41876cccdc0f92210600ef50372656052a38",
-      "cmc_id": "2539",
-      "cg_id": "republic-protocol"
+      "usd_id": "2539"
     },
-    {
+    "QKC": {
       "name": "QuarkChain",
       "decimals": 18,
       "symbol": "QKC",
       "address": "0xea26c4ac16d4a5a106820bc8aee85fd0b7b2b664",
-      "cmc_id": "2840",
-      "cg_id": "quark-chain"
+      "usd_id": "2840"
     },
-    {
+    "MKR":{
       "name": "Maker",
       "decimals": 18,
       "symbol" : "MKR",
       "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2",
-      "cmc_id":"1518",
-      "cg_id": "maker"
+      "usd_id":"1518"
     },
-    {
+    "DCC":{
       "name": "Distributed Credit Chain",
       "decimals": 18,
       "symbol" : "DCC",
       "address": "0xffa93aacf49297d51e211817452839052fdfb961",
-      "cmc_id":"2881",
-      "cg_id": "distributed-credit-chain"
-    }
-  ]
+      "usd_id":"2881"
+    }   
+  },
+  "reserve": "0x63825c174ab367968ec60f061753d3bbd36a0d8f",
+  "network": "0x818E6FECD516Ecc3849DAf6845e3EC868087B755",
+  "wrapper": "0x6172afc8c00c46e0d07ce3af203828198194620a",
+  "trade_topic":"0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
+  "endpoint": "wss://mainnet.infura.io/ws",
+  "averageBlockTime": 15000,
+  "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
+  "tracker_endpoint":"https://tracker.kyber.network",
+  "config_endpoint": "https://api.kyber.network/internal/currencies"
 }

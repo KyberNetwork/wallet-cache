@@ -1,4 +1,4 @@
-package bfetcher
+package fetcher
 
 import (
 	"encoding/json"
@@ -147,36 +147,42 @@ func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
 	}, nil
 }
 
-// func (self *BlockchainFetcher) GetRateUsdEther() (string, error) {
-// 	response, err := http.Get("https://api.coinmarketcap.com/v1/ticker/ethereum")
-// 	if err != nil {
-// 		log.Print(err)
-// 		return "", err
-// 	}
-// 	defer (response.Body).Close()
-// 	b, err := ioutil.ReadAll(response.Body)
-// 	if err != nil {
-// 		log.Print(err)
-// 		return "", err
-// 	}
-// 	rateItem := make([]ethereum.RateUSD, 0)
-// 	err = json.Unmarshal(b, &rateItem)
-// 	if err != nil {
-// 		log.Print(err)
-// 		return "", err
-// 	}
-// 	return rateItem[0].PriceUsd, nil
-// }
+func (self *BlockchainFetcher) GetRateUsdEther() (string, error) {
+	response, err := http.Get("https://api.coinmarketcap.com/v1/ticker/ethereum")
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	defer (response.Body).Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	rateItem := make([]RateUSD, 0)
+	err = json.Unmarshal(b, &rateItem)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+	return rateItem[0].PriceUsd, nil
+}
 
-// func (self *BlockchainFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo, error) {
-// 	err := errors.New("Blockchain is not support this api")
-// 	//log.Print(err)
-// 	return nil, err
-// }
+func (self *BlockchainFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo, error) {
+	err := errors.New("Blockchain is not support this api")
+	//log.Print(err)
+	return nil, err
+}
 
 func (self *BlockchainFetcher) GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error) {
 	trackerData := map[string]*ethereum.Rates{}
 	err := errors.New("Blockchain is not support this api")
 	//log.Print(err)
 	return trackerData, err
+}
+
+func (self *BlockchainFetcher) GetListToken(configEndpoint string) (map[string]ethereum.Token, error) {
+	listToken := make(map[string]ethereum.Token)
+	err := errors.New("Blockchain is not support this api")
+	return listToken, err
 }

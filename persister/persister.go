@@ -30,12 +30,27 @@ type RateUSD struct {
 }
 
 type Persister interface {
+	//	SetRateToken(map[string]ethereum.Token)
+
 	GetRate() *[]ethereum.Rate
 
 	SaveRate(*[]ethereum.Rate)
+	//	SaveNewRate(bool)
+	//GetIsNewRate() bool
 
-	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo, map[string]*ethereum.TokenGeneralInfo)
+	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
 	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
+	//SetIsNewGeneralInfoTokens(bool)
+
+	// SaveNewRateUsdEther(bool)
+	// SaveRateUSDEther(string)
+	// GetIsNewRateUsdEther() bool
+	// GetRateUSDEther() string
+
+	// GetEvent() []ethereum.EventHistory
+	// SaveEvent(*[]ethereum.EventHistory) error
+	// GetIsNewEvent() bool
+	// SetNewEvents(bool)
 
 	GetLatestBlock() string
 	GetIsNewLatestBlock() bool
@@ -45,13 +60,8 @@ type Persister interface {
 	GetRateUSD() []RateUSD
 	GetRateETH() string
 	GetIsNewRateUSD() bool
-	SaveRateUSD(string, string) error
+	SaveRateUSD(string) error
 	SetNewRateUSD(bool)
-
-	GetRateUSDCG() []RateUSD
-	GetRateETHCG() string
-	SetNewRateUSDCG(bool)
-	GetIsNewRateUSDCG() bool
 
 	SaveKyberEnabled(bool)
 	SetNewKyberEnabled(bool)
@@ -70,13 +80,11 @@ type Persister interface {
 
 	SaveMarketData(rates map[string]*ethereum.Rates, tokens map[string]ethereum.Token)
 	GetRightMarketData() map[string]*ethereum.RightMarketInfo
-	GetRightMarketDataCG() map[string]*ethereum.RightMarketInfo
 	GetLast7D(listTokens string) map[string][]float64
 	GetIsNewTrackerData() bool
 	SetIsNewTrackerData(isNewTrackerData bool)
 	SetIsNewMarketInfo(isNewMarketInfo bool)
 	GetIsNewMarketInfo() bool
-	GetIsNewMarketInfoCG() bool
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
