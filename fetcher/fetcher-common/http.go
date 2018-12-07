@@ -5,10 +5,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
 func HTTPCall(url string) ([]byte, error) {
-	response, err := http.Get(url)
+	client := http.Client{
+		Timeout: 6 * time.Second,
+	}
+	response, err := client.Get(url)
 	if err != nil {
 		log.Print(err)
 		return nil, err

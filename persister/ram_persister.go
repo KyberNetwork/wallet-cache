@@ -459,7 +459,8 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 		dataSevenDays := []float64{}
 		rightMarketInfo := &ethereum.RightMarketInfo{}
 		// rightMarketInfoCG := &ethereum.RightMarketInfo{}
-		if rateInfo := marketRate[symbol]; rateInfo != nil {
+		rateInfo := marketRate[symbol]
+		if rateInfo != nil {
 			// marketInfo.Rates = rateInfo
 			dataSevenDays = rateInfo.P
 			rightMarketInfo.Rate = &rateInfo.R
@@ -475,9 +476,10 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 		// rightMarketInfoCG.Quotes = tokenInfoCG.Quotes
 		// }
 
-		if rightMarketInfo.Rate != nil && rightMarketInfo.Quotes != nil {
-			newResult[symbol] = rightMarketInfo
-			lastSevenDays[symbol] = dataSevenDays
+		if rateInfo == nil && rightMarketInfo.Quotes == nil {
+			// newResult[symbol] = rightMarketInfo
+			// lastSevenDays[symbol] = dataSevenDays
+			continue
 		}
 
 		// // if rightMarketInfoCG.Rate != nil && rightMarketInfoCG.Quotes != nil {
@@ -486,8 +488,8 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 		// }
 
 		// result[symbol] = marketInfo
-		// newResult[symbol] = rightMarketInfo
-		// lastSevenDays[symbol] = dataSevenDays
+		newResult[symbol] = rightMarketInfo
+		lastSevenDays[symbol] = dataSevenDays
 	}
 
 	// self.marketInfo = result

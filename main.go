@@ -64,7 +64,11 @@ func main() {
 	}()
 
 	tokenNum := fertcherIns.GetNumTokens()
-	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
+	bonusTimeWait := 900
+	if tokenNum > 200 {
+		bonusTimeWait = 60
+	}
+	intervalFetchGeneralInfoTokens := time.Duration((tokenNum * 7) + bonusTimeWait)
 	//	initRateToken(persisterIns, fertcherIns)
 
 	//run fetch data
