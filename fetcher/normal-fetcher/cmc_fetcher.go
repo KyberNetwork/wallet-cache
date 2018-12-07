@@ -63,6 +63,6 @@ func (self *CMCFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo
 	return nil, err
 }
 
-func (self *CMCFetcher) GetTypeMarket() string {
-	return self.typeMarket
-}
+// func (self *CMCFetcher) GetTypeMarket() string {
+// 	return self.typeMarket
+// }

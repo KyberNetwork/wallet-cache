@@ -48,10 +48,10 @@ type Persister interface {
 	SaveRateUSD(string) error
 	SetNewRateUSD(bool)
 
-	GetRateUSDCG() []RateUSD
-	GetRateETHCG() string
-	SetNewRateUSDCG(bool)
-	GetIsNewRateUSDCG() bool
+	// GetRateUSDCG() []RateUSD
+	// GetRateETHCG() string
+	// SetNewRateUSDCG(bool)
+	// GetIsNewRateUSDCG() bool
 
 	SaveKyberEnabled(bool)
 	SetNewKyberEnabled(bool)
@@ -70,13 +70,13 @@ type Persister interface {
 
 	SaveMarketData(rates map[string]*ethereum.Rates, tokens map[string]ethereum.Token)
 	GetRightMarketData() map[string]*ethereum.RightMarketInfo
-	GetRightMarketDataCG() map[string]*ethereum.RightMarketInfo
+	// GetRightMarketDataCG() map[string]*ethereum.RightMarketInfo
 	GetLast7D(listTokens string) map[string][]float64
 	GetIsNewTrackerData() bool
 	SetIsNewTrackerData(isNewTrackerData bool)
 	SetIsNewMarketInfo(isNewMarketInfo bool)
 	GetIsNewMarketInfo() bool
-	GetIsNewMarketInfoCG() bool
+	// GetIsNewMarketInfoCG() bool
 }
 
 //var transactionPersistent = models.NewTransactionPersister()

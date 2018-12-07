@@ -45,6 +45,7 @@ type InfoData struct {
 	CanDeleteToken []string            `json:"can_delete"`
 
 	OriginalToken []ethereum.TokenAPI
+	BackupTokens  map[string]ethereum.Token
 	Tokens        map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
 	Connections []Connection `json:"connections"`
@@ -70,6 +71,12 @@ func (self *InfoData) GetListToken() map[string]ethereum.Token {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	return self.Tokens
+}
+
+func (self *InfoData) UpdateByBackupToken() {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.Tokens = self.BackupTokens
 }
 
 func (self *InfoData) GetTokenAPI() []ethereum.TokenAPI {
@@ -247,6 +254,7 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		listToken[t.Symbol] = ethereum.TokenAPIToToken(t)
 	}
 	infoData.Tokens = listToken
+	infoData.BackupTokens = listToken
 	infoData.OriginalToken = originalToken
 
 	fetIns := make([]FetcherInterface, 0)
@@ -280,6 +288,44 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	}
 
 	return fetcher, nil
+}
+
+func (self *InfoData) UpdateByBackupToken() {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.Tokens = self.TokenSnapshot
+}
+
+func (self *Fetcher) TryUpdateListToken() error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = self.UpdateListToken()
+		if err != nil {
+			log.Println(err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return nil
+	}
+	self.info.UpdateByBackupToken()
+	return nil
+}
+
+func (self *Fetcher) UpdateListToken() error {
+	var err error
+	result := make(map[string]ethereum.Token)
+	for _, fetIns := range self.fetNormalIns {
+		result, err = fetIns.GetListToken(self.info.ConfigEndpoint)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		break
+	}
+	if err == nil {
+		self.info.UpdateListToken(result)
+	}
+	return err
 }
 
 // api to get config token
@@ -370,7 +416,7 @@ func (self *Fetcher) GetRateUsdEther() (string, error) {
 			log.Print(err)
 			continue
 		}
-		return "", rateUsd
+		return rateUsd, nil
 	}
 
 	return "", errors.New("Can not get rate eth usd")

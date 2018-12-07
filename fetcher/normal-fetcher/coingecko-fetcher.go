@@ -61,6 +61,6 @@ func (self *CGFetcher) GetGeneralInfo(coinID string) (*ethereum.TokenGeneralInfo
 	return nil, err
 }
 
-func (self *CGFetcher) GetTypeMarket() string {
-	return self.typeMarket
-}
+// func (self *CGFetcher) GetTypeMarket() string {
+// 	return self.typeMarket
+// }
