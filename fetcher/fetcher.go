@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
+	nFetcher "github.com/KyberNetwork/server-go/fetcher/normal-fetcher"
 )
 
 const (
@@ -77,6 +78,22 @@ func (self *InfoData) UpdateByBackupToken() {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.Tokens = self.BackupTokens
+}
+
+func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	currentListToken := self.Tokens
+	finalListToken := make(map[string]ethereum.Token)
+	for symbol, token := range tokens {
+		if currentToken, ok := currentListToken[symbol]; ok {
+			if token.CGId == "" {
+				token.CGId = currentToken.CGId
+			}
+		}
+		finalListToken[symbol] = token
+	}
+	self.Tokens = finalListToken
 }
 
 func (self *InfoData) GetTokenAPI() []ethereum.TokenAPI {
@@ -176,6 +193,7 @@ type Fetcher struct {
 	ethereum     *Ethereum
 	fetIns       []FetcherInterface
 	fetNormalIns []FetcherNormalInterface
+	httpFetcher  *nFetcher.HTTPFetcher
 }
 
 func (self *Fetcher) GetNumTokens() int {
@@ -269,9 +287,14 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 
 	fetNormalIns := make([]FetcherNormalInterface, 0)
 	for _, market := range infoData.CoinMarket {
+		if market == "cmc" {
+			continue
+		}
 		f := NewFetcherNormalIns(market)
 		fetNormalIns = append(fetNormalIns, f)
 	}
+
+	httpFetcher := nFetcher.NewHTTPFetcher(infoData.ConfigEndpoint)
 
 	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi, infoData.TradeTopic,
 		infoData.Wapper, infoData.WrapperAbi, infoData.AverageBlockTime)
@@ -285,16 +308,17 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		ethereum:     ethereum,
 		fetIns:       fetIns,
 		fetNormalIns: fetNormalIns,
+		httpFetcher:  httpFetcher,
 	}
 
 	return fetcher, nil
 }
 
-func (self *InfoData) UpdateByBackupToken() {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-	self.Tokens = self.TokenSnapshot
-}
+// func (self *InfoData) UpdateByBackupToken() {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	self.Tokens = self.TokenSnapshot
+// }
 
 func (self *Fetcher) TryUpdateListToken() error {
 	var err error
@@ -314,18 +338,13 @@ func (self *Fetcher) TryUpdateListToken() error {
 func (self *Fetcher) UpdateListToken() error {
 	var err error
 	result := make(map[string]ethereum.Token)
-	for _, fetIns := range self.fetNormalIns {
-		result, err = fetIns.GetListToken(self.info.ConfigEndpoint)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		break
+	result, err = self.httpFetcher.GetListToken()
+	if err != nil {
+		log.Println(err)
+		return err
 	}
-	if err == nil {
-		self.info.UpdateListToken(result)
-	}
-	return err
+	self.info.UpdateListToken(result)
+	return nil
 }
 
 // api to get config token

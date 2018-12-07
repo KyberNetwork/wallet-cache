@@ -8,7 +8,7 @@ import (
 type FetcherNormalInterface interface {
 	GetRateUsdEther() (string, error)
 	GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
-	GetTypeMarket() string
+	// GetTypeMarket() string
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
