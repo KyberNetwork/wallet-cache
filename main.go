@@ -50,21 +50,25 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// err = fertcherIns.TryUpdateListToken()
-	// if err != nil {
-	// 	log.Println(err)
-	// }
+	err = fertcherIns.TryUpdateListToken()
+	if err != nil {
+		log.Println(err)
+	}
 
-	// tickerUpdateToken := time.NewTicker(300 * time.Second)
-	// go func() {
-	// 	for {
-	// 		<-tickerUpdateToken.C
-	// 		fertcherIns.TryUpdateListToken()
-	// 	}
-	// }()
+	tickerUpdateToken := time.NewTicker(300 * time.Second)
+	go func() {
+		for {
+			<-tickerUpdateToken.C
+			fertcherIns.TryUpdateListToken()
+		}
+	}()
 
 	tokenNum := fertcherIns.GetNumTokens()
-	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
+	bonusTimeWait := 900
+	if tokenNum > 200 {
+		bonusTimeWait = 60
+	}
+	intervalFetchGeneralInfoTokens := time.Duration((tokenNum * 7) + bonusTimeWait)
 	//	initRateToken(persisterIns, fertcherIns)
 
 	//run fetch data
@@ -150,24 +154,24 @@ func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) 
 }
 
 func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	rateUSDCMC, rateUSDCG, err := fetcher.GetRateUsdEther()
+	rateUSD, err := fetcher.GetRateUsdEther()
 	if err != nil {
 		log.Print(err)
 		persister.SetNewRateUSD(false)
 		return
 	}
 
-	if rateUSDCG == "" {
-		persister.SetNewRateUSDCG(false)
-		return
-	}
+	// if rateUSDCG == "" {
+	// 	persister.SetNewRateUSDCG(false)
+	// 	return
+	// }
 
-	if rateUSDCMC == "" {
+	if rateUSD == "" {
 		persister.SetNewRateUSD(false)
 		return
 	}
 
-	err = persister.SaveRateUSD(rateUSDCMC, rateUSDCG)
+	err = persister.SaveRateUSD(rateUSD)
 	if err != nil {
 		log.Print(err)
 		persister.SetNewRateUSD(false)
@@ -229,8 +233,8 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 // }
 
 func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	generalInfo, generalInfoCG := fetcher.GetGeneralInfoTokens()
-	persister.SaveGeneralInfoTokens(generalInfo, generalInfoCG)
+	generalInfo := fetcher.GetGeneralInfoTokens()
+	persister.SaveGeneralInfoTokens(generalInfo)
 
 	// if err != nil {
 	// 	log.Print(err)

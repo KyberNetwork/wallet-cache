@@ -259,16 +259,10 @@
       "address": "0xf629cbd94d3791c9250152bd8dfbdf380e2a3b9c",
       "decimals": 18,
       "symbol":"ENJ",        
-<<<<<<< HEAD
       "cmc_id":"2130",
       "cg_id": "enjincoin"
     },
     {
-=======
-      "cmc_id":"2130"
-    },
-    "AE": {
->>>>>>> 294760895d68c174f66bf87f220195238be7a561
       "name": "Aeternity",
       "decimals": 18,
       "symbol":"AE", 
@@ -369,17 +363,11 @@
       "decimals": 18,
       "address": "0xb97048628db6b661d4c2aa833e95dbe1a905b280",
       "symbol":"PAY", 
-<<<<<<< HEAD
       "cmc_id":"1758",
       "cg_id": "tenx",
       "is_not_erc20": true
     },
     {
-=======
-      "cmc_id":"1758"
-    },
-    "DTA": {
->>>>>>> 294760895d68c174f66bf87f220195238be7a561
       "name": "Data",
       "decimals": 18,
       "address": "0x69b148395ce0015c13e36bffbad63f49ef874e03",
@@ -501,7 +489,7 @@
       "cmc_id":"3352",
       "cg_id": "midas-protocol"           
     },
-    "DAT": {
+    {
       "name": "Datum",
       "decimals": 18,
       "symbol": "DAT",

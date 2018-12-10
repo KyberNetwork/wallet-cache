@@ -36,12 +36,13 @@ type GasPrice struct {
 }
 
 type Token struct {
-	Name    string `json:"name"`
-	Symbol  string `json:"symbol"`
-	Address string `json:"address"`
-	Decimal int    `json:"decimals"`
-	UsdId   string `json:"cmc_id"`
-	CGId    string `json:"cg_id"`
+	Name       string `json:"name"`
+	Symbol     string `json:"symbol"`
+	Address    string `json:"address"`
+	Decimal    int    `json:"decimals"`
+	UsdId      string `json:"cmc_id"`
+	DelistTime uint64 `json:"delist_time"`
+	CGId       string `json:"cg_id"`
 }
 
 type TokenAPI struct {
@@ -94,7 +95,7 @@ type TokenInfoCoinGecko struct {
 	} `json:"market_data"`
 }
 
-func TokenInfoCGToCMC(tokenInfo TokenInfoCoinGecko) TokenGeneralInfo {
+func (tokenInfo TokenInfoCoinGecko) ToTokenInfoCMC() TokenGeneralInfo {
 	quotes := make(map[string]QuoInfo)
 	quotes["ETH"] = QuoInfo{
 		MarketCap: tokenInfo.MarketData.MarketCap.ETH,

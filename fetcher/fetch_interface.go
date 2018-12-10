@@ -1,9 +1,6 @@
 package fetcher
 
 import (
-	"io"
-
-	"github.com/KyberNetwork/server-go/ethereum"
 	bFetcher "github.com/KyberNetwork/server-go/fetcher/blockchain-fetcher"
 )
 
@@ -17,8 +14,8 @@ type FetcherInterface interface {
 	GetLatestBlock() (string, error)
 	// GetEvents(string, string, string, string) (*[]ethereum.EventRaw, error)
 
-	GetRateUsd([]string) ([]io.ReadCloser, error)
-	GetGasPrice() (*ethereum.GasPrice, error)
+	// GetRateUsd([]string) ([]io.ReadCloser, error)
+	// GetGasPrice() (*ethereum.GasPrice, error)
 
 	GetTypeName() string
 
@@ -27,7 +24,7 @@ type FetcherInterface interface {
 	// GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
 
 	// get data from tracker
-	GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error)
+	// GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error)
 }
 
 //var transactionPersistent = models.NewTransactionPersister()

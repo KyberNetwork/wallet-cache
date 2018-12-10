@@ -81,21 +81,21 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetRateUSDCG(c *gin.Context) {
-	if !self.persister.GetIsNewRateUSDCG() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": false},
-		)
-		return
-	}
+// func (self *HTTPServer) GetRateUSDCG(c *gin.Context) {
+// 	if !self.persister.GetIsNewRateUSDCG() {
+// 		c.JSON(
+// 			http.StatusOK,
+// 			gin.H{"success": false},
+// 		)
+// 		return
+// 	}
 
-	rates := self.persister.GetRateUSDCG()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": rates},
-	)
-}
+// 	rates := self.persister.GetRateUSDCG()
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": rates},
+// 	)
+// }
 
 func (self *HTTPServer) GetRateETH(c *gin.Context) {
 	if !self.persister.GetIsNewRateUSD() {
@@ -113,21 +113,21 @@ func (self *HTTPServer) GetRateETH(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetRateETHCG(c *gin.Context) {
-	if !self.persister.GetIsNewRateUSDCG() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": false},
-		)
-		return
-	}
+// func (self *HTTPServer) GetRateETHCG(c *gin.Context) {
+// 	if !self.persister.GetIsNewRateUSDCG() {
+// 		c.JSON(
+// 			http.StatusOK,
+// 			gin.H{"success": false},
+// 		)
+// 		return
+// 	}
 
-	ethRate := self.persister.GetRateETHCG()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": ethRate},
-	)
-}
+// 	ethRate := self.persister.GetRateETHCG()
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": ethRate},
+// 	)
+// }
 
 func (self *HTTPServer) GetKyberEnabled(c *gin.Context) {
 	if !self.persister.GetNewKyberEnabled() {
@@ -215,20 +215,20 @@ func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetRightMarketInfoCG(c *gin.Context) {
-	data := self.persister.GetRightMarketDataCG()
-	if self.persister.GetIsNewMarketInfoCG() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": true, "data": data, "status": "latest"},
-		)
-		return
-	}
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": data, "status": "old"},
-	)
-}
+// func (self *HTTPServer) GetRightMarketInfoCG(c *gin.Context) {
+// 	data := self.persister.GetRightMarketDataCG()
+// 	if self.persister.GetIsNewMarketInfoCG() {
+// 		c.JSON(
+// 			http.StatusOK,
+// 			gin.H{"success": true, "data": data, "status": "latest"},
+// 		)
+// 		return
+// 	}
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": data, "status": "old"},
+// 	)
+// }
 
 func (self *HTTPServer) GetLast7D(c *gin.Context) {
 	listTokens := c.Query("listToken")
@@ -261,13 +261,13 @@ func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 // 	return
 // }
 
-func (self *HTTPServer) GetListTokenAPI(c *gin.Context) {
-	listToken := self.fetcher.GetListTokenAPI()
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": listToken},
-	)
-}
+// func (self *HTTPServer) GetListTokenAPI(c *gin.Context) {
+// 	listToken := self.fetcher.GetListTokenAPI()
+// 	c.JSON(
+// 		http.StatusOK,
+// 		gin.H{"success": true, "data": listToken},
+// 	)
+// }
 
 func (self *HTTPServer) AddToken(c *gin.Context) {
 	token := c.Param("token")
@@ -322,20 +322,20 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/rateETH", self.GetRateETH)
 	self.r.GET("/cacheVersion", self.getCacheVersion)
 
-	self.r.GET("/coingecko/marketInfo", self.GetRightMarketInfoCG)
-	self.r.GET("/coingecko/rateUSD/", self.GetRateUSDCG)
-	self.r.GET("/coingecko/rateETH", self.GetRateETHCG)
+	// self.r.GET("/coingecko/marketInfo", self.GetRightMarketInfoCG)
+	// self.r.GET("/coingecko/rateUSD/", self.GetRateUSDCG)
+	// self.r.GET("/coingecko/rateETH", self.GetRateETHCG)
 
 	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if kyberENV != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
 	}
 
-	self.r.GET("/currencies", self.GetListTokenAPI)
-	if kyberENV == "ropsten" || kyberENV == "rinkeby" || kyberENV == "staging" {
-		self.r.GET("/tokens/add/:token/:key", self.AddToken)
-		self.r.GET("/tokens/remove/:token/:key", self.RemoveToken)
-	}
+	// self.r.GET("/currencies", self.GetListTokenAPI)
+	// if kyberENV == "ropsten" || kyberENV == "rinkeby" || kyberENV == "staging" {
+	// 	self.r.GET("/tokens/add/:token/:key", self.AddToken)
+	// 	self.r.GET("/tokens/remove/:token/:key", self.RemoveToken)
+	// }
 
 	self.r.Run(self.host)
 }

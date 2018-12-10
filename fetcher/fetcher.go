@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"math/big"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
+	// nFetcher "github.com/KyberNetwork/server-go/fetcher/normal-fetcher"
 )
 
 const (
@@ -45,6 +45,7 @@ type InfoData struct {
 	CanDeleteToken []string            `json:"can_delete"`
 
 	OriginalToken []ethereum.TokenAPI
+	BackupTokens  map[string]ethereum.Token
 	Tokens        map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
 	Connections []Connection `json:"connections"`
@@ -62,14 +63,38 @@ type InfoData struct {
 
 	AverageBlockTime int64 `json:"averageBlockTime"`
 
-	TrackerEndpoint string `json:"tracker_endpoint"`
-	ConfigEndpoint  string `json:"config_endpoint"`
+	GasStationEndpoint string `json:"gasstation_endpoint"`
+	TrackerEndpoint    string `json:"tracker_endpoint"`
+	ConfigEndpoint     string `json:"config_endpoint"`
 }
 
 func (self *InfoData) GetListToken() map[string]ethereum.Token {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	return self.Tokens
+}
+
+func (self *InfoData) UpdateByBackupToken() {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.Tokens = self.BackupTokens
+}
+
+func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	// currentListToken := self.Tokens
+	// finalListToken := make(map[string]ethereum.Token)
+	// for symbol, token := range tokens {
+	// 	if currentToken, ok := currentListToken[symbol]; ok {
+	// 		if token.CGId == "" {
+	// 			token.CGId = currentToken.CGId
+	// 		}
+	// 	}
+	// 	finalListToken[symbol] = token
+	// }
+	// self.Tokens = finalListToken
+	self.Tokens = tokens
 }
 
 func (self *InfoData) GetTokenAPI() []ethereum.TokenAPI {
@@ -165,10 +190,12 @@ func (self *InfoData) RemoveToken(symbol, key string) error {
 }
 
 type Fetcher struct {
-	info         *InfoData
-	ethereum     *Ethereum
-	fetIns       []FetcherInterface
-	fetNormalIns []FetcherNormalInterface
+	info     *InfoData
+	ethereum *Ethereum
+	fetIns   []FetcherInterface
+	// fetNormalIns []FetcherNormalInterface
+	marketFetIns MarketFetcherInterface
+	httpFetcher  *HTTPFetcher
 }
 
 func (self *Fetcher) GetNumTokens() int {
@@ -247,6 +274,7 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		listToken[t.Symbol] = ethereum.TokenAPIToToken(t)
 	}
 	infoData.Tokens = listToken
+	infoData.BackupTokens = listToken
 	infoData.OriginalToken = originalToken
 
 	fetIns := make([]FetcherInterface, 0)
@@ -259,11 +287,17 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		}
 	}
 
-	fetNormalIns := make([]FetcherNormalInterface, 0)
-	for _, market := range infoData.CoinMarket {
-		f := NewFetcherNormalIns(market)
-		fetNormalIns = append(fetNormalIns, f)
-	}
+	// fetNormalIns := make([]FetcherNormalInterface, 0)
+	// for _, market := range infoData.CoinMarket {
+	// 	if market == "cmc" {
+	// 		continue
+	// 	}
+	// 	f := NewFetcherNormalIns(market)
+	// 	fetNormalIns = append(fetNormalIns, f)
+	// }
+	marketFetcherIns := NewMarketFetcherInterface()
+
+	httpFetcher := NewHTTPFetcher(infoData.ConfigEndpoint, infoData.GasStationEndpoint, infoData.TrackerEndpoint)
 
 	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi, infoData.TradeTopic,
 		infoData.Wapper, infoData.WrapperAbi, infoData.AverageBlockTime)
@@ -273,13 +307,48 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	}
 
 	fetcher := &Fetcher{
-		info:         &infoData,
-		ethereum:     ethereum,
-		fetIns:       fetIns,
-		fetNormalIns: fetNormalIns,
+		info:     &infoData,
+		ethereum: ethereum,
+		fetIns:   fetIns,
+		// fetNormalIns: fetNormalIns,
+		marketFetIns: marketFetcherIns,
+		httpFetcher:  httpFetcher,
 	}
 
 	return fetcher, nil
+}
+
+// func (self *InfoData) UpdateByBackupToken() {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	self.Tokens = self.TokenSnapshot
+// }
+
+func (self *Fetcher) TryUpdateListToken() error {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = self.UpdateListToken()
+		if err != nil {
+			log.Println(err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		return nil
+	}
+	self.info.UpdateByBackupToken()
+	return nil
+}
+
+func (self *Fetcher) UpdateListToken() error {
+	var err error
+	result := make(map[string]ethereum.Token)
+	result, err = self.httpFetcher.GetListToken()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	self.info.UpdateListToken(result)
+	return nil
 }
 
 // api to get config token
@@ -300,57 +369,58 @@ func (self *Fetcher) RemoveToken(symbol, key string) error {
 	return self.info.RemoveToken(symbol, key)
 }
 
-func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
-	usdId := make([]string, 0)
-	listTokens := self.GetListToken()
-	for _, token := range listTokens {
-		if token.UsdId != "" {
-			usdId = append(usdId, token.UsdId)
-		}
-	}
-	for _, fetIns := range self.fetIns {
-		result, err := fetIns.GetRateUsd(usdId)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		return result, nil
-	}
-	return nil, errors.New("Cannot get rate USD")
-}
+// func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
+// 	usdId := make([]string, 0)
+// 	listTokens := self.GetListToken()
+// 	for _, token := range listTokens {
+// 		if token.UsdId != "" {
+// 			usdId = append(usdId, token.UsdId)
+// 		}
+// 	}
+// 	for _, fetIns := range self.fetIns {
+// 		result, err := fetIns.GetRateUsd(usdId)
+// 		if err != nil {
+// 			log.Print(err)
+// 			continue
+// 		}
+// 		return result, nil
+// 	}
+// 	return nil, errors.New("Cannot get rate USD")
+// }
 
-func (self *Fetcher) GetGeneralInfoTokens() (map[string]*ethereum.TokenGeneralInfo, map[string]*ethereum.TokenGeneralInfo) {
+func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInfo {
 	generalInfo := map[string]*ethereum.TokenGeneralInfo{}
-	generalInfoCG := map[string]*ethereum.TokenGeneralInfo{}
+	// generalInfoCG := map[string]*ethereum.TokenGeneralInfo{}
 	//	usdId := make([]string, 0)
 	listTokens := self.GetListToken()
 	for _, token := range listTokens {
 		if token.UsdId != "" {
 			//usdId = append(usdId, token.UsdId)
-			for _, fetIns := range self.fetNormalIns {
-				typeMarket := fetIns.GetTypeMarket()
+			// for _, fetIns := range self.fetNormalIns {
+			// typeMarket := fetIns.GetTypeMarket()
 
-				if typeMarket == "cmc" {
-					result, err := fetIns.GetGeneralInfo(token.UsdId)
-					if err != nil {
-						log.Print(err)
-						continue
-					}
-					generalInfo[token.Symbol] = result
-				} else {
-					result, err := fetIns.GetGeneralInfo(token.CGId)
-					if err != nil {
-						log.Print(err)
-						continue
-					}
-					generalInfoCG[token.Symbol] = result
-				}
-			}
+			// if typeMarket == "cmc" {
+			result, err := self.marketFetIns.GetGeneralInfo(token.CGId)
 			time.Sleep(5 * time.Second)
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+			generalInfo[token.Symbol] = result
+			// } else {
+			// 	result, err := fetIns.GetGeneralInfo(token.CGId)
+			// 	if err != nil {
+			// 		log.Print(err)
+			// 		continue
+			// 	}
+			// 	generalInfoCG[token.Symbol] = result
+			// }
+			// }
+			// time.Sleep(5 * time.Second)
 		}
 	}
 
-	return generalInfo, generalInfoCG
+	return generalInfo
 	// for _, fetIns := range self.fetIns {
 	// 	result, err := fetIns.GetGeneralInfo(usdId)
 	// 	if err != nil {
@@ -362,44 +432,32 @@ func (self *Fetcher) GetGeneralInfoTokens() (map[string]*ethereum.TokenGeneralIn
 	// return nil, errors.New("Cannot get rate USD")
 }
 
-func (self *Fetcher) GetRateUsdEther() (string, string, error) {
-	//rateUsd, err := fetIns.GetRateUsdEther()
-
-	// usdId := make([]string, 0)
-	// for _, token := range self.info.Tokens {
-	// 	usdId = append(usdId, token.UsdId)
-	// }
-	var rateETHCMC, rateETHCG string
-	for _, fetIns := range self.fetNormalIns {
-		rateUsd, typeMarket, err := fetIns.GetRateUsdEther()
-		//fmt.Print(rateUsd)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		if typeMarket == "cmc" {
-			rateETHCMC = rateUsd
-		}
-		if typeMarket == "coingecko" {
-			rateETHCG = rateUsd
-		}
+func (self *Fetcher) GetRateUsdEther() (string, error) {
+	// for _, fetIns := range self.fetNormalIns {
+	rateUsd, err := self.marketFetIns.GetRateUsdEther()
+	//fmt.Print(rateUsd)
+	if err != nil {
+		log.Print(err)
+		// continue
+		return "", err
 	}
-	// if err != nil {
-	// 	err = errors.New("Cannot get rate USD")
+	return rateUsd, nil
 	// }
-	return rateETHCMC, rateETHCG, nil
+
+	// return "", errors.New("Can not get rate eth usd")
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	for _, fetIns := range self.fetIns {
-		result, err := fetIns.GetGasPrice()
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		return result, nil
+	// for _, fetIns := range self.fetIns {
+	result, err := self.httpFetcher.GetGasPrice()
+	if err != nil {
+		log.Print(err)
+		return nil, errors.New("Cannot get gas price")
+		// continue
 	}
-	return nil, errors.New("Cannot get gas price")
+	return result, nil
+	// }
+	// return nil, errors.New("Cannot get gas price")
 }
 
 func (self *Fetcher) GetMaxGasPrice() (string, error) {
@@ -605,13 +663,14 @@ func (self *Fetcher) GetLatestBlock() (string, error) {
 // }
 
 func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
-	for _, fetIns := range self.fetIns {
-		result, err := fetIns.GetTrackerData(self.info.TrackerEndpoint)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		return result, nil
+	// for _, fetIns := range self.fetIns {
+	result, err := self.httpFetcher.GetTrackerData()
+	if err != nil {
+		log.Print(err)
+		// continue
+		return nil, errors.New("Cannot get data from tracker")
 	}
-	return nil, errors.New("Cannot get data from tracker")
+	return result, nil
+	// }
+	// return nil, errors.New("Cannot get data from tracker")
 }

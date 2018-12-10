@@ -1,4 +1,4 @@
-package nFetcher
+package mFetcher
 
 import (
 	"encoding/json"
@@ -23,21 +23,21 @@ func NewCMCFetcher() *CMCFetcher {
 	}
 }
 
-func (self *CMCFetcher) GetRateUsdEther() (string, string, error) {
-	typeMarket := self.typeMarket
+func (self *CMCFetcher) GetRateUsdEther() (string, error) {
+	// typeMarket := self.typeMarket
 	url := self.APIV1 + "/ticker/ethereum"
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
-		return "", typeMarket, err
+		return "", err
 	}
 	rateItem := make([]ethereum.RateUSD, 0)
 	err = json.Unmarshal(b, &rateItem)
 	if err != nil {
 		log.Print(err)
-		return "", typeMarket, err
+		return "", err
 	}
-	return rateItem[0].PriceUsd, typeMarket, nil
+	return rateItem[0].PriceUsd, nil
 }
 
 func (self *CMCFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo, error) {
@@ -63,6 +63,6 @@ func (self *CMCFetcher) GetGeneralInfo(usdId string) (*ethereum.TokenGeneralInfo
 	return nil, err
 }
 
-func (self *CMCFetcher) GetTypeMarket() string {
-	return self.typeMarket
-}
+// func (self *CMCFetcher) GetTypeMarket() string {
+// 	return self.typeMarket
+// }
