@@ -189,10 +189,11 @@ func (self *InfoData) RemoveToken(symbol, key string) error {
 }
 
 type Fetcher struct {
-	info         *InfoData
-	ethereum     *Ethereum
-	fetIns       []FetcherInterface
-	fetNormalIns []FetcherNormalInterface
+	info     *InfoData
+	ethereum *Ethereum
+	fetIns   []FetcherInterface
+	// fetNormalIns []FetcherNormalInterface
+	marketFetIns MarketFetcherInterface
 	httpFetcher  *nFetcher.HTTPFetcher
 }
 
@@ -285,14 +286,15 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		}
 	}
 
-	fetNormalIns := make([]FetcherNormalInterface, 0)
-	for _, market := range infoData.CoinMarket {
-		if market == "cmc" {
-			continue
-		}
-		f := NewFetcherNormalIns(market)
-		fetNormalIns = append(fetNormalIns, f)
-	}
+	// fetNormalIns := make([]FetcherNormalInterface, 0)
+	// for _, market := range infoData.CoinMarket {
+	// 	if market == "cmc" {
+	// 		continue
+	// 	}
+	// 	f := NewFetcherNormalIns(market)
+	// 	fetNormalIns = append(fetNormalIns, f)
+	// }
+	marketFetcherIns := NewMarketFetcherInterface()
 
 	httpFetcher := nFetcher.NewHTTPFetcher(infoData.ConfigEndpoint)
 
@@ -304,10 +306,11 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	}
 
 	fetcher := &Fetcher{
-		info:         &infoData,
-		ethereum:     ethereum,
-		fetIns:       fetIns,
-		fetNormalIns: fetNormalIns,
+		info:     &infoData,
+		ethereum: ethereum,
+		fetIns:   fetIns,
+		// fetNormalIns: fetNormalIns,
+		marketFetIns: marketFetcherIns,
 		httpFetcher:  httpFetcher,
 	}
 
@@ -392,26 +395,27 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 	for _, token := range listTokens {
 		if token.UsdId != "" {
 			//usdId = append(usdId, token.UsdId)
-			for _, fetIns := range self.fetNormalIns {
-				// typeMarket := fetIns.GetTypeMarket()
+			// for _, fetIns := range self.fetNormalIns {
+			// typeMarket := fetIns.GetTypeMarket()
 
-				// if typeMarket == "cmc" {
-				result, err := fetIns.GetGeneralInfo(token.CGId)
-				if err != nil {
-					log.Print(err)
-					continue
-				}
-				generalInfo[token.Symbol] = result
-				// } else {
-				// 	result, err := fetIns.GetGeneralInfo(token.CGId)
-				// 	if err != nil {
-				// 		log.Print(err)
-				// 		continue
-				// 	}
-				// 	generalInfoCG[token.Symbol] = result
-				// }
-			}
+			// if typeMarket == "cmc" {
+			result, err := self.marketFetIns.GetGeneralInfo(token.CGId)
 			time.Sleep(5 * time.Second)
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+			generalInfo[token.Symbol] = result
+			// } else {
+			// 	result, err := fetIns.GetGeneralInfo(token.CGId)
+			// 	if err != nil {
+			// 		log.Print(err)
+			// 		continue
+			// 	}
+			// 	generalInfoCG[token.Symbol] = result
+			// }
+			// }
+			// time.Sleep(5 * time.Second)
 		}
 	}
 
@@ -428,17 +432,18 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 }
 
 func (self *Fetcher) GetRateUsdEther() (string, error) {
-	for _, fetIns := range self.fetNormalIns {
-		rateUsd, err := fetIns.GetRateUsdEther()
-		//fmt.Print(rateUsd)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		return rateUsd, nil
+	// for _, fetIns := range self.fetNormalIns {
+	rateUsd, err := self.marketFetIns.GetRateUsdEther()
+	//fmt.Print(rateUsd)
+	if err != nil {
+		log.Print(err)
+		// continue
+		return "", err
 	}
+	return rateUsd, nil
+	// }
 
-	return "", errors.New("Can not get rate eth usd")
+	// return "", errors.New("Can not get rate eth usd")
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {
