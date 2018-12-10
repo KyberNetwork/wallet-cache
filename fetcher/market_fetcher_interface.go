@@ -2,7 +2,7 @@ package fetcher
 
 import (
 	"github.com/KyberNetwork/server-go/ethereum"
-	nFetcher "github.com/KyberNetwork/server-go/fetcher/normal-fetcher"
+	mFetcher "github.com/KyberNetwork/server-go/fetcher/market-fetcher"
 )
 
 type MarketFetcherInterface interface {
@@ -24,5 +24,5 @@ func NewMarketFetcherInterface() MarketFetcherInterface {
 	// 	break
 	// }
 	// return fetcher
-	return nFetcher.NewCGFetcher()
+	return mFetcher.NewCGFetcher()
 }

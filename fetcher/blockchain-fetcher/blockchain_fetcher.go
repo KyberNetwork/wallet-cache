@@ -1,17 +1,10 @@
 package bfetcher
 
 import (
-	"encoding/json"
-	"errors"
-	"io"
-	"io/ioutil"
 	"log"
-	"math/big"
-	"net/http"
 
 	// "strconv"
 
-	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -96,55 +89,22 @@ type TopicParam struct {
 // 	return &result, nil
 // }
 
-func (self *BlockchainFetcher) GetRateUsd(tickers []string) ([]io.ReadCloser, error) {
-	outPut := make([]io.ReadCloser, 0)
-	for _, ticker := range tickers {
-		response, err := http.Get("https://api.coinmarketcap.com/v1/ticker/" + ticker)
-		if err != nil {
-			log.Print(err)
-			return nil, err
-		}
-		outPut = append(outPut, response.Body)
-	}
+// func (self *BlockchainFetcher) GetRateUsd(tickers []string) ([]io.ReadCloser, error) {
+// 	outPut := make([]io.ReadCloser, 0)
+// 	for _, ticker := range tickers {
+// 		response, err := http.Get("https://api.coinmarketcap.com/v1/ticker/" + ticker)
+// 		if err != nil {
+// 			log.Print(err)
+// 			return nil, err
+// 		}
+// 		outPut = append(outPut, response.Body)
+// 	}
 
-	return outPut, nil
-}
+// 	return outPut, nil
+// }
 
 func (self *BlockchainFetcher) GetTypeName() string {
 	return self.TypeName
-}
-
-func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	response, err := http.Get("https://ethgasstation.info/json/ethgasAPI.json")
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-	if response.StatusCode != 200 {
-		return nil, errors.New("Status code is 200")
-	}
-	defer (response.Body).Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	var gasPrice GasStation
-	err = json.Unmarshal(b, &gasPrice)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	fast := big.NewFloat(gasPrice.Fast / 10)
-	standard := big.NewFloat((gasPrice.Fast + gasPrice.Standard) / 20)
-	low := big.NewFloat(gasPrice.Low / 10)
-	defaultGas := standard
-
-	return &ethereum.GasPrice{
-		fast.String(), standard.String(), low.String(), defaultGas.String(),
-	}, nil
 }
 
 // func (self *BlockchainFetcher) GetRateUsdEther() (string, error) {
@@ -173,10 +133,3 @@ func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
 // 	//log.Print(err)
 // 	return nil, err
 // }
-
-func (self *BlockchainFetcher) GetTrackerData(trackerEndpoint string) (map[string]*ethereum.Rates, error) {
-	trackerData := map[string]*ethereum.Rates{}
-	err := errors.New("Blockchain is not support this api")
-	//log.Print(err)
-	return trackerData, err
-}

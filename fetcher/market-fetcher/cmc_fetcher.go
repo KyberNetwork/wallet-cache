@@ -1,4 +1,4 @@
-package nFetcher
+package mFetcher
 
 import (
 	"encoding/json"
