@@ -394,7 +394,7 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 	//	usdId := make([]string, 0)
 	listTokens := self.GetListToken()
 	for _, token := range listTokens {
-		if token.UsdId != "" {
+		if token.CGId != "" {
 			//usdId = append(usdId, token.UsdId)
 			// for _, fetIns := range self.fetNormalIns {
 			// typeMarket := fetIns.GetTypeMarket()
