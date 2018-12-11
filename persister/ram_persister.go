@@ -2,10 +2,12 @@ package Persister
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 )
@@ -25,7 +27,8 @@ const (
 )
 
 type RamPersister struct {
-	mu sync.RWMutex
+	mu      sync.RWMutex
+	timeRun string
 
 	kyberEnabled      bool
 	isNewKyberEnabled bool
@@ -74,6 +77,9 @@ type RamPersister struct {
 
 func NewRamPersister() (*RamPersister, error) {
 	var mu sync.RWMutex
+	location, _ := time.LoadLocation("Asia/Bangkok")
+	tNow := time.Now().In(location)
+	timeRun := fmt.Sprintf("%02d:%02d:%02d %02d-%02d-%d", tNow.Hour(), tNow.Minute(), tNow.Second(), tNow.Day(), tNow.Month(), tNow.Year())
 
 	kyberEnabled := true
 	isNewKyberEnabled := true
@@ -119,6 +125,7 @@ func NewRamPersister() (*RamPersister, error) {
 
 	persister := &RamPersister{
 		mu:                mu,
+		timeRun:           timeRun,
 		kyberEnabled:      kyberEnabled,
 		isNewKyberEnabled: isNewKyberEnabled,
 		rates:             &rates,
@@ -521,3 +528,9 @@ func (self *RamPersister) GetIsNewMarketInfo() bool {
 // 	defer self.mu.Unlock()
 // 	return self.isNewMarketInfoCG
 // }
+
+func (self *RamPersister) GetTimeVersion() string {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.timeRun
+}

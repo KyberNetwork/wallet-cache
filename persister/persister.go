@@ -77,6 +77,7 @@ type Persister interface {
 	SetIsNewMarketInfo(isNewMarketInfo bool)
 	GetIsNewMarketInfo() bool
 	// GetIsNewMarketInfoCG() bool
+	GetTimeVersion() string
 }
 
 //var transactionPersistent = models.NewTransactionPersister()

@@ -247,9 +247,10 @@ func (self *HTTPServer) GetLast7D(c *gin.Context) {
 }
 
 func (self *HTTPServer) getCacheVersion(c *gin.Context) {
+	timeRun := self.persister.GetTimeVersion()
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": true, "data": "1.6"},
+		gin.H{"success": true, "data": timeRun},
 	)
 }
 
