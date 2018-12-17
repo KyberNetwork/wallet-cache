@@ -310,17 +310,33 @@ func (self *HTTPServer) Run(kyberENV string) {
 	//self.r.GET("/getRate", self.GetRate)
 	// self.r.GET("/getHistoryOneColumn", self.GetEvent)
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
+	self.r.GET("/latestBlock", self.GetLatestBlock)
 
 	self.r.GET("/getRateUSD", self.GetRateUSD)
+	self.r.GET("/rateUSD", self.GetRateUSD)
+
 	self.r.GET("/getRate", self.GetRate)
+	self.r.GET("/rate", self.GetRate)
 	// self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
 	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
+	self.r.GET("/kyberEnabled", self.GetKyberEnabled)
+
 	self.r.GET("/getMaxGasPrice", self.GetMaxGasPrice)
+	self.r.GET("/maxGasPrice", self.GetMaxGasPrice)
+
 	self.r.GET("/getGasPrice", self.GetGasPrice)
+	self.r.GET("/gasPrice", self.GetGasPrice)
+
 	self.r.GET("/getRightMarketInfo", self.GetRightMarketInfo)
+	self.r.GET("/marketInfo", self.GetRightMarketInfo)
+
 	self.r.GET("/getLast7D", self.GetLast7D)
+	self.r.GET("/last7D", self.GetLast7D)
+
 	self.r.GET("/getRateETH", self.GetRateETH)
+	self.r.GET("/rateETH", self.GetRateETH)
+
 	self.r.GET("/cacheVersion", self.getCacheVersion)
 
 	// self.r.GET("/coingecko/marketInfo", self.GetRightMarketInfoCG)
