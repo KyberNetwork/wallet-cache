@@ -2,10 +2,12 @@ package Persister
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/KyberNetwork/server-go/ethereum"
 )
@@ -25,7 +27,8 @@ const (
 )
 
 type RamPersister struct {
-	mu sync.RWMutex
+	mu      sync.RWMutex
+	timeRun string
 
 	kyberEnabled      bool
 	isNewKyberEnabled bool
@@ -40,6 +43,10 @@ type RamPersister struct {
 	rateETH      string
 	isNewRateUsd bool
 
+	// rateUSDCG      []RateUSD
+	// rateETHCG      string
+	// isNewRateUsdCG bool
+
 	events     []ethereum.EventHistory
 	isNewEvent bool
 
@@ -53,6 +60,7 @@ type RamPersister struct {
 	// isNewEthRate bool
 
 	tokenInfo map[string]*ethereum.TokenGeneralInfo
+	// tokenInfoCG map[string]*ethereum.TokenGeneralInfo
 
 	//isNewTokenInfo bool
 
@@ -61,11 +69,17 @@ type RamPersister struct {
 	isNewTrackerData bool
 
 	rightMarketInfo map[string]*ethereum.RightMarketInfo
+	// rightMarketInfoCG map[string]*ethereum.RightMarketInfo
+
 	isNewMarketInfo bool
+	// isNewMarketInfoCG bool
 }
 
 func NewRamPersister() (*RamPersister, error) {
 	var mu sync.RWMutex
+	location, _ := time.LoadLocation("Asia/Bangkok")
+	tNow := time.Now().In(location)
+	timeRun := fmt.Sprintf("%02d:%02d:%02d %02d-%02d-%d", tNow.Hour(), tNow.Minute(), tNow.Second(), tNow.Day(), tNow.Month(), tNow.Year())
 
 	kyberEnabled := true
 	isNewKyberEnabled := true
@@ -79,6 +93,9 @@ func NewRamPersister() (*RamPersister, error) {
 	rateUSD := make([]RateUSD, 0)
 	rateETH := "0"
 	isNewRateUsd := true
+	// rateUSDCG := make([]RateUSD, 0)
+	// rateETHCG := "0"
+	// isNewRateUsdCG := true
 
 	events := make([]ethereum.EventHistory, 0)
 	isNewEvent := true
@@ -93,6 +110,7 @@ func NewRamPersister() (*RamPersister, error) {
 	// isNewEthRate := true
 
 	tokenInfo := map[string]*ethereum.TokenGeneralInfo{}
+	// tokenInfoCG := map[string]*ethereum.TokenGeneralInfo{}
 	//isNewTokenInfo := true
 
 	marketInfo := map[string]*ethereum.MarketInfo{}
@@ -100,34 +118,50 @@ func NewRamPersister() (*RamPersister, error) {
 	isNewTrackerData := true
 
 	rightMarketInfo := map[string]*ethereum.RightMarketInfo{}
+	// rightMarketInfoCG := map[string]*ethereum.RightMarketInfo{}
+
 	isNewMarketInfo := true
+	// isNewMarketInfoCG := true
 
 	persister := &RamPersister{
-		mu, kyberEnabled, isNewKyberEnabled, &rates, isNewRate, latestBlock, isNewLatestBlock, rateUSD, rateETH, isNewRateUsd, events, isNewEvent, maxGasPrice, isNewMaxGasPrice,
-		&gasPrice, isNewGasPrice, tokenInfo, marketInfo, last7D, isNewTrackerData, rightMarketInfo, isNewMarketInfo,
+		mu:                mu,
+		timeRun:           timeRun,
+		kyberEnabled:      kyberEnabled,
+		isNewKyberEnabled: isNewKyberEnabled,
+		rates:             &rates,
+		isNewRate:         isNewRate,
+		latestBlock:       latestBlock,
+		isNewLatestBlock:  isNewLatestBlock,
+		rateUSD:           rateUSD,
+		rateETH:           rateETH,
+		isNewRateUsd:      isNewRateUsd,
+		// rateUSDCG:         rateUSDCG,
+		// rateETHCG:         rateETHCG,
+		// isNewRateUsdCG:    isNewRateUsdCG,
+		events:           events,
+		isNewEvent:       isNewEvent,
+		maxGasPrice:      maxGasPrice,
+		isNewMaxGasPrice: isNewMaxGasPrice,
+		gasPrice:         &gasPrice,
+		isNewGasPrice:    isNewGasPrice,
+		tokenInfo:        tokenInfo,
+		// tokenInfoCG:       tokenInfoCG,
+		marketInfo:       marketInfo,
+		last7D:           last7D,
+		isNewTrackerData: isNewTrackerData,
+		rightMarketInfo:  rightMarketInfo,
+		// rightMarketInfoCG: rightMarketInfoCG,
+		isNewMarketInfo: isNewMarketInfo,
+		// isNewMarketInfoCG: isNewMarketInfoCG,
 	}
 	return persister, nil
 }
-
-// func (self *RamPersister) SetRateToken(tokens map[string]ethereum.Token) {
-// 	self.muRate.Lock()
-// 	defer self.muRate.Unlock()
-// 	for key, _ := range tokens {
-// 		if key == "ETH" {
-// 			continue
-// 		}
-// 		historyMap := map[int64]*ethereum.RateHistory{}
-// 		rateInfo := ethereum.RateInfo{
-// 			HistoryRecord: historyMap,
-// 		}
-// 		self.tokenRates[key] = &rateInfo
-// 	}
-// }
 
 func (self *RamPersister) SaveGeneralInfoTokens(generalInfo map[string]*ethereum.TokenGeneralInfo) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.tokenInfo = generalInfo
+	// self.tokenInfoCG = generalInfoCG
 }
 
 func (self *RamPersister) GetTokenInfo() map[string]*ethereum.TokenGeneralInfo {
@@ -136,52 +170,12 @@ func (self *RamPersister) GetTokenInfo() map[string]*ethereum.TokenGeneralInfo {
 	return self.tokenInfo
 }
 
-//----------------------------
-// func (self *RamPersister) SaveRateUSDEther(rate string) {
-// 	self.mu.Lock()
-// 	defer self.mu.Unlock()
-// 	self.ethRate = rate
-// }
-// func (self *RamPersister) SaveNewRateUsdEther(isNew bool) {
-// 	self.mu.Lock()
-// 	defer self.mu.Unlock()
-// 	self.isNewEthRate = isNew
-// }
-
-// func (self *RamPersister) GetIsNewRateUsdEther() bool {
-// 	self.mu.RLock()
-// 	defer self.mu.RUnlock()
-// 	return self.isNewEthRate
-// }
-// func (self *RamPersister) GetRateUSDEther() string {
-// 	self.mu.RLock()
-// 	defer self.mu.RUnlock()
-// 	return self.ethRate
-// }
-
 /////------------------------------
 func (self *RamPersister) GetRate() *[]ethereum.Rate {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.rates
 }
-
-// func (self *RamPersister) ReStructureRate(rates *[]ethereum.Rate) map[string]*ethereum.RateHistory {
-// 	refinedRate := map[string]*ethereum.RateHistory{}
-// 	for key, _ := range self.tokenRates {
-// 		refinedRate[key] = &ethereum.RateHistory{}
-// 	}
-
-// 	for _, rate := range *rates {
-// 		if rate.Source != "ETH" {
-// 			refinedRate[rate.Source].SellPrice = rate.Rate
-// 		}
-// 		if rate.Dest != "ETH" {
-// 			refinedRate[rate.Dest].BuyPrice = rate.Rate
-// 		}
-// 	}
-// 	return refinedRate
-// }
 
 func (self *RamPersister) SaveRate(rates *[]ethereum.Rate) {
 	self.mu.Lock()
@@ -278,11 +272,23 @@ func (self *RamPersister) GetRateUSD() []RateUSD {
 	return self.rateUSD
 }
 
+// func (self *RamPersister) GetRateUSDCG() []RateUSD {
+// 	self.mu.RLock()
+// 	defer self.mu.RUnlock()
+// 	return self.rateUSDCG
+// }
+
 func (self *RamPersister) GetRateETH() string {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.rateETH
 }
+
+// func (self *RamPersister) GetRateETHCG() string {
+// 	self.mu.RLock()
+// 	defer self.mu.RUnlock()
+// 	return self.rateETHCG
+// }
 
 func (self *RamPersister) GetIsNewRateUSD() bool {
 	self.mu.RLock()
@@ -290,32 +296,58 @@ func (self *RamPersister) GetIsNewRateUSD() bool {
 	return self.isNewRateUsd
 }
 
+// func (self *RamPersister) GetIsNewRateUSDCG() bool {
+// 	self.mu.RLock()
+// 	defer self.mu.RUnlock()
+// 	return self.isNewRateUsdCG
+// }
+
 func (self *RamPersister) SaveRateUSD(rateUSDEth string) error {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
 	rates := make([]RateUSD, 0)
+	// ratesCG := make([]RateUSD, 0)
 
 	itemRateEth := RateUSD{Symbol: "ETH", PriceUsd: rateUSDEth}
+	// itemRateEthCG := RateUSD{Symbol: "ETH", PriceUsd: rateUSDEthCG}
 	rates = append(rates, itemRateEth)
+	// ratesCG = append(ratesCG, itemRateEthCG)
 	for _, item := range *(self.rates) {
 		if item.Source != "ETH" {
 			priceUsd, err := CalculateRateUSD(item.Rate, rateUSDEth)
 			if err != nil {
 				log.Print(err)
-				return err
+				self.isNewRateUsd = false
+				return nil
 			}
+			// priceUsdCG, err := CalculateRateUSD(item.Rate, rateUSDEthCG)
+			// if err != nil {
+			// 	log.Print(err)
+			// 	self.isNewRateUsdCG = false
+			// 	return nil
+			// }
 			sourceSymbol := item.Source
 			if sourceSymbol == "ETHOS" {
 				sourceSymbol = "BQX"
 			}
 			itemRate := RateUSD{Symbol: sourceSymbol, PriceUsd: priceUsd}
 			rates = append(rates, itemRate)
+			// ratesCG = append(ratesCG, RateUSD{
+			// 	Symbol:   sourceSymbol,
+			// 	PriceUsd: priceUsdCG,
+			// })
 		}
 	}
 
-	self.mu.Lock()
-	defer self.mu.Unlock()
 	self.rateUSD = rates
 	self.rateETH = rateUSDEth
 	self.isNewRateUsd = true
+
+	// self.rateUSDCG = ratesCG
+	// self.rateETHCG = rateUSDEthCG
+	// self.isNewRateUsdCG = true
+
 	return nil
 }
 
@@ -347,6 +379,12 @@ func (self *RamPersister) SetNewRateUSD(isNew bool) {
 	self.isNewRateUsd = isNew
 }
 
+// func (self *RamPersister) SetNewRateUSDCG(isNew bool) {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	self.isNewRateUsdCG = isNew
+// }
+
 func (self *RamPersister) GetLatestBlock() string {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
@@ -373,32 +411,6 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 	self.isNewLatestBlock = isNew
 }
 
-/////-----------------------------------
-// func (self *RamPersister) GetEvent() []ethereum.EventHistory {
-// 	self.mu.RLock()
-// 	defer self.mu.RUnlock()
-// 	return self.events
-// }
-
-// func (self *RamPersister) GetIsNewEvent() bool {
-// 	self.mu.RLock()
-// 	defer self.mu.RUnlock()
-// 	return self.isNewEvent
-// }
-
-// func (self *RamPersister) SaveEvent(events *[]ethereum.EventHistory) error {
-// 	self.mu.Lock()
-// 	defer self.mu.Unlock()
-// 	self.events = *events
-// 	return nil
-// }
-
-// func (self *RamPersister) SetNewEvents(isNew bool) {
-// 	self.mu.Lock()
-// 	defer self.mu.Unlock()
-// 	self.isNewEvent = isNew
-// }
-
 // ----------------------------------------
 // return data from kyber tracker
 
@@ -408,6 +420,12 @@ func (self *RamPersister) GetRightMarketData() map[string]*ethereum.RightMarketI
 	defer self.mu.Unlock()
 	return self.rightMarketInfo
 }
+
+// func (self *RamPersister) GetRightMarketDataCG() map[string]*ethereum.RightMarketInfo {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	return self.rightMarketInfoCG
+// }
 
 func (self *RamPersister) GetIsNewTrackerData() bool {
 	self.mu.Lock()
@@ -438,34 +456,53 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	// resultMarketInfo := []map[string]*ethereum.MarketInfo{}
-	result := map[string]*ethereum.MarketInfo{}
+	// result := map[string]*ethereum.MarketInfo{}
 	lastSevenDays := map[string][]float64{}
 	newResult := map[string]*ethereum.RightMarketInfo{}
+	// newResultCG := map[string]*ethereum.RightMarketInfo{}
 
 	for symbol, _ := range tokens {
-		marketInfo := &ethereum.MarketInfo{}
+		// marketInfo := &ethereum.MarketInfo{}
 		dataSevenDays := []float64{}
 		rightMarketInfo := &ethereum.RightMarketInfo{}
-		if rateInfo := marketRate[symbol]; rateInfo != nil {
-			marketInfo.Rates = rateInfo
+		// rightMarketInfoCG := &ethereum.RightMarketInfo{}
+		rateInfo := marketRate[symbol]
+		if rateInfo != nil {
+			// marketInfo.Rates = rateInfo
 			dataSevenDays = rateInfo.P
 			rightMarketInfo.Rate = &rateInfo.R
+			// rightMarketInfoCG.Rate = &rateInfo.R
 		}
 		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
-			marketInfo.Quotes = tokenInfo.Quotes
+			// marketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Quotes = tokenInfo.Quotes
 		}
-		if marketInfo.Rates == nil && marketInfo.Quotes == nil {
+
+		// if tokenInfoCG := self.tokenInfoCG[symbol]; tokenInfoCG != nil {
+		// marketInfo.Quotes = tokenInfo.Quotes
+		// rightMarketInfoCG.Quotes = tokenInfoCG.Quotes
+		// }
+
+		if rateInfo == nil && rightMarketInfo.Quotes == nil {
+			// newResult[symbol] = rightMarketInfo
+			// lastSevenDays[symbol] = dataSevenDays
 			continue
 		}
-		result[symbol] = marketInfo
+
+		// // if rightMarketInfoCG.Rate != nil && rightMarketInfoCG.Quotes != nil {
+		// newResultCG[symbol] = rightMarketInfoCG
+		// lastSevenDays[symbol] = dataSevenDays
+		// }
+
+		// result[symbol] = marketInfo
 		newResult[symbol] = rightMarketInfo
 		lastSevenDays[symbol] = dataSevenDays
 	}
 
-	self.marketInfo = result
+	// self.marketInfo = result
 	self.last7D = lastSevenDays
 	self.rightMarketInfo = newResult
+	// self.rightMarketInfoCG = newResultCG
 }
 
 func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
@@ -474,8 +511,26 @@ func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
 	self.isNewMarketInfo = isNewMarketInfo
 }
 
+// func (self *RamPersister) SetIsNewMarketInfoCG(isNewMarketInfo bool) {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	self.isNewMarketInfoCG = isNewMarketInfo
+// }
+
 func (self *RamPersister) GetIsNewMarketInfo() bool {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	return self.isNewMarketInfo
+}
+
+// func (self *RamPersister) GetIsNewMarketInfoCG() bool {
+// 	self.mu.Lock()
+// 	defer self.mu.Unlock()
+// 	return self.isNewMarketInfoCG
+// }
+
+func (self *RamPersister) GetTimeVersion() string {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	return self.timeRun
 }

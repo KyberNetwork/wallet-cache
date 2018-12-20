@@ -1,5 +1,9 @@
 package ethereum
 
+// const (
+// 	TIME_TO_DELETE = 18000
+// )
+
 type EventRaw struct {
 	Timestamp   string `json:"timestamp"`
 	BlockNumber string `json:"blockNumber"`
@@ -38,6 +42,32 @@ type Token struct {
 	Decimal    int    `json:"decimals"`
 	UsdId      string `json:"cmc_id"`
 	DelistTime uint64 `json:"delist_time"`
+	CGId       string `json:"cg_id"`
+}
+
+type TokenAPI struct {
+	Symbol      string `json:"symbol"`
+	Name        string `json:"name"`
+	Address     string `json:"address"`
+	Decimals    int    `json:"decimals"`
+	UsdID       string `json:"cmc_id"`
+	TimeListing uint64 `json:"listing_time,omitempty"`
+	CGId        string `json:"cg_id"`
+	// DelistTime  uint64 `json:"delist_time,omitempty"`
+}
+
+func TokenAPIToToken(tokenAPI TokenAPI) Token {
+	// if tokenAPI.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+tokenAPI.DelistTime {
+	return Token{
+		Name:    tokenAPI.Name,
+		Symbol:  tokenAPI.Symbol,
+		Address: tokenAPI.Address,
+		Decimal: tokenAPI.Decimals,
+		UsdId:   tokenAPI.UsdID,
+		CGId:    tokenAPI.CGId,
+	}
+	// }
+	// return nil
 }
 
 type QuoInfo struct {
@@ -51,6 +81,50 @@ type TokenGeneralInfo struct {
 	MaxSupply         float64            `json:"max_supply"`
 	MarketCap         float64            `json:"market_cap"`
 	Quotes            map[string]QuoInfo `json:"quotes`
+}
+
+type CurrencyData struct {
+	ETH float64 `json:"eth"`
+	USD float64 `json:"usd"`
+}
+
+type TokenInfoCoinGecko struct {
+	MarketData struct {
+		MarketCap CurrencyData `json:"market_cap"`
+		Volume24H CurrencyData `json:"total_volume"`
+	} `json:"market_data"`
+}
+
+func (tokenInfo TokenInfoCoinGecko) ToTokenInfoCMC() TokenGeneralInfo {
+	quotes := make(map[string]QuoInfo)
+	quotes["ETH"] = QuoInfo{
+		MarketCap: tokenInfo.MarketData.MarketCap.ETH,
+		Volume24h: tokenInfo.MarketData.Volume24H.ETH,
+	}
+	quotes["USD"] = QuoInfo{
+		MarketCap: tokenInfo.MarketData.MarketCap.USD,
+		Volume24h: tokenInfo.MarketData.Volume24H.USD,
+	}
+	return TokenGeneralInfo{
+		Quotes: quotes,
+	}
+}
+
+type RateUSDCG struct {
+	MarketData struct {
+		CurrentPrice struct {
+			USD float64 `json:"usd"`
+		} `json:"current_price"`
+	} `json:"market_data"`
+}
+
+type RateUSD struct {
+	Symbol   string `json:"symbol"`
+	PriceUsd string `json:"price_usd"`
+}
+
+type ResultRpc struct {
+	Result string `json:"result"`
 }
 
 // type TokenInfoData struct {

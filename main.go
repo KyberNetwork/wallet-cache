@@ -43,8 +43,9 @@ func main() {
 		defer f.Close()
 	}
 
+	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
-	fertcherIns, err := fetcher.NewFetcher()
+	fertcherIns, err := fetcher.NewFetcher(kyberENV)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,7 +64,11 @@ func main() {
 	}()
 
 	tokenNum := fertcherIns.GetNumTokens()
-	intervalFetchGeneralInfoTokens := time.Duration((tokenNum + 1) * 7)
+	bonusTimeWait := 900
+	if tokenNum > 200 {
+		bonusTimeWait = 60
+	}
+	intervalFetchGeneralInfoTokens := time.Duration((tokenNum * 7) + bonusTimeWait)
 	//	initRateToken(persisterIns, fertcherIns)
 
 	//run fetch data
@@ -87,7 +92,7 @@ func main() {
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
-	server.Run()
+	server.Run(kyberENV)
 
 	//init fetch data
 
@@ -155,6 +160,17 @@ func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		persister.SetNewRateUSD(false)
 		return
 	}
+
+	// if rateUSDCG == "" {
+	// 	persister.SetNewRateUSDCG(false)
+	// 	return
+	// }
+
+	if rateUSD == "" {
+		persister.SetNewRateUSD(false)
+		return
+	}
+
 	err = persister.SaveRateUSD(rateUSD)
 	if err != nil {
 		log.Print(err)
@@ -246,6 +262,8 @@ func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		log.Print(err)
 		persister.SetIsNewTrackerData(false)
 		// return
+	} else {
+		persister.SetIsNewTrackerData(true)
 	}
 	tokens := fetcher.GetListToken()
 	persister.SaveMarketData(data, tokens)
