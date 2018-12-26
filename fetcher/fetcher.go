@@ -523,6 +523,12 @@ func getAmountTokenWithMinETH(rate *big.Int, decimal int) *big.Int {
 	return amountInt
 }
 
+func getOrAmount(amount *big.Int) *big.Int {
+	orNumber := big.NewInt(0).Exp(big.NewInt(2), big.NewInt(255), nil)
+	orAmount := big.NewInt(0).Or(amount, orNumber)
+	return orAmount
+}
+
 func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	//append rate
 	listTokens := self.GetListToken()
@@ -534,7 +540,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	amountETH := make([]*big.Int, 0)
 	ethSymbol := self.info.EthSymbol
 	ethAddr := self.info.EthAdress
-	minAmountETH := getAmountInWei(MIN_ETH)
+	minAmountETH := getOrAmount(getAmountInWei(MIN_ETH))
 
 	if len(*rates) > 0 && len(*rates) == len(listTokens)*2 {
 		for _, rate := range *rates {
@@ -551,7 +557,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 					if decimal != 0 || r.Cmp(amountToken) != 0 {
 						amountToken = getAmountTokenWithMinETH(r, decimal)
 					}
-					amount = append(amount, amountToken)
+					amount = append(amount, getOrAmount(amountToken))
 					tokenAddr := destToken.Address
 					sourceAddr = append(sourceAddr, tokenAddr)
 					sourceSymbol = append(sourceSymbol, destSym)
@@ -576,7 +582,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 			sourceSymbol = append(sourceSymbol, token.Symbol)
 			destAddr = append(destAddr, ethAddr)
 			destSymbol = append(destSymbol, ethSymbol)
-			amount = append(amount, big.NewInt(0))
+			amount = append(amount, getOrAmount(big.NewInt(0)))
 			amountETH = append(amountETH, minAmountETH)
 		}
 	}
