@@ -43,6 +43,22 @@ func (self *BlockchainFetcher) EthCall(to string, data string) (string, error) {
 
 }
 
+func (self *BlockchainFetcher) GetRate(to string, data string) (string, error) {
+	params := make(map[string]string)
+	params["data"] = "0x" + data
+	params["to"] = to
+
+	var result string
+	err := self.client.Call(&result, "eth_call", params, "latest")
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+
+	return result, nil
+
+}
+
 func (self *BlockchainFetcher) GetLatestBlock() (string, error) {
 	var blockNum *hexutil.Big
 	err := self.client.Call(&blockNum, "eth_blockNumber", "latest")
