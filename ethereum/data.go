@@ -81,6 +81,7 @@ type TokenGeneralInfo struct {
 	MaxSupply         float64            `json:"max_supply"`
 	MarketCap         float64            `json:"market_cap"`
 	Quotes            map[string]QuoInfo `json:"quotes`
+	Change24H         string             `json:"change_24h"`
 }
 
 type CurrencyData struct {
@@ -92,6 +93,7 @@ type TokenInfoCoinGecko struct {
 	MarketData struct {
 		MarketCap CurrencyData `json:"market_cap"`
 		Volume24H CurrencyData `json:"total_volume"`
+		Change24H string       `json:"price_change_percentage_24h"`
 	} `json:"market_data"`
 }
 
@@ -106,7 +108,8 @@ func (tokenInfo TokenInfoCoinGecko) ToTokenInfoCMC() TokenGeneralInfo {
 		Volume24h: tokenInfo.MarketData.Volume24H.USD,
 	}
 	return TokenGeneralInfo{
-		Quotes: quotes,
+		Quotes:    quotes,
+		Change24H: tokenInfo.MarketData.Change24H,
 	}
 }
 
@@ -169,8 +172,9 @@ type MarketInfo struct {
 }
 
 type RightMarketInfo struct {
-	Rate   *float64           `json:"rate"`
-	Quotes map[string]QuoInfo `json:"quotes"`
+	Rate      *float64           `json:"rate"`
+	Change24H string             `json:"change_24h"`
+	Quotes    map[string]QuoInfo `json:"quotes"`
 }
 
 func NewMarketInfo(quotes map[string]QuoInfo, rates *Rates) *MarketInfo {
