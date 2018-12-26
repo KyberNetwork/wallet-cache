@@ -317,7 +317,6 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/getRate", self.GetRate)
 	self.r.GET("/rate", self.GetRate)
-
 	// self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
 	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
