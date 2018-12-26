@@ -177,6 +177,19 @@ func (self *RamPersister) GetRate() *[]ethereum.Rate {
 	return self.rates
 }
 
+func (self *RamPersister) SetIsNewRate(isNewRate bool) {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	// return self.rates
+	self.isNewRate = isNewRate
+}
+
+func (self *RamPersister) GetIsNewRate() bool {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.isNewRate
+}
+
 func (self *RamPersister) SaveRate(rates *[]ethereum.Rate) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
