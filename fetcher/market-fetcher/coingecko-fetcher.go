@@ -41,7 +41,7 @@ func (self *CGFetcher) GetRateUsdEther() (string, error) {
 }
 
 func (self *CGFetcher) GetGeneralInfo(coinID string) (*ethereum.TokenGeneralInfo, error) {
-	url := self.API + "/coins/" + coinID
+	url := fmt.Sprintf("%s/coins/%s?tickers=false&community_data=false&developer_data=false&sparkline=false", self.API, coinID)
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)

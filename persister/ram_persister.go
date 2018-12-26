@@ -476,6 +476,7 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
 			// marketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Quotes = tokenInfo.Quotes
+			rightMarketInfo.Change24H = tokenInfo.Change24H
 		}
 
 		// if tokenInfoCG := self.tokenInfoCG[symbol]; tokenInfoCG != nil {
