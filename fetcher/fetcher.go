@@ -593,7 +593,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	}
 
 	for _, fetIns := range self.fetIns {
-		result, err := fetIns.EthCall(self.info.Wapper, dataAbi)
+		result, err := fetIns.GetRate(self.info.Wapper, dataAbi)
 		if err != nil {
 			log.Print(err)
 			continue

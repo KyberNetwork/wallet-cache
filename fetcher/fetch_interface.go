@@ -19,6 +19,8 @@ type FetcherInterface interface {
 
 	GetTypeName() string
 
+	GetRate(string, string) (string, error)
+
 	// GetRateUsdEther() (string, error)
 
 	// GetGeneralInfo(string) (*ethereum.TokenGeneralInfo, error)
