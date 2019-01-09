@@ -406,7 +406,7 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 				log.Print(err)
 				continue
 			}
-			generalInfo[token.Symbol] = result
+			generalInfo[strings.ToLower(token.Address)] = result
 			// } else {
 			// 	result, err := fetIns.GetGeneralInfo(token.CGId)
 			// 	if err != nil {
@@ -587,9 +587,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 		}
 	}
 	sourceArr := append(sourceAddr, destAddr...)
-	sourceSymbolArr := append(sourceSymbol, destSymbol...)
 	destArr := append(destAddr, sourceAddr...)
-	destSymbolArr := append(destSymbol, sourceSymbol...)
 	amountArr := append(amount, amountETH...)
 
 	dataAbi, err := self.ethereum.EncodeRateData(sourceArr, destArr, amountArr)
@@ -604,7 +602,7 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 			log.Print(err)
 			continue
 		}
-		rates, err := self.ethereum.ExtractRateData(result, sourceSymbolArr, destSymbolArr)
+		rates, err := self.ethereum.ExtractRateData(result, sourceArr, destArr)
 		if err != nil {
 			log.Print(err)
 			continue
