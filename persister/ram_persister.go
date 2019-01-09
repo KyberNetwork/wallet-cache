@@ -452,14 +452,15 @@ func (self *RamPersister) SetIsNewTrackerData(isNewTrackerData bool) {
 	self.isNewTrackerData = isNewTrackerData
 }
 
-func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
+func (self *RamPersister) GetLast7D(listTokenAddrs string) map[string][]float64 {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	tokens := strings.Split(listTokens, "-")
+	tokenAddrs := strings.Split(listTokenAddrs, "-")
 	result := make(map[string][]float64)
-	for _, symbol := range tokens {
-		if self.last7D[symbol] != nil {
-			result[symbol] = self.last7D[symbol]
+	for _, addr := range tokenAddrs {
+		lowerAddr := strings.ToLower(addr)
+		if self.last7D[lowerAddr] != nil {
+			result[lowerAddr] = self.last7D[lowerAddr]
 		}
 	}
 	return result
@@ -473,20 +474,20 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 	lastSevenDays := map[string][]float64{}
 	newResult := map[string]*ethereum.RightMarketInfo{}
 	// newResultCG := map[string]*ethereum.RightMarketInfo{}
-
-	for symbol, _ := range tokens {
+	for _, token := range tokens {
 		// marketInfo := &ethereum.MarketInfo{}
+		tokenAddr := strings.ToLower(token.Address)
 		dataSevenDays := []float64{}
 		rightMarketInfo := &ethereum.RightMarketInfo{}
 		// rightMarketInfoCG := &ethereum.RightMarketInfo{}
-		rateInfo := marketRate[symbol]
+		rateInfo := marketRate[tokenAddr]
 		if rateInfo != nil {
 			// marketInfo.Rates = rateInfo
 			dataSevenDays = rateInfo.P
 			rightMarketInfo.Rate = &rateInfo.R
 			// rightMarketInfoCG.Rate = &rateInfo.R
 		}
-		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
+		if tokenInfo := self.tokenInfo[tokenAddr]; tokenInfo != nil {
 			// marketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Change24H = tokenInfo.Change24H
@@ -509,8 +510,8 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 		// }
 
 		// result[symbol] = marketInfo
-		newResult[symbol] = rightMarketInfo
-		lastSevenDays[symbol] = dataSevenDays
+		newResult[tokenAddr] = rightMarketInfo
+		lastSevenDays[tokenAddr] = dataSevenDays
 	}
 
 	// self.marketInfo = result
