@@ -19,7 +19,7 @@ import (
 
 const (
 	ETH_TO_WEI = 1000000000000000000
-	MIN_ETH    = 0.001
+	MIN_ETH    = 0.5
 	KEY        = "kybersecret"
 )
 
