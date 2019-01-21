@@ -33,7 +33,7 @@ type RamPersister struct {
 	kyberEnabled      bool
 	isNewKyberEnabled bool
 
-	rates     *[]ethereum.Rate
+	rates     []ethereum.Rate
 	isNewRate bool
 
 	latestBlock      string
@@ -84,7 +84,7 @@ func NewRamPersister() (*RamPersister, error) {
 	kyberEnabled := true
 	isNewKyberEnabled := true
 
-	rates := make([]ethereum.Rate, 0)
+	rates := []ethereum.Rate{}
 	isNewRate := true
 
 	latestBlock := "0"
@@ -128,7 +128,7 @@ func NewRamPersister() (*RamPersister, error) {
 		timeRun:           timeRun,
 		kyberEnabled:      kyberEnabled,
 		isNewKyberEnabled: isNewKyberEnabled,
-		rates:             &rates,
+		rates:             rates,
 		isNewRate:         isNewRate,
 		latestBlock:       latestBlock,
 		isNewLatestBlock:  isNewLatestBlock,
@@ -171,13 +171,26 @@ func (self *RamPersister) GetTokenInfo() map[string]*ethereum.TokenGeneralInfo {
 }
 
 /////------------------------------
-func (self *RamPersister) GetRate() *[]ethereum.Rate {
+func (self *RamPersister) GetRate() []ethereum.Rate {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.rates
 }
 
-func (self *RamPersister) SaveRate(rates *[]ethereum.Rate) {
+func (self *RamPersister) SetIsNewRate(isNewRate bool) {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	// return self.rates
+	self.isNewRate = isNewRate
+}
+
+func (self *RamPersister) GetIsNewRate() bool {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.isNewRate
+}
+
+func (self *RamPersister) SaveRate(rates []ethereum.Rate) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.rates = rates
@@ -313,7 +326,7 @@ func (self *RamPersister) SaveRateUSD(rateUSDEth string) error {
 	// itemRateEthCG := RateUSD{Symbol: "ETH", PriceUsd: rateUSDEthCG}
 	rates = append(rates, itemRateEth)
 	// ratesCG = append(ratesCG, itemRateEthCG)
-	for _, item := range *(self.rates) {
+	for _, item := range self.rates {
 		if item.Source != "ETH" {
 			priceUsd, err := CalculateRateUSD(item.Rate, rateUSDEth)
 			if err != nil {
@@ -476,6 +489,7 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
 			// marketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Quotes = tokenInfo.Quotes
+			rightMarketInfo.Change24H = tokenInfo.Change24H
 		}
 
 		// if tokenInfoCG := self.tokenInfoCG[symbol]; tokenInfoCG != nil {

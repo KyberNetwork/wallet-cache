@@ -19,7 +19,7 @@ import (
 
 const (
 	ETH_TO_WEI = 1000000000000000000
-	MIN_ETH    = 0.5
+	MIN_ETH    = 0.1
 	KEY        = "kybersecret"
 )
 
@@ -523,8 +523,89 @@ func getAmountTokenWithMinETH(rate *big.Int, decimal int) *big.Int {
 	return amountInt
 }
 
-func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
-	//append rate
+func tokenWei(decimal int) *big.Int {
+	return new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(decimal)), nil)
+}
+
+func (self *Fetcher) queryRateBlockchain(fromAddr, toAddr, fromSymbol, toSymbol string, amount *big.Int) (ethereum.Rate, error) {
+	var rate ethereum.Rate
+	dataAbi, err := self.ethereum.EncodeRateData(fromAddr, toAddr, amount)
+	if err != nil {
+		log.Print(err)
+		return rate, err
+	}
+
+	for _, fetIns := range self.fetIns {
+		result, err := fetIns.GetRate(self.info.Network, dataAbi)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		rate, err := self.ethereum.ExtractRateData(result, fromSymbol, toSymbol)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		return rate, nil
+	}
+	return rate, errors.New("cannot get rate")
+}
+
+func (self *Fetcher) GetRate(oldRate []ethereum.Rate) ([]ethereum.Rate, error) {
+	var (
+		rates []ethereum.Rate
+		err   error
+	)
+	if len(oldRate) == 0 {
+		initRate := self.getInitRate()
+		oldRate = initRate
+	}
+	rates, err = self.getRateWrapper(oldRate)
+	if err != nil {
+		log.Println("run get rate from network")
+		rates, err = self.getRateNetwork(oldRate)
+	}
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return rates, nil
+}
+
+func (self *Fetcher) getInitRate() []ethereum.Rate {
+	listTokens := self.GetListToken()
+	ethSymbol := self.info.EthSymbol
+	ethAddr := self.info.EthAdress
+	minAmountETH := getAmountInWei(MIN_ETH)
+
+	srcArr := []string{}
+	destArr := []string{}
+	srcSymbolArr := []string{}
+	dstSymbolArr := []string{}
+	amount := []*big.Int{}
+	for _, t := range listTokens {
+		if t.Symbol == ethSymbol {
+			continue
+		}
+		srcArr = append(srcArr, ethAddr)
+		destArr = append(destArr, t.Address)
+		srcSymbolArr = append(srcSymbolArr, ethSymbol)
+		dstSymbolArr = append(dstSymbolArr, t.Symbol)
+		amount = append(amount, minAmountETH)
+	}
+	initRate, _ := self.runFetchRate(srcArr, destArr, srcSymbolArr, dstSymbolArr, amount)
+	return initRate
+}
+
+func getMapRates(rates []ethereum.Rate) map[string]ethereum.Rate {
+	m := make(map[string]ethereum.Rate)
+	for _, r := range rates {
+		m[r.Dest] = r
+	}
+	return m
+}
+
+func (self *Fetcher) makeDataGetRate(rates []ethereum.Rate) ([]string, []string, []string, []string, []*big.Int) {
 	listTokens := self.GetListToken()
 	sourceAddr := make([]string, 0)
 	sourceSymbol := make([]string, 0)
@@ -535,70 +616,81 @@ func (self *Fetcher) GetRate(rates *[]ethereum.Rate) (*[]ethereum.Rate, error) {
 	ethSymbol := self.info.EthSymbol
 	ethAddr := self.info.EthAdress
 	minAmountETH := getAmountInWei(MIN_ETH)
+	mapRate := getMapRates(rates)
 
-	if len(*rates) > 0 && len(*rates) == len(listTokens)*2 {
-		for _, rate := range *rates {
-			if rate.Source == "ETH" && rate.Dest == "ETH" {
-				continue
-			}
-			if rate.Source == "ETH" {
-				amountToken := big.NewInt(0)
-				r := big.NewInt(0)
-				r.SetString(rate.Rate, 10)
-				destSym := rate.Dest
-				if destToken, ok := listTokens[destSym]; ok {
-					decimal := destToken.Decimal
-					if decimal != 0 || r.Cmp(amountToken) != 0 {
-						amountToken = getAmountTokenWithMinETH(r, decimal)
-					}
-					amount = append(amount, amountToken)
-					tokenAddr := destToken.Address
-					sourceAddr = append(sourceAddr, tokenAddr)
-					sourceSymbol = append(sourceSymbol, destSym)
-				}
-			} else {
-				if _, ok := listTokens[rate.Source]; ok {
-					destAddr = append(destAddr, ethAddr)
-					destSymbol = append(destSymbol, ethSymbol)
-					amountETH = append(amountETH, minAmountETH)
-				}
-			}
+	for _, t := range listTokens {
+		if t.Symbol == "ETH" {
+			continue
 		}
-		sourceAddr = append(sourceAddr, ethAddr)
+		decimal := t.Decimal
+		amountToken := tokenWei(decimal)
+		if rate, ok := mapRate[t.Symbol]; ok {
+			r := new(big.Int)
+			r.SetString(rate.Rate, 10)
+			if r.Cmp(new(big.Int)) != 0 {
+				amountToken = getAmountTokenWithMinETH(r, decimal)
+			}
+		} else {
+			amountToken = tokenWei(t.Decimal / 2)
+		}
+		sourceAddr = append(sourceAddr, t.Address)
 		destAddr = append(destAddr, ethAddr)
-		sourceSymbol = append(sourceSymbol, ethSymbol)
+		sourceSymbol = append(sourceSymbol, t.Symbol)
 		destSymbol = append(destSymbol, ethSymbol)
-		amount = append(amount, minAmountETH)
+		amount = append(amount, amountToken)
 		amountETH = append(amountETH, minAmountETH)
-	} else {
-		for _, token := range listTokens {
-			sourceAddr = append(sourceAddr, token.Address)
-			sourceSymbol = append(sourceSymbol, token.Symbol)
-			destAddr = append(destAddr, ethAddr)
-			destSymbol = append(destSymbol, ethSymbol)
-			amount = append(amount, big.NewInt(0))
-			amountETH = append(amountETH, minAmountETH)
-		}
 	}
+	sourceAddr = append(sourceAddr, ethAddr)
+	destAddr = append(destAddr, ethAddr)
+	sourceSymbol = append(sourceSymbol, ethSymbol)
+	destSymbol = append(destSymbol, ethSymbol)
+	amount = append(amount, minAmountETH)
+	amountETH = append(amountETH, minAmountETH)
+
 	sourceArr := append(sourceAddr, destAddr...)
 	sourceSymbolArr := append(sourceSymbol, destSymbol...)
 	destArr := append(destAddr, sourceAddr...)
 	destSymbolArr := append(destSymbol, sourceSymbol...)
 	amountArr := append(amount, amountETH...)
 
-	dataAbi, err := self.ethereum.EncodeRateData(sourceArr, destArr, amountArr)
+	return sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr
+}
+
+func (self *Fetcher) getRateNetwork(oldRates []ethereum.Rate) ([]ethereum.Rate, error) {
+	var result []ethereum.Rate
+	sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr := self.makeDataGetRate(oldRates)
+
+	for index, source := range sourceArr {
+		rate, err := self.queryRateBlockchain(source, destArr[index], sourceSymbolArr[index], destSymbolArr[index], amountArr[index])
+		if err != nil {
+			log.Printf("cant get rate ETH_%s", sourceSymbolArr[index])
+			result = append(result, ethereum.Rate{})
+		} else {
+			result = append(result, rate)
+		}
+	}
+	return result, nil
+}
+
+func (self *Fetcher) getRateWrapper(rates []ethereum.Rate) ([]ethereum.Rate, error) {
+	sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr := self.makeDataGetRate(rates)
+	return self.runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbolArr, amountArr)
+}
+
+func (self *Fetcher) runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbolArr []string, amountArr []*big.Int) ([]ethereum.Rate, error) {
+	dataAbi, err := self.ethereum.EncodeRateDataWrapper(sourceArr, destArr, amountArr)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
 
 	for _, fetIns := range self.fetIns {
-		result, err := fetIns.EthCall(self.info.Wapper, dataAbi)
+		result, err := fetIns.GetRate(self.info.Wapper, dataAbi)
 		if err != nil {
 			log.Print(err)
 			continue
 		}
-		rates, err := self.ethereum.ExtractRateData(result, sourceSymbolArr, destSymbolArr)
+		rates, err := self.ethereum.ExtractRateDataWrapper(result, sourceSymbolArr, destSymbolArr)
 		if err != nil {
 			log.Print(err)
 			continue

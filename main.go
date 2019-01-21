@@ -84,7 +84,7 @@ func main() {
 	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
 
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
-	runFetchData(persisterIns, fetchRate, fertcherIns, 20)
+	runFetchData(persisterIns, fetchRate, fertcherIns, 180)
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
@@ -209,11 +209,11 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	rates, err := fetcher.GetRate(currentRate)
 	if err != nil {
 		log.Print(err)
-		//persister.SetNewRate(false)
+		persister.SetIsNewRate(false)
 		return
 	}
 	persister.SaveRate(rates)
-	//	persister.SetNewRate(true)
+	persister.SetIsNewRate(true)
 }
 
 // func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {

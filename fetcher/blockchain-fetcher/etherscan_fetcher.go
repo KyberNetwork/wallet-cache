@@ -2,6 +2,7 @@ package bfetcher
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 
 	"github.com/KyberNetwork/server-go/ethereum"
@@ -48,6 +49,10 @@ func (self *Etherscan) EthCall(to string, data string) (string, error) {
 
 	return result.Result, nil
 
+}
+
+func (self *Etherscan) GetRate(to string, data string) (string, error) {
+	return "", errors.New("not support this func")
 }
 
 func (self *Etherscan) GetLatestBlock() (string, error) {
