@@ -33,7 +33,7 @@ type RamPersister struct {
 	kyberEnabled      bool
 	isNewKyberEnabled bool
 
-	rates     *[]ethereum.Rate
+	rates     []ethereum.Rate
 	isNewRate bool
 
 	latestBlock      string
@@ -84,7 +84,7 @@ func NewRamPersister() (*RamPersister, error) {
 	kyberEnabled := true
 	isNewKyberEnabled := true
 
-	rates := make([]ethereum.Rate, 0)
+	rates := []ethereum.Rate{}
 	isNewRate := true
 
 	latestBlock := "0"
@@ -128,7 +128,7 @@ func NewRamPersister() (*RamPersister, error) {
 		timeRun:           timeRun,
 		kyberEnabled:      kyberEnabled,
 		isNewKyberEnabled: isNewKyberEnabled,
-		rates:             &rates,
+		rates:             rates,
 		isNewRate:         isNewRate,
 		latestBlock:       latestBlock,
 		isNewLatestBlock:  isNewLatestBlock,
@@ -171,7 +171,7 @@ func (self *RamPersister) GetTokenInfo() map[string]*ethereum.TokenGeneralInfo {
 }
 
 /////------------------------------
-func (self *RamPersister) GetRate() *[]ethereum.Rate {
+func (self *RamPersister) GetRate() []ethereum.Rate {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
 	return self.rates
@@ -190,7 +190,7 @@ func (self *RamPersister) GetIsNewRate() bool {
 	return self.isNewRate
 }
 
-func (self *RamPersister) SaveRate(rates *[]ethereum.Rate) {
+func (self *RamPersister) SaveRate(rates []ethereum.Rate) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.rates = rates
@@ -326,7 +326,7 @@ func (self *RamPersister) SaveRateUSD(rateUSDEth string) error {
 	// itemRateEthCG := RateUSD{Symbol: "ETH", PriceUsd: rateUSDEthCG}
 	rates = append(rates, itemRateEth)
 	// ratesCG = append(ratesCG, itemRateEthCG)
-	for _, item := range *(self.rates) {
+	for _, item := range self.rates {
 		if item.Source != "ETH" {
 			priceUsd, err := CalculateRateUSD(item.Rate, rateUSDEth)
 			if err != nil {

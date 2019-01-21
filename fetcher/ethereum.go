@@ -14,6 +14,11 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 
+type RateNetwork struct {
+	ExpectedRate *big.Int `json:"expectedRate"`
+	SlippageRate *big.Int `json:"slippageRate"`
+}
+
 type RateWrapper struct {
 	ExpectedRate []*big.Int `json:"expectedRate"`
 	SlippageRate []*big.Int `json:"slippageRate"`
@@ -49,7 +54,26 @@ func NewEthereum(network string, networkAbiStr string, tradeTopic string, wrappe
 	return ethereum, nil
 }
 
-func (self *Ethereum) EncodeRateData(source []string, dest []string, quantity []*big.Int) (string, error) {
+func getOrAmount(amount *big.Int) *big.Int {
+	orNumber := big.NewInt(0).Exp(big.NewInt(2), big.NewInt(255), nil)
+	orAmount := big.NewInt(0).Or(amount, orNumber)
+	return orAmount
+}
+
+func (self *Ethereum) EncodeRateData(source, dest string, quantity *big.Int) (string, error) {
+	srcAddr := common.HexToAddress(source)
+	destAddr := common.HexToAddress(dest)
+
+	encodedData, err := self.networkAbi.Pack("getExpectedRate", srcAddr, destAddr, getOrAmount(quantity))
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+
+	return common.Bytes2Hex(encodedData), nil
+}
+
+func (self *Ethereum) EncodeRateDataWrapper(source, dest []string, quantity []*big.Int) (string, error) {
 	sourceList := make([]common.Address, 0)
 	for _, sourceItem := range source {
 		sourceList = append(sourceList, common.HexToAddress(sourceItem))
@@ -61,7 +85,7 @@ func (self *Ethereum) EncodeRateData(source []string, dest []string, quantity []
 
 	quantityList := make([]*big.Int, 0)
 	for _, quanItem := range quantity {
-		quantityList = append(quantityList, quanItem)
+		quantityList = append(quantityList, getOrAmount(quanItem))
 	}
 
 	encodedData, err := self.wrapperAbi.Pack("getExpectedRates", common.HexToAddress(self.network), sourceList, destList, quantityList)
@@ -121,7 +145,29 @@ func (self *Ethereum) ExtractMaxGasPrice(result string) (string, error) {
 	return gasPrice.String(), nil
 }
 
-func (self *Ethereum) ExtractRateData(result string, sourceArr []string, destAddr []string) (*[]ethereum.Rate, error) {
+func (self *Ethereum) ExtractRateData(result string, sourceSymbol, destSymbol string) (ethereum.Rate, error) {
+	var rate ethereum.Rate
+	rateByte, err := hexutil.Decode(result)
+	if err != nil {
+		log.Print(err)
+		return rate, err
+	}
+	var rateNetwork RateNetwork
+	err = self.networkAbi.Unpack(&rateNetwork, "getExpectedRate", rateByte)
+	if err != nil {
+		log.Print(err)
+		return rate, err
+	}
+
+	return ethereum.Rate{
+		Source:  sourceSymbol,
+		Dest:    destSymbol,
+		Rate:    rateNetwork.ExpectedRate.String(),
+		Minrate: rateNetwork.SlippageRate.String(),
+	}, nil
+}
+
+func (self *Ethereum) ExtractRateDataWrapper(result string, sourceArr, destAddr []string) ([]ethereum.Rate, error) {
 	rateByte, err := hexutil.Decode(result)
 	if err != nil {
 		log.Print(err)
@@ -151,7 +197,7 @@ func (self *Ethereum) ExtractRateData(result string, sourceArr []string, destAdd
 			source, dest, rate.String(), minRate.String(),
 		})
 	}
-	return &rateReturn, nil
+	return rateReturn, nil
 }
 
 func (self *Ethereum) ReadEventsWithBlockNumber(eventRaw *[]ethereum.EventRaw, latestBlock string) (*[]ethereum.EventHistory, error) {
