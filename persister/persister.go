@@ -30,11 +30,11 @@ type RateUSD struct {
 }
 
 type Persister interface {
-	GetRate() *[]ethereum.Rate
+	GetRate() []ethereum.Rate
 	GetIsNewRate() bool
 	SetIsNewRate(bool)
 
-	SaveRate(*[]ethereum.Rate)
+	SaveRate([]ethereum.Rate)
 
 	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
 	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
