@@ -35,6 +35,7 @@ type RamPersister struct {
 
 	rates     []ethereum.Rate
 	isNewRate bool
+	updatedAt int64
 
 	latestBlock      string
 	isNewLatestBlock bool
@@ -130,6 +131,7 @@ func NewRamPersister() (*RamPersister, error) {
 		isNewKyberEnabled: isNewKyberEnabled,
 		rates:             rates,
 		isNewRate:         isNewRate,
+		updatedAt:         0,
 		latestBlock:       latestBlock,
 		isNewLatestBlock:  isNewLatestBlock,
 		rateUSD:           rateUSD,
@@ -177,6 +179,12 @@ func (self *RamPersister) GetRate() []ethereum.Rate {
 	return self.rates
 }
 
+func (self *RamPersister) GetTimeUpdateRate() int64 {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.updatedAt
+}
+
 func (self *RamPersister) SetIsNewRate(isNewRate bool) {
 	self.mu.RLock()
 	defer self.mu.RUnlock()
@@ -190,10 +198,11 @@ func (self *RamPersister) GetIsNewRate() bool {
 	return self.isNewRate
 }
 
-func (self *RamPersister) SaveRate(rates []ethereum.Rate) {
+func (self *RamPersister) SaveRate(rates []ethereum.Rate, timestamp int64) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.rates = rates
+	self.updatedAt = timestamp
 }
 
 //--------------------------------------------------------
