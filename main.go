@@ -212,7 +212,8 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		persister.SetIsNewRate(false)
 		return
 	}
-	persister.SaveRate(rates)
+	timeNow := time.Now().UTC().Unix()
+	persister.SaveRate(rates, timeNow)
 	persister.SetIsNewRate(true)
 }
 
