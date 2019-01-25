@@ -33,8 +33,9 @@ type Persister interface {
 	GetRate() []ethereum.Rate
 	GetIsNewRate() bool
 	SetIsNewRate(bool)
+	GetTimeUpdateRate() int64
 
-	SaveRate([]ethereum.Rate)
+	SaveRate([]ethereum.Rate, int64)
 
 	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
 	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
