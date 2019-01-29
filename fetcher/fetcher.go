@@ -536,6 +536,9 @@ func (self *Fetcher) queryRateBlockchain(fromAddr, toAddr, fromSymbol, toSymbol 
 	}
 
 	for _, fetIns := range self.fetIns {
+		if fetIns.GetTypeName() == "etherscan" {
+			continue
+		}
 		result, err := fetIns.GetRate(self.info.Network, dataAbi)
 		if err != nil {
 			log.Print(err)
@@ -562,7 +565,8 @@ func (self *Fetcher) GetRate(oldRate []ethereum.Rate) ([]ethereum.Rate, error) {
 	}
 	rates, err = self.getRateWrapper(oldRate)
 	if err != nil {
-		log.Println("run get rate from network")
+		log.Println("cannot get rate from wrapper")
+		log.Println("get rate from network")
 		rates, err = self.getRateNetwork(oldRate)
 	}
 	if err != nil {
@@ -661,10 +665,18 @@ func (self *Fetcher) getRateNetwork(oldRates []ethereum.Rate) ([]ethereum.Rate, 
 	sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr := self.makeDataGetRate(oldRates)
 
 	for index, source := range sourceArr {
-		rate, err := self.queryRateBlockchain(source, destArr[index], sourceSymbolArr[index], destSymbolArr[index], amountArr[index])
+		sourceSymbol := sourceSymbolArr[index]
+		destSymbol := destSymbolArr[index]
+		rate, err := self.queryRateBlockchain(source, destArr[index], sourceSymbol, destSymbol, amountArr[index])
 		if err != nil {
-			log.Printf("cant get rate ETH_%s", sourceSymbolArr[index])
-			result = append(result, ethereum.Rate{})
+			log.Printf("cant get rate pair %s_%s", sourceSymbol, destSymbol)
+			emptyRate := ethereum.Rate{
+				Source:  sourceSymbol,
+				Dest:    destSymbol,
+				Rate:    "0",
+				Minrate: "0",
+			}
+			result = append(result, emptyRate)
 		} else {
 			result = append(result, rate)
 		}

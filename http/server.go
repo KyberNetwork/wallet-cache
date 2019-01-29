@@ -36,9 +36,10 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 	}
 
 	rates := self.persister.GetRate()
+	updateAt := self.persister.GetTimeUpdateRate()
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": true, "data": rates},
+		gin.H{"success": true, "updateAt": updateAt, "data": rates},
 	)
 }
 
@@ -325,7 +326,7 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/getRate", self.GetRate)
 	self.r.GET("/rate", self.GetRate)
-  
+
 	// self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
 	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
