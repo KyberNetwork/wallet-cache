@@ -461,6 +461,7 @@ func (self *RamPersister) SetIsNewTrackerData(isNewTrackerData bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewTrackerData = isNewTrackerData
+	self.numRequestFailedTracker = 0
 }
 
 func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
