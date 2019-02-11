@@ -245,13 +245,13 @@ func (self *HTTPServer) GetLast7D(c *gin.Context) {
 	if self.persister.GetIsNewTrackerData() {
 		c.JSON(
 			http.StatusOK,
-			gin.H{"success": true, "data": data},
+			gin.H{"success": true, "data": data, "status": "latest"},
 		)
 		return
 	}
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": false, "error": "cannot fetch data from tracker"},
+		gin.H{"success": true, "data": data, "status": "old"},
 	)
 }
 
