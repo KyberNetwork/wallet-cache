@@ -261,12 +261,14 @@ func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	data, err := fetcher.FetchTrackerData()
 	if err != nil {
 		log.Print(err)
+		if !persister.IsFailedToFetchTracker() {
+			return
+		}
 		persister.SetIsNewTrackerData(false)
-		// return
 	} else {
 		persister.SetIsNewTrackerData(true)
 	}
 	tokens := fetcher.GetListToken()
 	persister.SaveMarketData(data, tokens)
-	persister.SetIsNewMarketInfo(true)
+	// persister.SetIsNewMarketInfo(true)
 }

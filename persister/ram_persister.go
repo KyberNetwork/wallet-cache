@@ -65,9 +65,10 @@ type RamPersister struct {
 
 	//isNewTokenInfo bool
 
-	marketInfo       map[string]*ethereum.MarketInfo
-	last7D           map[string][]float64
-	isNewTrackerData bool
+	marketInfo              map[string]*ethereum.MarketInfo
+	last7D                  map[string][]float64
+	isNewTrackerData        bool
+	numRequestFailedTracker int
 
 	rightMarketInfo map[string]*ethereum.RightMarketInfo
 	// rightMarketInfoCG map[string]*ethereum.RightMarketInfo
@@ -148,10 +149,11 @@ func NewRamPersister() (*RamPersister, error) {
 		isNewGasPrice:    isNewGasPrice,
 		tokenInfo:        tokenInfo,
 		// tokenInfoCG:       tokenInfoCG,
-		marketInfo:       marketInfo,
-		last7D:           last7D,
-		isNewTrackerData: isNewTrackerData,
-		rightMarketInfo:  rightMarketInfo,
+		marketInfo:              marketInfo,
+		last7D:                  last7D,
+		isNewTrackerData:        isNewTrackerData,
+		numRequestFailedTracker: 0,
+		rightMarketInfo:         rightMarketInfo,
 		// rightMarketInfoCG: rightMarketInfoCG,
 		isNewMarketInfo: isNewMarketInfo,
 		// isNewMarketInfoCG: isNewMarketInfoCG,
@@ -459,6 +461,7 @@ func (self *RamPersister) SetIsNewTrackerData(isNewTrackerData bool) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.isNewTrackerData = isNewTrackerData
+	self.numRequestFailedTracker = 0
 }
 
 func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
@@ -477,55 +480,32 @@ func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
 func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, tokens map[string]ethereum.Token) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	// resultMarketInfo := []map[string]*ethereum.MarketInfo{}
-	// result := map[string]*ethereum.MarketInfo{}
 	lastSevenDays := map[string][]float64{}
 	newResult := map[string]*ethereum.RightMarketInfo{}
-	// newResultCG := map[string]*ethereum.RightMarketInfo{}
 
-	for symbol, _ := range tokens {
-		// marketInfo := &ethereum.MarketInfo{}
+	for symbol := range tokens {
 		dataSevenDays := []float64{}
 		rightMarketInfo := &ethereum.RightMarketInfo{}
-		// rightMarketInfoCG := &ethereum.RightMarketInfo{}
 		rateInfo := marketRate[symbol]
 		if rateInfo != nil {
-			// marketInfo.Rates = rateInfo
 			dataSevenDays = rateInfo.P
 			rightMarketInfo.Rate = &rateInfo.R
-			// rightMarketInfoCG.Rate = &rateInfo.R
 		}
 		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
-			// marketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Change24H = tokenInfo.Change24H
 		}
 
-		// if tokenInfoCG := self.tokenInfoCG[symbol]; tokenInfoCG != nil {
-		// marketInfo.Quotes = tokenInfo.Quotes
-		// rightMarketInfoCG.Quotes = tokenInfoCG.Quotes
-		// }
-
 		if rateInfo == nil && rightMarketInfo.Quotes == nil {
-			// newResult[symbol] = rightMarketInfo
-			// lastSevenDays[symbol] = dataSevenDays
 			continue
 		}
 
-		// // if rightMarketInfoCG.Rate != nil && rightMarketInfoCG.Quotes != nil {
-		// newResultCG[symbol] = rightMarketInfoCG
-		// lastSevenDays[symbol] = dataSevenDays
-		// }
-
-		// result[symbol] = marketInfo
 		newResult[symbol] = rightMarketInfo
 		lastSevenDays[symbol] = dataSevenDays
 	}
 
-	// self.marketInfo = result
 	self.last7D = lastSevenDays
 	self.rightMarketInfo = newResult
-	// self.rightMarketInfoCG = newResultCG
 }
 
 func (self *RamPersister) SetIsNewMarketInfo(isNewMarketInfo bool) {
@@ -556,4 +536,14 @@ func (self *RamPersister) GetTimeVersion() string {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	return self.timeRun
+}
+
+func (self *RamPersister) IsFailedToFetchTracker() bool {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.numRequestFailedTracker++
+	if self.numRequestFailedTracker > 2 {
+		return true
+	}
+	return false
 }
