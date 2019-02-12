@@ -542,7 +542,7 @@ func (self *RamPersister) IsFailedToFetchTracker() bool {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.numRequestFailedTracker++
-	if self.numRequestFailedTracker > 2 {
+	if self.numRequestFailedTracker > 12 {
 		return true
 	}
 	return false
