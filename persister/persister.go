@@ -81,6 +81,8 @@ type Persister interface {
 	GetIsNewMarketInfo() bool
 	// GetIsNewMarketInfoCG() bool
 	GetTimeVersion() string
+
+	IsFailedToFetchTracker() bool
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
