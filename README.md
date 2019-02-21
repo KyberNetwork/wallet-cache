@@ -85,28 +85,16 @@ Response:
 {
     "data": [
         {
-            "source": "0xa94758d328af7ef1815e73053e95b5f86588c16d",
-            "dest": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "rate": "0",
-            "minRate": "0"
+            "source": "POWR",
+            "dest": "ETH",
+            "rate": "580350000000000",
+            "minRate": "562939500000000"
         },
         {
-            "source": "0x7a17267576318efb728bc4a0833e489a46ba138f",
-            "dest": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "rate": "0",
-            "minRate": "0"
-        },
-        {
-            "source": "0x72fd6c7c1397040a66f33c2ecc83a0f71ee46d5c",
-            "dest": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "rate": "178480000000000",
-            "minRate": "0"
-        },
-        {
-            "source": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-            "dest": "0x95cc8d8f29d0f7fcc425e8708893e759d1599c97",
-            "rate": "287229960000000000000",
-            "minRate": "278613061200000000000"
+            "source": "REQ",
+            "dest": "ETH",
+            "rate": "251549999999999",
+            "minRate": "244003499999999"
         }
     ],
     "success": true
@@ -166,48 +154,34 @@ Response:
 ```javascript
 {
     "data": {
-        "0x1742c81075031b8f173d2327e3479d1fc3feaa76": {
-            "rate": null,
-            "change_24h": "3.71950684029737",
+        "ABYSS": {
+            "rate": 0.000041852212356469,
+            "change_24h": "-0.394025094063878",
             "quotes": {
                 "ETH": {
-                    "market_cap": 52535.45868371555,
-                    "volume_24h": 1715.0882823743132
+                    "market_cap": 10157.605967244439,
+                    "volume_24h": 851.7915794548644
                 },
                 "USD": {
-                    "market_cap": 7904239.161183325,
-                    "volume_24h": 258066.9832533837
+                    "market_cap": 1461685.3215727722,
+                    "volume_24h": 122573.29657632124
                 }
             }
         },
-        "0x2799f05b55d56be756ca01af40bf7350787f48d4": {
-            "rate": null,
-            "change_24h": "2.7791374304334",
+        "ADX": {
+            "rate": 0.000847373339761277,
+            "change_24h": "-2.68156999862817",
             "quotes": {
                 "ETH": {
-                    "market_cap": 32373.764520744804,
-                    "volume_24h": 646.0999704525954
+                    "market_cap": 70549.85998080991,
+                    "volume_24h": 7525.880561645942
                 },
                 "USD": {
-                    "market_cap": 4870803.400472581,
-                    "volume_24h": 97209.1438766459
+                    "market_cap": 10227848.101636952,
+                    "volume_24h": 1084130.1458401734
                 }
             }
         },
-        "0x499990db50b34687cdafb2c8dabae4e99d6f38a7": {
-            "rate": null,
-            "change_24h": "1.08168964231987",
-            "quotes": {
-                "ETH": {
-                    "market_cap": 55691.72455294219,
-                    "volume_24h": 2844.0081889865687
-                },
-                "USD": {
-                    "market_cap": 8379113.314326793,
-                    "volume_24h": 427896.01280416525
-                }
-            }
-        }
     },
     "status": "latest",
     "success": true
