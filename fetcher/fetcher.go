@@ -67,6 +67,7 @@ type InfoData struct {
 	GasStationEndpoint string `json:"gasstation_endpoint"`
 	TrackerEndpoint    string `json:"tracker_endpoint"`
 	ConfigEndpoint     string `json:"config_endpoint"`
+	UserStatsEndpoint  string `json:"user_stats_endpoint"`
 }
 
 func (self *InfoData) GetListToken() map[string]ethereum.Token {
@@ -782,7 +783,7 @@ func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
 
 func (self *Fetcher) FetchUserInfo(address string) (common.UserInfo, error) {
 	userInfo := common.UserInfo{}
-	userInfo, err := self.httpFetcher.GetUserInfo(address)
+	userInfo, err := self.httpFetcher.GetUserInfo(self.info.UserStatsEndpoint + "users?address=" + address)
 	if err != nil {
 		return userInfo, errors.New("Cannot get user info")
 	}

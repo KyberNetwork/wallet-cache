@@ -103,11 +103,8 @@ func (self *HTTPFetcher) GetTrackerData() (map[string]*ethereum.Rates, error) {
 	return trackerData, nil
 }
 
-func (self *HTTPFetcher) GetUserInfo(address string) (common.UserInfo, error) {
+func (self *HTTPFetcher) GetUserInfo(url string) (common.UserInfo, error) {
 	userInfo := common.UserInfo{}
-	url := "https://dev-users-stats.knstats.com/users?address=" + address
-	log.Println("URL: ", url)
-
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
