@@ -40,7 +40,8 @@ docker-compose -f docker-compose-staging.yml up --build
  - /last7D: ```params: listToken=KNC-DAI-...``` return last 7 days mid price (base on ETH) of token in listToken
   param listToken is created by linking tokens (token's symbol in uppercase) with "-"
  - /rateETH: return USD price of ETH from Coingecko
-
+ - /users: ```params: address=0x2262d4f6312805851e3b27c40db2c7282e6e4a42``` return user stats info
+ 
 ## Cache version
  - /cacheVersion: return current cache version
  
@@ -296,5 +297,19 @@ Response:
 {
     "data": "14:40:42 09-01-2019",
     "success": true
+}
+```
+
+### 11. Get UserInfo
+`/users?address=0x2262d4f6312805851e3b27c40db2c7282e6e4a42`
+
+(GET) Return User stats info
+
+Response:
+```javascript
+{
+    "cap": 40304044000000000000,
+    "kyced": true,
+    "rich": false
 }
 ```
