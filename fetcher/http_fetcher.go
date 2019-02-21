@@ -103,17 +103,17 @@ func (self *HTTPFetcher) GetTrackerData() (map[string]*ethereum.Rates, error) {
 	return trackerData, nil
 }
 
-func (self *HTTPFetcher) GetUserInfo(url string) (common.UserInfo, error) {
-	userInfo := common.UserInfo{}
+func (self *HTTPFetcher) GetUserInfo(url string) (*common.UserInfo, error) {
+	userInfo := &common.UserInfo{}
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
-		return userInfo, err
+		return nil, err
 	}
-	err = json.Unmarshal(b, &userInfo)
+	err = json.Unmarshal(b, userInfo)
 	if err != nil {
 		log.Println(err)
-		return userInfo, err
+		return nil, err
 	}
 	return userInfo, nil
 }

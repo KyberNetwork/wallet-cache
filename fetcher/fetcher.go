@@ -781,11 +781,10 @@ func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
 	// return nil, errors.New("Cannot get data from tracker")
 }
 
-func (self *Fetcher) FetchUserInfo(address string) (common.UserInfo, error) {
-	userInfo := common.UserInfo{}
+func (self *Fetcher) FetchUserInfo(address string) (*common.UserInfo, error) {
 	userInfo, err := self.httpFetcher.GetUserInfo(self.info.UserStatsEndpoint + "users?address=" + address)
 	if err != nil {
-		return userInfo, errors.New("Cannot get user info")
+		return nil, errors.New("Cannot get user info")
 	}
 	return userInfo, nil
 }
