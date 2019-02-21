@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/KyberNetwork/server-go/common"
 	"github.com/KyberNetwork/server-go/ethereum"
 	fCommon "github.com/KyberNetwork/server-go/fetcher/fetcher-common"
 )
@@ -100,4 +101,19 @@ func (self *HTTPFetcher) GetTrackerData() (map[string]*ethereum.Rates, error) {
 		return nil, err
 	}
 	return trackerData, nil
+}
+
+func (self *HTTPFetcher) GetUserInfo(url string) (*common.UserInfo, error) {
+	userInfo := &common.UserInfo{}
+	b, err := fCommon.HTTPCall(url)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	err = json.Unmarshal(b, userInfo)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return userInfo, nil
 }

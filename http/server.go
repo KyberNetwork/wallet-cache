@@ -315,6 +315,22 @@ func (self *HTTPServer) RemoveToken(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) GetUserInfo(c *gin.Context) {
+	address := c.Query("address")
+	userInfo, err := self.fetcher.FetchUserInfo(address)
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		userInfo,
+	)
+}
+
 func (self *HTTPServer) Run(kyberENV string) {
 	//self.r.GET("/getRate", self.GetRate)
 	// self.r.GET("/getHistoryOneColumn", self.GetEvent)
@@ -348,6 +364,8 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/rateETH", self.GetRateETH)
 
 	self.r.GET("/cacheVersion", self.getCacheVersion)
+
+	self.r.GET("/users", self.GetUserInfo)
 
 	// self.r.GET("/coingecko/marketInfo", self.GetRightMarketInfoCG)
 	// self.r.GET("/coingecko/rateUSD/", self.GetRateUSDCG)
