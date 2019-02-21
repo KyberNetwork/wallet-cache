@@ -13,6 +13,7 @@ import (
 	// "strconv"
 	"time"
 
+	"github.com/KyberNetwork/server-go/common"
 	"github.com/KyberNetwork/server-go/ethereum"
 	// nFetcher "github.com/KyberNetwork/server-go/fetcher/normal-fetcher"
 )
@@ -777,4 +778,13 @@ func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
 	return result, nil
 	// }
 	// return nil, errors.New("Cannot get data from tracker")
+}
+
+func (self *Fetcher) FetchUserInfo(address string) (common.UserInfo, error) {
+	userInfo := common.UserInfo{}
+	userInfo, err := self.httpFetcher.GetUserInfo(address)
+	if err != nil {
+		return userInfo, errors.New("Cannot get user info")
+	}
+	return userInfo, nil
 }
