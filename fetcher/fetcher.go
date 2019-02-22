@@ -65,7 +65,7 @@ type InfoData struct {
 	AverageBlockTime int64 `json:"averageBlockTime"`
 
 	GasStationEndpoint string `json:"gasstation_endpoint"`
-	TrackerEndpoint    string `json:"tracker_endpoint"`
+	APIEndpoint        string `json:"api_endpoint"`
 	ConfigEndpoint     string `json:"config_endpoint"`
 	UserStatsEndpoint  string `json:"user_stats_endpoint"`
 }
@@ -299,7 +299,7 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	// }
 	marketFetcherIns := NewMarketFetcherInterface()
 
-	httpFetcher := NewHTTPFetcher(infoData.ConfigEndpoint, infoData.GasStationEndpoint, infoData.TrackerEndpoint)
+	httpFetcher := NewHTTPFetcher(infoData.ConfigEndpoint, infoData.GasStationEndpoint, infoData.APIEndpoint)
 
 	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi, infoData.TradeTopic,
 		infoData.Wapper, infoData.WrapperAbi, infoData.AverageBlockTime)
@@ -768,9 +768,9 @@ func (self *Fetcher) GetLatestBlock() (string, error) {
 // 	return nil, errors.New("Cannot get events")
 // }
 
-func (self *Fetcher) FetchTrackerData() (map[string]*ethereum.Rates, error) {
+func (self *Fetcher) FetchRate7dData() (map[string]*ethereum.Rates, error) {
 	// for _, fetIns := range self.fetIns {
-	result, err := self.httpFetcher.GetTrackerData()
+	result, err := self.httpFetcher.GetRate7dData()
 	if err != nil {
 		log.Print(err)
 		// continue

@@ -88,7 +88,7 @@ func main() {
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
-	runFetchData(persisterIns, fetchTrackerData, fertcherIns, 300)
+	runFetchData(persisterIns, fetchRate7dData, fertcherIns, 300)
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
@@ -257,8 +257,8 @@ func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetc
 // 	persister.SetNewKyberEnable(true)
 // }
 
-func fetchTrackerData(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	data, err := fetcher.FetchTrackerData()
+func fetchRate7dData(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	data, err := fetcher.FetchRate7dData()
 	if err != nil {
 		log.Print(err)
 		if !persister.IsFailedToFetchTracker() {

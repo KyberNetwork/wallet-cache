@@ -20,14 +20,14 @@ const (
 type HTTPFetcher struct {
 	tradingAPIEndpoint string
 	gasStationEndPoint string
-	trackerEndpoint    string
+	apiEndpoint        string
 }
 
-func NewHTTPFetcher(tradingAPIEndpoint, gasStationEndpoint, trackerEndpoint string) *HTTPFetcher {
+func NewHTTPFetcher(tradingAPIEndpoint, gasStationEndpoint, apiEndpoint string) *HTTPFetcher {
 	return &HTTPFetcher{
 		tradingAPIEndpoint: tradingAPIEndpoint,
 		gasStationEndPoint: gasStationEndpoint,
-		trackerEndpoint:    trackerEndpoint,
+		apiEndpoint:        apiEndpoint,
 	}
 }
 
@@ -87,8 +87,8 @@ func (self *HTTPFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
 
 // get data from tracker.kyber
 
-func (self *HTTPFetcher) GetTrackerData() (map[string]*ethereum.Rates, error) {
-	trackerAPI := self.trackerEndpoint + "/api/tokens/rates?api_key=" + API_KEY_TRACKER
+func (self *HTTPFetcher) GetRate7dData() (map[string]*ethereum.Rates, error) {
+	trackerAPI := self.apiEndpoint + "/rates7d"
 	b, err := fCommon.HTTPCall(trackerAPI)
 	if err != nil {
 		log.Print(err)

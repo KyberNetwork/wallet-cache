@@ -30,7 +30,7 @@
   "trade_topic": "0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "tracker_endpoint":"https://staging-tracker.knstats.com",
+  "api_endpoint":"https://staging-api.knstats.com",
   "config_endpoint": "https://staging-api.knstats.com/internal/currencies",
   "user_stats_endpoint": "https://users-stats.knstats.com/",
 
