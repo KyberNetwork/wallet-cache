@@ -21,6 +21,8 @@ const (
 	ETH_TO_WEI = 1000000000000000000
 	MIN_ETH    = 0.1
 	KEY        = "kybersecret"
+
+	timeW8Req = 2
 )
 
 // type Token struct {
@@ -668,6 +670,7 @@ func (self *Fetcher) getRateNetwork(oldRates []ethereum.Rate) ([]ethereum.Rate, 
 		sourceSymbol := sourceSymbolArr[index]
 		destSymbol := destSymbolArr[index]
 		rate, err := self.queryRateBlockchain(source, destArr[index], sourceSymbol, destSymbol, amountArr[index])
+		time.Sleep(timeW8Req * time.Second)
 		if err != nil {
 			log.Printf("cant get rate pair %s_%s", sourceSymbol, destSymbol)
 			emptyRate := ethereum.Rate{
