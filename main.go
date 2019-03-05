@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/KyberNetwork/server-go/common"
+	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/KyberNetwork/server-go/fetcher"
 	"github.com/KyberNetwork/server-go/http"
 	persister "github.com/KyberNetwork/server-go/persister"
@@ -35,13 +38,13 @@ func main() {
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	if os.Getenv("LOG_TO_STDOUT") != "true" {
-		f, err := enableLogToFile()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-	}
+	// if os.Getenv("LOG_TO_STDOUT") != "true" {
+	// 	f, err := enableLogToFile()
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	defer f.Close()
+	// }
 
 	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
@@ -62,7 +65,36 @@ func main() {
 			fertcherIns.TryUpdateListToken()
 		}
 	}()
-
+	var (
+		initRate  []ethereum.Rate
+		ethSymbol = common.ETHSymbol
+	)
+	for symbol := range fertcherIns.GetListToken() {
+		if symbol == ethSymbol {
+			ethRate := ethereum.Rate{
+				Source:  ethSymbol,
+				Dest:    ethSymbol,
+				Rate:    "0",
+				Minrate: "0",
+			}
+			initRate = append(initRate, ethRate, ethRate)
+		} else {
+			buyRate := ethereum.Rate{
+				Source:  ethSymbol,
+				Dest:    symbol,
+				Rate:    "0",
+				Minrate: "0",
+			}
+			sellRate := ethereum.Rate{
+				Source:  symbol,
+				Dest:    ethSymbol,
+				Rate:    "0",
+				Minrate: "0",
+			}
+			initRate = append(initRate, buyRate, sellRate)
+		}
+	}
+	persisterIns.SaveRate(initRate, 0)
 	tokenNum := fertcherIns.GetNumTokens()
 	bonusTimeWait := 900
 	if tokenNum > 200 {
@@ -84,7 +116,8 @@ func main() {
 	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
 
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
-	runFetchData(persisterIns, fetchRate, fertcherIns, 180)
+	runFetchData(persisterIns, fetchRate, fertcherIns, 30)
+	runFetchData(persisterIns, fetchRateWithFallback, fertcherIns, 600)
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
@@ -204,58 +237,85 @@ func fetchBlockNumber(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	}
 }
 
+func makeMapRate(rates []ethereum.Rate) map[string]ethereum.Rate {
+	mapRate := make(map[string]ethereum.Rate)
+	for _, r := range rates {
+		mapRate[fmt.Sprintf("%s_%s", r.Source, r.Dest)] = r
+	}
+	return mapRate
+}
+
 func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	var result []ethereum.Rate
 	currentRate := persister.GetRate()
-	rates, err := fetcher.GetRate(currentRate)
+	tokenPriority := fetcher.GetListTokenPriority()
+	rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), tokenPriority, false)
 	if err != nil {
 		log.Print(err)
 		persister.SetIsNewRate(false)
 		return
 	}
+	mapRate := makeMapRate(rates)
+	for _, cr := range currentRate {
+		keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
+		if r, ok := mapRate[keyRate]; ok {
+			result = append(result, r)
+			delete(mapRate, keyRate)
+		} else {
+			result = append(result, cr)
+		}
+	}
+	// add new token to current rate
+	if len(mapRate) > 0 {
+		for _, nr := range mapRate {
+			result = append(result, nr)
+		}
+	}
 	timeNow := time.Now().UTC().Unix()
-	persister.SaveRate(rates, timeNow)
+	persister.SaveRate(result, timeNow)
 	persister.SetIsNewRate(true)
 }
 
-// func fetchEvent(persister persister.Persister, fetcher *fetcher.Fetcher) {
-// 	if persister.GetIsNewLatestBlock() {
-// 		blockNum := persister.GetLatestBlock()
-// 		events, err := fetcher.GetEvents(blockNum)
-// 		if err != nil {
-// 			log.Print(err)
-// 			persister.SetNewEvents(false)
-// 			return
-// 		}
-// 		persister.SaveEvent(events)
-// 		persister.SetNewEvents(true)
-// 	} else {
-// 		persister.SetNewEvents(false)
-// 	}
-// }
+func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	var result []ethereum.Rate
+	currentRate := persister.GetRate()
+	listToken := fetcher.GetListToken()
+	newList := make(map[string]ethereum.Token)
+	for _, t := range listToken {
+		if !t.Priority {
+			newList[t.Symbol] = t
+		}
+	}
+	rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), newList, true)
+	if err != nil {
+		log.Print(err)
+		persister.SetIsNewRate(false)
+		return
+	}
+	mapRate := makeMapRate(rates)
+	for _, cr := range currentRate {
+		keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
+		if r, ok := mapRate[keyRate]; ok {
+			result = append(result, r)
+			delete(mapRate, keyRate)
+		} else {
+			result = append(result, cr)
+		}
+	}
+	// add new token to current rate
+	if len(mapRate) > 0 {
+		for _, nr := range mapRate {
+			result = append(result, nr)
+		}
+	}
+	persister.SaveRate(result, 0)
+	persister.SetIsNewRate(true)
+}
 
 func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	generalInfo := fetcher.GetGeneralInfoTokens()
 	persister.SaveGeneralInfoTokens(generalInfo)
-
-	// if err != nil {
-	// 	log.Print(err)
-	// 	persister.SetIsNewGeneralInfoTokens(false)
-	// 	return
-	// }
-	// persister.SaveGeneralInfoTokens(generalInfo)
-	// persister.SetIsNewGeneralInfoTokens(true)
 }
-
-// func fetchKyberEnable(persister persister.Persister, fetcher *fetcher.Fetcher) {
-// 	enable, err := fetcher.GetKyberEnable()
-// 	if err != nil {
-// 		log.Print(err)
-// 		persister.SetNewKyberEnable(false)
-// 		return
-// 	}
-// 	persister.SaveKyberEnable(enable)
-// 	persister.SetNewKyberEnable(true)
-// }
 
 func fetchRate7dData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	data, err := fetcher.FetchRate7dData()

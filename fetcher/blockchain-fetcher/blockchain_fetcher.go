@@ -1,7 +1,9 @@
 package bfetcher
 
 import (
+	"context"
 	"log"
+	"time"
 
 	// "strconv"
 
@@ -13,6 +15,8 @@ type BlockchainFetcher struct {
 	client   *rpc.Client
 	url      string
 	TypeName string
+
+	timeount time.Duration
 }
 
 func NewBlockchainFetcher(typeName string, endpoint string, apiKey string) (*BlockchainFetcher, error) {
@@ -21,8 +25,9 @@ func NewBlockchainFetcher(typeName string, endpoint string, apiKey string) (*Blo
 		log.Print(err)
 		return nil, err
 	}
+	timeout := 5 * time.Second
 	blockchain := BlockchainFetcher{
-		client, endpoint, typeName,
+		client, endpoint, typeName, timeount,
 	}
 	return &blockchain, nil
 }
@@ -32,15 +37,16 @@ func (self *BlockchainFetcher) EthCall(to string, data string) (string, error) {
 	params["data"] = "0x" + data
 	params["to"] = to
 
+	ctx, cancel := context.WithTimeout(context.Background(), self.timeount)
+	defer cancel()
 	var result string
-	err := self.client.Call(&result, "eth_call", params, "latest")
+	err := self.client.CallContext(ctx, &result, "eth_call", params, "latest")
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
 	return result, nil
-
 }
 
 func (self *BlockchainFetcher) GetRate(to string, data string) (string, error) {
@@ -48,8 +54,10 @@ func (self *BlockchainFetcher) GetRate(to string, data string) (string, error) {
 	params["data"] = "0x" + data
 	params["to"] = to
 
+	ctx, cancel := context.WithTimeout(context.Background(), self.timeount)
+	defer cancel()
 	var result string
-	err := self.client.Call(&result, "eth_call", params, "latest")
+	err := self.client.CallContext(ctx, &result, "eth_call", params, "latest")
 	if err != nil {
 		log.Print(err)
 		return "", err
@@ -61,7 +69,9 @@ func (self *BlockchainFetcher) GetRate(to string, data string) (string, error) {
 
 func (self *BlockchainFetcher) GetLatestBlock() (string, error) {
 	var blockNum *hexutil.Big
-	err := self.client.Call(&blockNum, "eth_blockNumber", "latest")
+	ctx, cancel := context.WithTimeout(context.Background(), self.timeount)
+	defer cancel()
+	err := self.client.CallContext(ctx, &blockNum, "eth_blockNumber", "latest")
 	if err != nil {
 		return "", err
 	}
