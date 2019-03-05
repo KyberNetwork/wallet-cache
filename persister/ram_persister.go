@@ -87,7 +87,7 @@ func NewRamPersister() (*RamPersister, error) {
 	isNewKyberEnabled := true
 
 	rates := []ethereum.Rate{}
-	isNewRate := true
+	isNewRate := false
 
 	latestBlock := "0"
 	isNewLatestBlock := true
@@ -204,7 +204,9 @@ func (self *RamPersister) SaveRate(rates []ethereum.Rate, timestamp int64) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.rates = rates
-	self.updatedAt = timestamp
+	if timestamp != 0 {
+		self.updatedAt = timestamp
+	}
 }
 
 //--------------------------------------------------------

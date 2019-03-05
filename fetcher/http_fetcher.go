@@ -5,7 +5,6 @@ import (
 	"errors"
 	"log"
 	"math/big"
-	"time"
 
 	"github.com/KyberNetwork/server-go/common"
 	"github.com/KyberNetwork/server-go/ethereum"
@@ -31,7 +30,7 @@ func NewHTTPFetcher(tradingAPIEndpoint, gasStationEndpoint, apiEndpoint string) 
 	}
 }
 
-func (self *HTTPFetcher) GetListToken() (map[string]ethereum.Token, error) {
+func (self *HTTPFetcher) GetListToken() ([]ethereum.Token, error) {
 	b, err := fCommon.HTTPCall(self.tradingAPIEndpoint)
 	if err != nil {
 		log.Print(err)
@@ -47,13 +46,12 @@ func (self *HTTPFetcher) GetListToken() (map[string]ethereum.Token, error) {
 		err = errors.New("Cannot get list token")
 		return nil, err
 	}
-	listToken := make(map[string]ethereum.Token)
-	for _, token := range result.Data {
-		if token.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+token.DelistTime {
-			listToken[token.Symbol] = token
-		}
+	data := result.Data
+	if len(data) == 0 {
+		err = errors.New("list token from api is empty")
+		return nil, err
 	}
-	return listToken, nil
+	return data, nil
 }
 
 type GasStation struct {
