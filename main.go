@@ -38,13 +38,13 @@ func main() {
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// if os.Getenv("LOG_TO_STDOUT") != "true" {
-	// 	f, err := enableLogToFile()
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	defer f.Close()
-	// }
+	if os.Getenv("LOG_TO_STDOUT") != "true" {
+		f, err := enableLogToFile()
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+	}
 
 	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
@@ -297,19 +297,21 @@ func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetch
 		keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
 		if r, ok := mapRate[keyRate]; ok {
 			result = append(result, r)
-			delete(mapRate, keyRate)
+			if keyRate != "ETH_ETH" {
+				delete(mapRate, keyRate)
+			}
 		} else {
 			result = append(result, cr)
 		}
 	}
 	// add new token to current rate
-	if len(mapRate) > 0 {
+	if len(mapRate) > 1 {
 		for _, nr := range mapRate {
 			result = append(result, nr)
 		}
 	}
 	persister.SaveRate(result, 0)
-	persister.SetIsNewRate(true)
+	// persister.SetIsNewRate(true)
 }
 
 func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {

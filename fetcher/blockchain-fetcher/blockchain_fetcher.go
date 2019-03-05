@@ -16,7 +16,7 @@ type BlockchainFetcher struct {
 	url      string
 	TypeName string
 
-	timeount time.Duration
+	timeout time.Duration
 }
 
 func NewBlockchainFetcher(typeName string, endpoint string, apiKey string) (*BlockchainFetcher, error) {
@@ -27,7 +27,10 @@ func NewBlockchainFetcher(typeName string, endpoint string, apiKey string) (*Blo
 	}
 	timeout := 5 * time.Second
 	blockchain := BlockchainFetcher{
-		client, endpoint, typeName, timeount,
+		client:   client,
+		url:      endpoint,
+		TypeName: typeName,
+		timeout:  timeout,
 	}
 	return &blockchain, nil
 }
@@ -37,7 +40,7 @@ func (self *BlockchainFetcher) EthCall(to string, data string) (string, error) {
 	params["data"] = "0x" + data
 	params["to"] = to
 
-	ctx, cancel := context.WithTimeout(context.Background(), self.timeount)
+	ctx, cancel := context.WithTimeout(context.Background(), self.timeout)
 	defer cancel()
 	var result string
 	err := self.client.CallContext(ctx, &result, "eth_call", params, "latest")
@@ -54,7 +57,7 @@ func (self *BlockchainFetcher) GetRate(to string, data string) (string, error) {
 	params["data"] = "0x" + data
 	params["to"] = to
 
-	ctx, cancel := context.WithTimeout(context.Background(), self.timeount)
+	ctx, cancel := context.WithTimeout(context.Background(), self.timeout)
 	defer cancel()
 	var result string
 	err := self.client.CallContext(ctx, &result, "eth_call", params, "latest")
@@ -69,7 +72,7 @@ func (self *BlockchainFetcher) GetRate(to string, data string) (string, error) {
 
 func (self *BlockchainFetcher) GetLatestBlock() (string, error) {
 	var blockNum *hexutil.Big
-	ctx, cancel := context.WithTimeout(context.Background(), self.timeount)
+	ctx, cancel := context.WithTimeout(context.Background(), self.timeout)
 	defer cancel()
 	err := self.client.CallContext(ctx, &blockNum, "eth_blockNumber", "latest")
 	if err != nil {
