@@ -10,7 +10,7 @@ import (
 
 func HTTPCall(url string) ([]byte, error) {
 	client := http.Client{
-		Timeout: 6 * time.Second,
+		Timeout: 5 * time.Second,
 	}
 	response, err := client.Get(url)
 	if err != nil {

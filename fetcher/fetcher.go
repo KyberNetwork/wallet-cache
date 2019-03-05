@@ -3,11 +3,9 @@ package fetcher
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"math/big"
-	"strings"
 	"sync"
 
 	// "strconv"
@@ -22,15 +20,9 @@ const (
 	ETH_TO_WEI = 1000000000000000000
 	MIN_ETH    = 0.1
 	KEY        = "kybersecret"
-)
 
-// type Token struct {
-// 	Name    string `json:"name"`
-// 	Symbol  string `json:"symbol"`
-// 	Address string `json:"address"`
-// 	Decimal int    `json:"decimal"`
-// 	UsdId   string `json:"usd_id"`
-// }
+	timeW8Req = 3
+)
 
 type Connection struct {
 	Endpoint string `json:"endPoint"`
@@ -45,9 +37,9 @@ type InfoData struct {
 	TokenAPI       []ethereum.TokenAPI `json:"tokens"`
 	CanDeleteToken []string            `json:"can_delete"`
 
-	OriginalToken []ethereum.TokenAPI
-	BackupTokens  map[string]ethereum.Token
 	Tokens        map[string]ethereum.Token
+	BackupTokens  map[string]ethereum.Token
+	TokenPriority map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
 	Connections []Connection `json:"connections"`
 
@@ -71,124 +63,44 @@ type InfoData struct {
 }
 
 func (self *InfoData) GetListToken() map[string]ethereum.Token {
-	self.mu.Lock()
-	defer self.mu.Unlock()
+	self.mu.RLock()
+	defer self.mu.RUnlock()
 	return self.Tokens
 }
 
 func (self *InfoData) UpdateByBackupToken() {
+	self.mu.RLock()
+	backupToken := self.BackupTokens
+	self.mu.RUnlock()
+	listPriority := make(map[string]ethereum.Token)
+	for _, t := range backupToken {
+		if t.Priority {
+			listPriority[t.Symbol] = t
+		}
+	}
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	self.Tokens = self.BackupTokens
+	self.Tokens = backupToken
+	self.TokenPriority = listPriority
 }
 
-func (self *InfoData) UpdateListToken(tokens map[string]ethereum.Token) {
+func (self *InfoData) UpdateListToken(tokens, tokenPriority map[string]ethereum.Token) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-	// currentListToken := self.Tokens
-	// finalListToken := make(map[string]ethereum.Token)
-	// for symbol, token := range tokens {
-	// 	if currentToken, ok := currentListToken[symbol]; ok {
-	// 		if token.CGId == "" {
-	// 			token.CGId = currentToken.CGId
-	// 		}
-	// 	}
-	// 	finalListToken[symbol] = token
-	// }
-	// self.Tokens = finalListToken
 	self.Tokens = tokens
+	self.TokenPriority = tokenPriority
 }
 
 func (self *InfoData) GetTokenAPI() []ethereum.TokenAPI {
-	self.mu.Lock()
-	defer self.mu.Unlock()
+	self.mu.RLock()
+	defer self.mu.RUnlock()
 	return self.TokenAPI
 }
 
-func (self *InfoData) CanDelete(symbol string) (bool, string) {
-	var errMsg string
-	for _, t := range self.CanDeleteToken {
-		if t == symbol {
-			return true, ""
-		}
-		errMsg += t + ", "
-	}
-	return false, errMsg
-}
-
-func (self *InfoData) AddToken(symbol, key string) error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-
-	if key != KEY {
-		return errors.New("you don't have permission to execute this action")
-	}
-	newListToken := make(map[string]ethereum.Token)
-	newList := []ethereum.TokenAPI{}
-	countIndex := 0
-	originalToken := self.OriginalToken
-	currentList := self.TokenAPI
-	tokenSymbol := strings.ToUpper(symbol)
-
-	for _, token := range originalToken {
-		if countIndex == len(currentList) {
-			if token.Symbol == tokenSymbol {
-				newList = append(newList, token)
-				newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
-			}
-			continue
-		}
-		if token.Symbol == currentList[countIndex].Symbol {
-			if token.Symbol == tokenSymbol {
-				return errors.New("Already had this token")
-			}
-			newList = append(newList, token)
-			newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
-			countIndex++
-		} else {
-			if token.Symbol == tokenSymbol {
-				newList = append(newList, token)
-				newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
-			}
-		}
-	}
-	if len(newList) == len(currentList) {
-		return fmt.Errorf("%s is not supported", tokenSymbol)
-	}
-	self.TokenAPI = newList
-	self.Tokens = newListToken
-	return nil
-}
-
-func (self *InfoData) RemoveToken(symbol, key string) error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-
-	if key != KEY {
-		return errors.New("you don't have permission to execute this action")
-	}
-	tokenSymbol := strings.ToUpper(symbol)
-	newListToken := make(map[string]ethereum.Token)
-	newList := []ethereum.TokenAPI{}
-	currentList := self.TokenAPI
-
-	canDelte, errMsg := self.CanDelete(tokenSymbol)
-	if canDelte == false {
-		return fmt.Errorf("you just can remove these tokens: %s", errMsg)
-	}
-	for _, token := range currentList {
-		if token.Symbol == tokenSymbol {
-			continue
-		}
-		newList = append(newList, token)
-		newListToken[token.Symbol] = ethereum.TokenAPIToToken(token)
-	}
-	if len(newList) == len(currentList) {
-		return fmt.Errorf("%s is not supported or already removed", tokenSymbol)
-	}
-	self.TokenAPI = newList
-	self.Tokens = newListToken
-	return nil
+func (self *InfoData) GetListTokenPriority() map[string]ethereum.Token {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.TokenPriority
 }
 
 type Fetcher struct {
@@ -270,14 +182,8 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	}
 
 	listToken := make(map[string]ethereum.Token)
-	originalToken := []ethereum.TokenAPI{}
-	for _, t := range infoData.TokenAPI {
-		originalToken = append(originalToken, t)
-		listToken[t.Symbol] = ethereum.TokenAPIToToken(t)
-	}
 	infoData.Tokens = listToken
 	infoData.BackupTokens = listToken
-	infoData.OriginalToken = originalToken
 
 	fetIns := make([]FetcherInterface, 0)
 	for _, connection := range infoData.Connections {
@@ -289,14 +195,6 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		}
 	}
 
-	// fetNormalIns := make([]FetcherNormalInterface, 0)
-	// for _, market := range infoData.CoinMarket {
-	// 	if market == "cmc" {
-	// 		continue
-	// 	}
-	// 	f := NewFetcherNormalIns(market)
-	// 	fetNormalIns = append(fetNormalIns, f)
-	// }
 	marketFetcherIns := NewMarketFetcherInterface()
 
 	httpFetcher := NewHTTPFetcher(infoData.ConfigEndpoint, infoData.GasStationEndpoint, infoData.APIEndpoint)
@@ -320,12 +218,6 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	return fetcher, nil
 }
 
-// func (self *InfoData) UpdateByBackupToken() {
-// 	self.mu.Lock()
-// 	defer self.mu.Unlock()
-// 	self.Tokens = self.TokenSnapshot
-// }
-
 func (self *Fetcher) TryUpdateListToken() error {
 	var err error
 	for i := 0; i < 3; i++ {
@@ -342,14 +234,26 @@ func (self *Fetcher) TryUpdateListToken() error {
 }
 
 func (self *Fetcher) UpdateListToken() error {
-	var err error
-	result := make(map[string]ethereum.Token)
+	var (
+		err    error
+		result []ethereum.Token
+	)
 	result, err = self.httpFetcher.GetListToken()
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	self.info.UpdateListToken(result)
+	listToken := make(map[string]ethereum.Token)
+	listPriority := make(map[string]ethereum.Token)
+	for _, token := range result {
+		if token.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+token.DelistTime {
+			listToken[token.Symbol] = token
+			if token.Priority {
+				listPriority[token.Symbol] = token
+			}
+		}
+	}
+	self.info.UpdateListToken(listToken, listPriority)
 	return nil
 }
 
@@ -358,50 +262,21 @@ func (self *Fetcher) GetListTokenAPI() []ethereum.TokenAPI {
 	return self.info.GetTokenAPI()
 }
 
+// GetListToken return map token with key is symbol
 func (self *Fetcher) GetListToken() map[string]ethereum.Token {
 	return self.info.GetListToken()
 }
 
-// api for dev
-func (self *Fetcher) AddToken(symbol, key string) error {
-	return self.info.AddToken(symbol, key)
+// GetListToken return map token with key is symbol
+func (self *Fetcher) GetListTokenPriority() map[string]ethereum.Token {
+	return self.info.GetListTokenPriority()
 }
-
-func (self *Fetcher) RemoveToken(symbol, key string) error {
-	return self.info.RemoveToken(symbol, key)
-}
-
-// func (self *Fetcher) GetRateUsd() ([]io.ReadCloser, error) {
-// 	usdId := make([]string, 0)
-// 	listTokens := self.GetListToken()
-// 	for _, token := range listTokens {
-// 		if token.UsdId != "" {
-// 			usdId = append(usdId, token.UsdId)
-// 		}
-// 	}
-// 	for _, fetIns := range self.fetIns {
-// 		result, err := fetIns.GetRateUsd(usdId)
-// 		if err != nil {
-// 			log.Print(err)
-// 			continue
-// 		}
-// 		return result, nil
-// 	}
-// 	return nil, errors.New("Cannot get rate USD")
-// }
 
 func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInfo {
 	generalInfo := map[string]*ethereum.TokenGeneralInfo{}
-	// generalInfoCG := map[string]*ethereum.TokenGeneralInfo{}
-	//	usdId := make([]string, 0)
 	listTokens := self.GetListToken()
 	for _, token := range listTokens {
 		if token.CGId != "" {
-			//usdId = append(usdId, token.UsdId)
-			// for _, fetIns := range self.fetNormalIns {
-			// typeMarket := fetIns.GetTypeMarket()
-
-			// if typeMarket == "cmc" {
 			result, err := self.marketFetIns.GetGeneralInfo(token.CGId)
 			time.Sleep(5 * time.Second)
 			if err != nil {
@@ -409,57 +284,28 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 				continue
 			}
 			generalInfo[token.Symbol] = result
-			// } else {
-			// 	result, err := fetIns.GetGeneralInfo(token.CGId)
-			// 	if err != nil {
-			// 		log.Print(err)
-			// 		continue
-			// 	}
-			// 	generalInfoCG[token.Symbol] = result
-			// }
-			// }
-			// time.Sleep(5 * time.Second)
 		}
 	}
 
 	return generalInfo
-	// for _, fetIns := range self.fetIns {
-	// 	result, err := fetIns.GetGeneralInfo(usdId)
-	// 	if err != nil {
-	// 		log.Print(err)
-	// 		continue
-	// 	}
-	// 	return result, nil
-	// }
-	// return nil, errors.New("Cannot get rate USD")
 }
 
 func (self *Fetcher) GetRateUsdEther() (string, error) {
-	// for _, fetIns := range self.fetNormalIns {
 	rateUsd, err := self.marketFetIns.GetRateUsdEther()
-	//fmt.Print(rateUsd)
 	if err != nil {
 		log.Print(err)
-		// continue
 		return "", err
 	}
 	return rateUsd, nil
-	// }
-
-	// return "", errors.New("Can not get rate eth usd")
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	// for _, fetIns := range self.fetIns {
 	result, err := self.httpFetcher.GetGasPrice()
 	if err != nil {
 		log.Print(err)
 		return nil, errors.New("Cannot get gas price")
-		// continue
 	}
 	return result, nil
-	// }
-	// return nil, errors.New("Cannot get gas price")
 }
 
 func (self *Fetcher) GetMaxGasPrice() (string, error) {
@@ -556,20 +402,47 @@ func (self *Fetcher) queryRateBlockchain(fromAddr, toAddr, fromSymbol, toSymbol 
 	return rate, errors.New("cannot get rate")
 }
 
-func (self *Fetcher) GetRate(oldRate []ethereum.Rate) ([]ethereum.Rate, error) {
+func (self *Fetcher) getRateNetwork(sourceArr []string, sourceSymbolArr []string, destArr []string, destSymbolArr []string, amountArr []*big.Int) ([]ethereum.Rate, error) {
+	var result []ethereum.Rate
+	// sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr := self.makeDataGetRate(oldRates)
+
+	for index, source := range sourceArr {
+		sourceSymbol := sourceSymbolArr[index]
+		destSymbol := destSymbolArr[index]
+		rate, err := self.queryRateBlockchain(source, destArr[index], sourceSymbol, destSymbol, amountArr[index])
+		if err != nil {
+			log.Printf("cant get rate pair %s_%s", sourceSymbol, destSymbol)
+			emptyRate := ethereum.Rate{
+				Source:  sourceSymbol,
+				Dest:    destSymbol,
+				Rate:    "0",
+				Minrate: "0",
+			}
+			result = append(result, emptyRate)
+		} else {
+			result = append(result, rate)
+		}
+		time.Sleep(timeW8Req * time.Second)
+	}
+	return result, nil
+}
+
+// GetRate get full rate of list token
+func (self *Fetcher) GetRate(currentRate []ethereum.Rate, isNewRate bool, mapToken map[string]ethereum.Token, fallback bool) ([]ethereum.Rate, error) {
 	var (
 		rates []ethereum.Rate
 		err   error
 	)
-	if len(oldRate) == 0 {
-		initRate := self.getInitRate()
-		oldRate = initRate
+	if !isNewRate {
+		initRate := self.getInitRate(mapToken)
+		currentRate = initRate
 	}
-	rates, err = self.getRateWrapper(oldRate)
-	if err != nil {
-		log.Println("cannot get rate from wrapper")
-		log.Println("get rate from network")
-		rates, err = self.getRateNetwork(oldRate)
+	sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr := self.makeDataGetRate(mapToken, currentRate)
+	rates, err = self.runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbolArr, amountArr)
+
+	if err != nil && fallback {
+		log.Println("cannot get rate from wrapper, change to get from network")
+		rates, _ = self.getRateNetwork(sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr)
 	}
 	if err != nil {
 		log.Println(err)
@@ -578,10 +451,9 @@ func (self *Fetcher) GetRate(oldRate []ethereum.Rate) ([]ethereum.Rate, error) {
 	return rates, nil
 }
 
-func (self *Fetcher) getInitRate() []ethereum.Rate {
-	listTokens := self.GetListToken()
-	ethSymbol := self.info.EthSymbol
-	ethAddr := self.info.EthAdress
+func (self *Fetcher) getInitRate(listTokens map[string]ethereum.Token) []ethereum.Rate {
+	ethSymbol := common.ETHSymbol
+	ethAddr := common.ETHAddr
 	minAmountETH := getAmountInWei(MIN_ETH)
 
 	srcArr := []string{}
@@ -611,33 +483,31 @@ func getMapRates(rates []ethereum.Rate) map[string]ethereum.Rate {
 	return m
 }
 
-func (self *Fetcher) makeDataGetRate(rates []ethereum.Rate) ([]string, []string, []string, []string, []*big.Int) {
-	listTokens := self.GetListToken()
+func (self *Fetcher) makeDataGetRate(listTokens map[string]ethereum.Token, rates []ethereum.Rate) ([]string, []string, []string, []string, []*big.Int) {
 	sourceAddr := make([]string, 0)
 	sourceSymbol := make([]string, 0)
 	destAddr := make([]string, 0)
 	destSymbol := make([]string, 0)
 	amount := make([]*big.Int, 0)
 	amountETH := make([]*big.Int, 0)
-	ethSymbol := self.info.EthSymbol
-	ethAddr := self.info.EthAdress
+	ethSymbol := common.ETHSymbol
+	ethAddr := common.ETHAddr
 	minAmountETH := getAmountInWei(MIN_ETH)
 	mapRate := getMapRates(rates)
 
 	for _, t := range listTokens {
-		if t.Symbol == "ETH" {
-			continue
-		}
 		decimal := t.Decimal
-		amountToken := tokenWei(decimal)
-		if rate, ok := mapRate[t.Symbol]; ok {
-			r := new(big.Int)
-			r.SetString(rate.Rate, 10)
-			if r.Cmp(new(big.Int)) != 0 {
-				amountToken = getAmountTokenWithMinETH(r, decimal)
-			}
+		amountToken := tokenWei(t.Decimal / 2)
+		if t.Symbol == ethSymbol {
+			amountToken = minAmountETH
 		} else {
-			amountToken = tokenWei(t.Decimal / 2)
+			if rate, ok := mapRate[t.Symbol]; ok {
+				r := new(big.Int)
+				r.SetString(rate.Rate, 10)
+				if r.Cmp(new(big.Int)) != 0 {
+					amountToken = getAmountTokenWithMinETH(r, decimal)
+				}
+			}
 		}
 		sourceAddr = append(sourceAddr, t.Address)
 		destAddr = append(destAddr, ethAddr)
@@ -646,12 +516,6 @@ func (self *Fetcher) makeDataGetRate(rates []ethereum.Rate) ([]string, []string,
 		amount = append(amount, amountToken)
 		amountETH = append(amountETH, minAmountETH)
 	}
-	sourceAddr = append(sourceAddr, ethAddr)
-	destAddr = append(destAddr, ethAddr)
-	sourceSymbol = append(sourceSymbol, ethSymbol)
-	destSymbol = append(destSymbol, ethSymbol)
-	amount = append(amount, minAmountETH)
-	amountETH = append(amountETH, minAmountETH)
 
 	sourceArr := append(sourceAddr, destAddr...)
 	sourceSymbolArr := append(sourceSymbol, destSymbol...)
@@ -660,35 +524,6 @@ func (self *Fetcher) makeDataGetRate(rates []ethereum.Rate) ([]string, []string,
 	amountArr := append(amount, amountETH...)
 
 	return sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr
-}
-
-func (self *Fetcher) getRateNetwork(oldRates []ethereum.Rate) ([]ethereum.Rate, error) {
-	var result []ethereum.Rate
-	sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr := self.makeDataGetRate(oldRates)
-
-	for index, source := range sourceArr {
-		sourceSymbol := sourceSymbolArr[index]
-		destSymbol := destSymbolArr[index]
-		rate, err := self.queryRateBlockchain(source, destArr[index], sourceSymbol, destSymbol, amountArr[index])
-		if err != nil {
-			log.Printf("cant get rate pair %s_%s", sourceSymbol, destSymbol)
-			emptyRate := ethereum.Rate{
-				Source:  sourceSymbol,
-				Dest:    destSymbol,
-				Rate:    "0",
-				Minrate: "0",
-			}
-			result = append(result, emptyRate)
-		} else {
-			result = append(result, rate)
-		}
-	}
-	return result, nil
-}
-
-func (self *Fetcher) getRateWrapper(rates []ethereum.Rate) ([]ethereum.Rate, error) {
-	sourceArr, sourceSymbolArr, destArr, destSymbolArr, amountArr := self.makeDataGetRate(rates)
-	return self.runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbolArr, amountArr)
 }
 
 func (self *Fetcher) runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbolArr []string, amountArr []*big.Int) ([]ethereum.Rate, error) {
@@ -726,50 +561,7 @@ func (self *Fetcher) GetLatestBlock() (string, error) {
 	return "", errors.New("Cannot get block number")
 }
 
-// func (self *Fetcher) GetEvents(blockNum string) (*[]ethereum.EventHistory, error) {
-// 	toBlock := blockNum
-
-// 	blockInt, err := strconv.Atoi(blockNum)
-// 	if err != nil {
-// 		log.Print(err)
-// 		return nil, err
-// 	}
-// 	if blockInt > 5000 {
-// 		blockInt = blockInt - 5000
-// 	} else {
-// 		blockInt = 0
-// 	}
-// 	fromBlock := strconv.Itoa(blockInt)
-
-// 	for _, fetIns := range self.fetIns {
-// 		eventRaw, err := fetIns.GetEvents(fromBlock, toBlock, self.info.Network, self.info.TradeTopic)
-// 		if err != nil {
-// 			log.Print(err)
-// 			continue
-// 		}
-// 		var events *[]ethereum.EventHistory
-// 		var errorEvent error
-// 		if fetIns.GetTypeName() == "node" {
-// 			latestBlock, err := self.GetLatestBlock()
-// 			if err != nil {
-// 				log.Print(err)
-// 				continue
-// 			}
-// 			events, errorEvent = self.ethereum.ReadEventsWithBlockNumber(eventRaw, latestBlock)
-// 		} else {
-// 			events, errorEvent = self.ethereum.ReadEventsWithTimeStamp(eventRaw)
-// 		}
-// 		if errorEvent != nil {
-// 			log.Print(errorEvent)
-// 			continue
-// 		}
-// 		return events, nil
-// 	}
-// 	return nil, errors.New("Cannot get events")
-// }
-
 func (self *Fetcher) FetchRate7dData() (map[string]*ethereum.Rates, error) {
-	// for _, fetIns := range self.fetIns {
 	result, err := self.httpFetcher.GetRate7dData()
 	if err != nil {
 		log.Print(err)
@@ -777,8 +569,6 @@ func (self *Fetcher) FetchRate7dData() (map[string]*ethereum.Rates, error) {
 		return nil, errors.New("Cannot get data from tracker")
 	}
 	return result, nil
-	// }
-	// return nil, errors.New("Cannot get data from tracker")
 }
 
 func (self *Fetcher) FetchUserInfo(address string) (*common.UserInfo, error) {
