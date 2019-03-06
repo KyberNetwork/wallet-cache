@@ -43,22 +43,6 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 	)
 }
 
-// func (self *HTTPServer) GetEvent(c *gin.Context) {
-// 	if !self.persister.GetIsNewEvent() {
-// 		c.JSON(
-// 			http.StatusOK,
-// 			gin.H{"success": false},
-// 		)
-// 		return
-// 	}
-
-// 	events := self.persister.GetEvent()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": events},
-// 	)
-// }
-
 func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
 	if !self.persister.GetIsNewLatestBlock() {
 		c.JSON(
@@ -90,22 +74,6 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 	)
 }
 
-// func (self *HTTPServer) GetRateUSDCG(c *gin.Context) {
-// 	if !self.persister.GetIsNewRateUSDCG() {
-// 		c.JSON(
-// 			http.StatusOK,
-// 			gin.H{"success": false},
-// 		)
-// 		return
-// 	}
-
-// 	rates := self.persister.GetRateUSDCG()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": rates},
-// 	)
-// }
-
 func (self *HTTPServer) GetRateETH(c *gin.Context) {
 	if !self.persister.GetIsNewRateUSD() {
 		c.JSON(
@@ -121,22 +89,6 @@ func (self *HTTPServer) GetRateETH(c *gin.Context) {
 		gin.H{"success": true, "data": ethRate},
 	)
 }
-
-// func (self *HTTPServer) GetRateETHCG(c *gin.Context) {
-// 	if !self.persister.GetIsNewRateUSDCG() {
-// 		c.JSON(
-// 			http.StatusOK,
-// 			gin.H{"success": false},
-// 		)
-// 		return
-// 	}
-
-// 	ethRate := self.persister.GetRateETHCG()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": ethRate},
-// 	)
-// }
 
 func (self *HTTPServer) GetKyberEnabled(c *gin.Context) {
 	if !self.persister.GetNewKyberEnabled() {
@@ -186,14 +138,6 @@ func (self *HTTPServer) GetGasPrice(c *gin.Context) {
 	)
 }
 
-// func (self *HTTPServer) GetTokenInfo(c *gin.Context) {
-// 	tokenInfo := self.persister.GetTokenInfo()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": tokenInfo},
-// 	)
-// }
-
 func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 	dat, err := ioutil.ReadFile("error.log")
 	if err != nil {
@@ -224,21 +168,6 @@ func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
 	)
 }
 
-// func (self *HTTPServer) GetRightMarketInfoCG(c *gin.Context) {
-// 	data := self.persister.GetRightMarketDataCG()
-// 	if self.persister.GetIsNewMarketInfoCG() {
-// 		c.JSON(
-// 			http.StatusOK,
-// 			gin.H{"success": true, "data": data, "status": "latest"},
-// 		)
-// 		return
-// 	}
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": data, "status": "old"},
-// 	)
-// }
-
 func (self *HTTPServer) GetLast7D(c *gin.Context) {
 	listTokens := c.Query("listToken")
 	data := self.persister.GetLast7D(listTokens)
@@ -263,61 +192,23 @@ func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 	)
 }
 
-// func (self *HTTPServer) GetLanguagePack(c *gin.Context) {
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": "get language pack"},
-// 	)
-// 	return
-// }
-
-// func (self *HTTPServer) GetListTokenAPI(c *gin.Context) {
-// 	listToken := self.fetcher.GetListTokenAPI()
-// 	c.JSON(
-// 		http.StatusOK,
-// 		gin.H{"success": true, "data": listToken},
-// 	)
-// }
-
-func (self *HTTPServer) AddToken(c *gin.Context) {
-	token := c.Param("token")
-	key := c.Param("key")
-
-	err := self.fetcher.AddToken(token, key)
+func (self *HTTPServer) GetUserInfo(c *gin.Context) {
+	address := c.Query("address")
+	userInfo, err := self.fetcher.FetchUserInfo(address)
 	if err != nil {
 		c.JSON(
 			http.StatusOK,
-			gin.H{"success": false, "error": err.Error()},
+			gin.H{"error": err.Error()},
 		)
 		return
 	}
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": true},
-	)
-}
-
-func (self *HTTPServer) RemoveToken(c *gin.Context) {
-	token := c.Param("token")
-	key := c.Param("key")
-
-	err := self.fetcher.RemoveToken(token, key)
-	if err != nil {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": false, "error": err.Error()},
-		)
-		return
-	}
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true},
+		userInfo,
 	)
 }
 
 func (self *HTTPServer) Run(kyberENV string) {
-	//self.r.GET("/getRate", self.GetRate)
-	// self.r.GET("/getHistoryOneColumn", self.GetEvent)
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 	self.r.GET("/latestBlock", self.GetLatestBlock)
 
@@ -326,8 +217,6 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/getRate", self.GetRate)
 	self.r.GET("/rate", self.GetRate)
-
-	// self.r.GET("/getTokenInfo", self.GetTokenInfo)
 
 	self.r.GET("/getKyberEnabled", self.GetKyberEnabled)
 	self.r.GET("/kyberEnabled", self.GetKyberEnabled)
@@ -349,20 +238,11 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/cacheVersion", self.getCacheVersion)
 
-	// self.r.GET("/coingecko/marketInfo", self.GetRightMarketInfoCG)
-	// self.r.GET("/coingecko/rateUSD/", self.GetRateUSDCG)
-	// self.r.GET("/coingecko/rateETH", self.GetRateETHCG)
+	self.r.GET("/users", self.GetUserInfo)
 
-	//self.r.GET("/getLanguagePack", self.GetLanguagePack)
 	if kyberENV != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
 	}
-
-	// self.r.GET("/currencies", self.GetListTokenAPI)
-	// if kyberENV == "ropsten" || kyberENV == "rinkeby" || kyberENV == "staging" {
-	// 	self.r.GET("/tokens/add/:token/:key", self.AddToken)
-	// 	self.r.GET("/tokens/remove/:token/:key", self.RemoveToken)
-	// }
 
 	self.r.Run(self.host)
 }

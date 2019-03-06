@@ -19,8 +19,9 @@
   "endpoint": "wss://ropsten.infura.io/ws",
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "tracker_endpoint":"https://tracker.kyber.network",
+  "api_endpoint":"https://dev-api.knstats.com",
   "config_endpoint": "https://ropsten-api.kyber.network/internal/currencies",
+  "user_stats_endpoint": "https://dev-users-stats.knstats.com/",
 
   "can_delete": ["BBO", "COFI", "BITX", "MOC", "MAS"],
 

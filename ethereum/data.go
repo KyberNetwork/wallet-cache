@@ -40,9 +40,9 @@ type Token struct {
 	Symbol     string `json:"symbol"`
 	Address    string `json:"address"`
 	Decimal    int    `json:"decimals"`
-	UsdId      string `json:"cmc_id"`
 	DelistTime uint64 `json:"delist_time"`
 	CGId       string `json:"cg_id"`
+	Priority   bool   `json:"priority"`
 }
 
 type TokenAPI struct {
@@ -63,7 +63,6 @@ func TokenAPIToToken(tokenAPI TokenAPI) Token {
 		Symbol:  tokenAPI.Symbol,
 		Address: tokenAPI.Address,
 		Decimal: tokenAPI.Decimals,
-		UsdId:   tokenAPI.UsdID,
 		CGId:    tokenAPI.CGId,
 	}
 	// }

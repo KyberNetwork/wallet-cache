@@ -5,8 +5,8 @@ import (
 	"errors"
 	"log"
 	"math/big"
-	"time"
 
+	"github.com/KyberNetwork/server-go/common"
 	"github.com/KyberNetwork/server-go/ethereum"
 	fCommon "github.com/KyberNetwork/server-go/fetcher/fetcher-common"
 )
@@ -19,18 +19,18 @@ const (
 type HTTPFetcher struct {
 	tradingAPIEndpoint string
 	gasStationEndPoint string
-	trackerEndpoint    string
+	apiEndpoint        string
 }
 
-func NewHTTPFetcher(tradingAPIEndpoint, gasStationEndpoint, trackerEndpoint string) *HTTPFetcher {
+func NewHTTPFetcher(tradingAPIEndpoint, gasStationEndpoint, apiEndpoint string) *HTTPFetcher {
 	return &HTTPFetcher{
 		tradingAPIEndpoint: tradingAPIEndpoint,
 		gasStationEndPoint: gasStationEndpoint,
-		trackerEndpoint:    trackerEndpoint,
+		apiEndpoint:        apiEndpoint,
 	}
 }
 
-func (self *HTTPFetcher) GetListToken() (map[string]ethereum.Token, error) {
+func (self *HTTPFetcher) GetListToken() ([]ethereum.Token, error) {
 	b, err := fCommon.HTTPCall(self.tradingAPIEndpoint)
 	if err != nil {
 		log.Print(err)
@@ -46,13 +46,12 @@ func (self *HTTPFetcher) GetListToken() (map[string]ethereum.Token, error) {
 		err = errors.New("Cannot get list token")
 		return nil, err
 	}
-	listToken := make(map[string]ethereum.Token)
-	for _, token := range result.Data {
-		if token.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+token.DelistTime {
-			listToken[token.Symbol] = token
-		}
+	data := result.Data
+	if len(data) == 0 {
+		err = errors.New("list token from api is empty")
+		return nil, err
 	}
-	return listToken, nil
+	return data, nil
 }
 
 type GasStation struct {
@@ -86,8 +85,8 @@ func (self *HTTPFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
 
 // get data from tracker.kyber
 
-func (self *HTTPFetcher) GetTrackerData() (map[string]*ethereum.Rates, error) {
-	trackerAPI := self.trackerEndpoint + "/api/tokens/rates?api_key=" + API_KEY_TRACKER
+func (self *HTTPFetcher) GetRate7dData() (map[string]*ethereum.Rates, error) {
+	trackerAPI := self.apiEndpoint + "/rates7d"
 	b, err := fCommon.HTTPCall(trackerAPI)
 	if err != nil {
 		log.Print(err)
@@ -100,4 +99,19 @@ func (self *HTTPFetcher) GetTrackerData() (map[string]*ethereum.Rates, error) {
 		return nil, err
 	}
 	return trackerData, nil
+}
+
+func (self *HTTPFetcher) GetUserInfo(url string) (*common.UserInfo, error) {
+	userInfo := &common.UserInfo{}
+	b, err := fCommon.HTTPCall(url)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	err = json.Unmarshal(b, userInfo)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return userInfo, nil
 }
