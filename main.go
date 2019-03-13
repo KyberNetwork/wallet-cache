@@ -116,8 +116,8 @@ func main() {
 	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
 
 	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
-	runFetchData(persisterIns, fetchRate, fertcherIns, 30)
-	runFetchData(persisterIns, fetchRateWithFallback, fertcherIns, 600)
+	runFetchData(persisterIns, fetchRate, fertcherIns, 15)
+	runFetchData(persisterIns, fetchRateWithFallback, fertcherIns, 300)
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
