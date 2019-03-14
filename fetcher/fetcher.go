@@ -21,7 +21,7 @@ const (
 	MIN_ETH    = 0.1
 	KEY        = "kybersecret"
 
-	timeW8Req = 3
+	timeW8Req = 500
 )
 
 type Connection struct {
@@ -422,7 +422,7 @@ func (self *Fetcher) getRateNetwork(sourceArr []string, sourceSymbolArr []string
 		} else {
 			result = append(result, rate)
 		}
-		time.Sleep(timeW8Req * time.Second)
+		time.Sleep(timeW8Req * time.Millisecond)
 	}
 	return result, nil
 }

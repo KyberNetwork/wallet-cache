@@ -19,7 +19,7 @@
   "endpoint": "wss://ropsten.infura.io/ws",
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "api_endpoint":"https://dev-api.knstats.com",
+  "api_endpoint":"https://ropsten-api.kyber.network",
   "config_endpoint": "https://ropsten-api.kyber.network/internal/currencies",
   "user_stats_endpoint": "https://dev-users-stats.knstats.com/",
 
