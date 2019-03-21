@@ -6,7 +6,7 @@
         "type": "etherscan"
     },
     {
-      "endPoint" : "https://ropsten.infura.io",
+      "endPoint" : "https://ropsten.infura.io/v3/c1d32946e55e45b78c330954cf543fc7",
       "type": "node"
     }
   ],
