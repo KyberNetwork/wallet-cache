@@ -1,7 +1,7 @@
 {
   "connections":[
     {
-      "endPoint": "https://eth-mainnet.alchemyapi.io/jsonrpc/hqcYQ0PDgAtqFtVAzg64Mc40YjRhX9sd",
+      "endPoint": "https://eth-mainnet.alchemyapi.io/jsonrpc/hYvhNnvmAnUIkI7z1r2yTbvXPbMftTli",
       "type": "node"
     },
     {

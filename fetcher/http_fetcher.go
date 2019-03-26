@@ -3,6 +3,7 @@ package fetcher
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"math/big"
 
@@ -114,4 +115,34 @@ func (self *HTTPFetcher) GetUserInfo(url string) (*common.UserInfo, error) {
 		return nil, err
 	}
 	return userInfo, nil
+}
+
+type TokenPrice struct {
+	Data []struct {
+		Symbol string  `json:"symbol"`
+		Price  float64 `json:"price"`
+	} `json:"data"`
+	Error      bool   `json:"error"`
+	TimeUpdate uint64 `json:"timeUpdated"`
+}
+
+// GetRateUsdEther get usd from api
+func (self *HTTPFetcher) GetRateUsdEther() (string, error) {
+	url := fmt.Sprintf("%s/token_price?currency=USD", self.apiEndpoint)
+	b, err := fCommon.HTTPCall(url)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	var tokenPrice TokenPrice
+	err = json.Unmarshal(b, tokenPrice)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if tokenPrice.Error {
+		return nil, errors.New("cannot get token price from api")
+	}
+
+	return tokenPrice, nil
 }
