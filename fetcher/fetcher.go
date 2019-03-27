@@ -88,6 +88,7 @@ func (self *InfoData) UpdateListToken(tokens, tokenPriority map[string]ethereum.
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	self.Tokens = tokens
+	self.BackupTokens = tokens
 	self.TokenPriority = tokenPriority
 }
 
@@ -182,8 +183,12 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 	}
 
 	listToken := make(map[string]ethereum.Token)
+	listBackup := make(map[string]ethereum.Token)
 	infoData.Tokens = listToken
-	infoData.BackupTokens = listToken
+	for _, t := range infoData.TokenAPI {
+		listBackup[t.Symbol] = ethereum.TokenAPIToToken(t)
+	}
+	infoData.BackupTokens = listBackup
 
 	fetIns := make([]FetcherInterface, 0)
 	for _, connection := range infoData.Connections {
@@ -247,9 +252,13 @@ func (self *Fetcher) UpdateListToken() error {
 	listPriority := make(map[string]ethereum.Token)
 	for _, token := range result {
 		if token.DelistTime == 0 || uint64(time.Now().UTC().Unix()) <= TIME_TO_DELETE+token.DelistTime {
-			listToken[token.Symbol] = token
+			tokenID := token.Symbol
+			if token.TokenID != "" {
+				tokenID = token.TokenID
+			}
+			listToken[tokenID] = token
 			if token.Priority {
-				listPriority[token.Symbol] = token
+				listPriority[tokenID] = token
 			}
 		}
 	}
@@ -262,12 +271,12 @@ func (self *Fetcher) GetListTokenAPI() []ethereum.TokenAPI {
 	return self.info.GetTokenAPI()
 }
 
-// GetListToken return map token with key is symbol
+// GetListToken return map token with key is token ID
 func (self *Fetcher) GetListToken() map[string]ethereum.Token {
 	return self.info.GetListToken()
 }
 
-// GetListToken return map token with key is symbol
+// GetListToken return map token with key is token ID
 func (self *Fetcher) GetListTokenPriority() map[string]ethereum.Token {
 	return self.info.GetListTokenPriority()
 }
@@ -283,7 +292,7 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 				log.Print(err)
 				continue
 			}
-			generalInfo[token.Symbol] = result
+			generalInfo[token.TokenID] = result
 		}
 	}
 
@@ -291,7 +300,8 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 }
 
 func (self *Fetcher) GetRateUsdEther() (string, error) {
-	rateUsd, err := self.marketFetIns.GetRateUsdEther()
+	// rateUsd, err := self.marketFetIns.GetRateUsdEther()
+	rateUsd, err := self.httpFetcher.GetRateUsdEther()
 	if err != nil {
 		log.Print(err)
 		return "", err
