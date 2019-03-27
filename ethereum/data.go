@@ -43,6 +43,7 @@ type Token struct {
 	DelistTime uint64 `json:"delist_time"`
 	CGId       string `json:"cg_id"`
 	Priority   bool   `json:"priority"`
+	TokenID    string `json:"token_id"`
 }
 
 type TokenAPI struct {
@@ -64,6 +65,7 @@ func TokenAPIToToken(tokenAPI TokenAPI) Token {
 		Address: tokenAPI.Address,
 		Decimal: tokenAPI.Decimals,
 		CGId:    tokenAPI.CGId,
+		TokenID: tokenAPI.Symbol,
 	}
 	// }
 	// return nil

@@ -128,21 +128,27 @@ type TokenPrice struct {
 
 // GetRateUsdEther get usd from api
 func (self *HTTPFetcher) GetRateUsdEther() (string, error) {
+	var ethPrice string
 	url := fmt.Sprintf("%s/token_price?currency=USD", self.apiEndpoint)
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
-		return nil, err
+		return ethPrice, err
 	}
 	var tokenPrice TokenPrice
-	err = json.Unmarshal(b, tokenPrice)
+	err = json.Unmarshal(b, &tokenPrice)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return ethPrice, err
 	}
 	if tokenPrice.Error {
-		return nil, errors.New("cannot get token price from api")
+		return ethPrice, errors.New("cannot get token price from api")
 	}
-
-	return tokenPrice, nil
+	for _, v := range tokenPrice.Data {
+		if v.Symbol == common.ETHSymbol {
+			ethPrice = fmt.Sprintf("%.6f", v.Price)
+			break
+		}
+	}
+	return ethPrice, nil
 }

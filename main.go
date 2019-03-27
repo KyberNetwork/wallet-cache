@@ -14,7 +14,7 @@ import (
 	persister "github.com/KyberNetwork/server-go/persister"
 )
 
-type fetcherFunc func(persister persister.Persister, fetcher *fetcher.Fetcher)
+type fetcherFunc func(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher)
 
 func enableLogToFile() (*os.File, error) {
 	const logFileName = "error.log"
@@ -48,6 +48,10 @@ func main() {
 
 	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
+	boltIns, err := persister.NewBoltStorage()
+	if err != nil {
+		log.Println("cannot init db: ", err.Error())
+	}
 	fertcherIns, err := fetcher.NewFetcher(kyberENV)
 	if err != nil {
 		log.Fatal(err)
@@ -104,24 +108,24 @@ func main() {
 	//	initRateToken(persisterIns, fertcherIns)
 
 	//run fetch data
-	runFetchData(persisterIns, fetchKyberEnabled, fertcherIns, 10)
-	runFetchData(persisterIns, fetchMaxGasPrice, fertcherIns, 60)
+	runFetchData(persisterIns, boltIns, fetchKyberEnabled, fertcherIns, 10)
+	runFetchData(persisterIns, boltIns, fetchMaxGasPrice, fertcherIns, 60)
 
-	runFetchData(persisterIns, fetchGasPrice, fertcherIns, 30)
+	runFetchData(persisterIns, boltIns, fetchGasPrice, fertcherIns, 30)
 
-	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 600)
+	runFetchData(persisterIns, boltIns, fetchRateUSD, fertcherIns, 600)
 
 	//runFetchData(persisterIns, fetchRateUSDEther, fertcherIns, 600)
 
-	runFetchData(persisterIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
+	runFetchData(persisterIns, boltIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
 
-	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
-	runFetchData(persisterIns, fetchRate, fertcherIns, 15)
-	runFetchData(persisterIns, fetchRateWithFallback, fertcherIns, 300)
+	runFetchData(persisterIns, boltIns, fetchBlockNumber, fertcherIns, 10)
+	runFetchData(persisterIns, boltIns, fetchRate, fertcherIns, 15)
+	runFetchData(persisterIns, boltIns, fetchRateWithFallback, fertcherIns, 300)
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
-	runFetchData(persisterIns, fetchRate7dData, fertcherIns, 300)
+	runFetchData(persisterIns, boltIns, fetchRate7dData, fertcherIns, 60)
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
@@ -146,17 +150,17 @@ func main() {
 // 	persister.SetRateToken(tokens)
 // }
 
-func runFetchData(persister persister.Persister, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
+func runFetchData(persister persister.Persister, boltIns persister.BoltInterface, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
 	ticker := time.NewTicker(interval * time.Second)
 	go func() {
 		for {
-			fn(persister, fertcherIns)
+			fn(persister, boltIns, fertcherIns)
 			<-ticker.C
 		}
 	}()
 }
 
-func fetchGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchGasPrice(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	gasPrice, err := fetcher.GetGasPrice()
 	if err != nil {
 		log.Print(err)
@@ -166,7 +170,7 @@ func fetchGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	persister.SaveGasPrice(gasPrice)
 }
 
-func fetchMaxGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchMaxGasPrice(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	gasPrice, err := fetcher.GetMaxGasPrice()
 	if err != nil {
 		log.Print(err)
@@ -176,7 +180,7 @@ func fetchMaxGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	persister.SaveMaxGasPrice(gasPrice)
 }
 
-func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchKyberEnabled(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	enabled, err := fetcher.CheckKyberEnable()
 	if err != nil {
 		log.Print(err)
@@ -186,7 +190,7 @@ func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) 
 	persister.SaveKyberEnabled(enabled)
 }
 
-func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchRateUSD(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	rateUSD, err := fetcher.GetRateUsdEther()
 	if err != nil {
 		log.Print(err)
@@ -222,7 +226,7 @@ func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
 // 	persister.SaveRateUSDEther(rateUSD)
 // }
 
-func fetchBlockNumber(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchBlockNumber(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	blockNum, err := fetcher.GetLatestBlock()
 	if err != nil {
 		log.Print(err)
@@ -245,7 +249,7 @@ func makeMapRate(rates []ethereum.Rate) map[string]ethereum.Rate {
 	return mapRate
 }
 
-func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchRate(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	var result []ethereum.Rate
 	currentRate := persister.GetRate()
 	tokenPriority := fetcher.GetListTokenPriority()
@@ -276,7 +280,7 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	persister.SetIsNewRate(true)
 }
 
-func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchRateWithFallback(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	var result []ethereum.Rate
 	currentRate := persister.GetRate()
 	listToken := fetcher.GetListToken()
@@ -314,12 +318,16 @@ func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetch
 	// persister.SetIsNewRate(true)
 }
 
-func fetchGeneralInfoTokens(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchGeneralInfoTokens(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	generalInfo := fetcher.GetGeneralInfoTokens()
 	persister.SaveGeneralInfoTokens(generalInfo)
+	err := boltIns.StoreGeneralInfo(generalInfo)
+	if err != nil {
+		log.Println(err.Error())
+	}
 }
 
-func fetchRate7dData(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchRate7dData(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	data, err := fetcher.FetchRate7dData()
 	if err != nil {
 		log.Print(err)
@@ -330,7 +338,12 @@ func fetchRate7dData(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	} else {
 		persister.SetIsNewTrackerData(true)
 	}
-	tokens := fetcher.GetListToken()
-	persister.SaveMarketData(data, tokens)
+	mapToken := fetcher.GetListToken()
+	currentGeneral, err := boltIns.GetGeneralInfo(mapToken)
+	if err != nil {
+		log.Println(err.Error())
+		currentGeneral = make(map[string]*ethereum.TokenGeneralInfo)
+	}
+	persister.SaveMarketData(data, currentGeneral, mapToken)
 	// persister.SetIsNewMarketInfo(true)
 }
