@@ -189,7 +189,6 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		listBackup[t.Symbol] = ethereum.TokenAPIToToken(t)
 	}
 	infoData.BackupTokens = listBackup
-	log.Println("backup: ", infoData.BackupTokens)
 
 	fetIns := make([]FetcherInterface, 0)
 	for _, connection := range infoData.Connections {
@@ -293,7 +292,6 @@ func (self *Fetcher) GetGeneralInfoTokens() map[string]*ethereum.TokenGeneralInf
 				log.Print(err)
 				continue
 			}
-			log.Println(*result)
 			generalInfo[token.TokenID] = result
 		}
 	}
