@@ -113,7 +113,7 @@ func main() {
 
 	runFetchData(persisterIns, boltIns, fetchGasPrice, fertcherIns, 30)
 
-	runFetchData(persisterIns, boltIns, fetchRateUSD, fertcherIns, 600)
+	runFetchData(persisterIns, boltIns, fetchRateUSD, fertcherIns, 300)
 
 	//runFetchData(persisterIns, fetchRateUSDEther, fertcherIns, 600)
 
@@ -125,7 +125,7 @@ func main() {
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
-	runFetchData(persisterIns, boltIns, fetchRate7dData, fertcherIns, 60)
+	runFetchData(persisterIns, boltIns, fetchRate7dData, fertcherIns, 300)
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
