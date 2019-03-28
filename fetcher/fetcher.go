@@ -256,9 +256,11 @@ func (self *Fetcher) UpdateListToken() error {
 			if token.TokenID != "" {
 				tokenID = token.TokenID
 			}
-			listToken[tokenID] = token
+			newToken := token
+			newToken.TokenID = tokenID
+			listToken[tokenID] = newToken
 			if token.Priority {
-				listPriority[tokenID] = token
+				listPriority[tokenID] = newToken
 			}
 		}
 	}
