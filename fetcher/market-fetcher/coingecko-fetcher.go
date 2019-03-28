@@ -2,7 +2,6 @@ package mFetcher
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 
@@ -56,9 +55,6 @@ func (self *CGFetcher) GetGeneralInfo(coinID string) (*ethereum.TokenGeneralInfo
 
 	tokenGenalInfo := tokenItem.ToTokenInfoCMC()
 	return &tokenGenalInfo, nil
-	err = errors.New("Cannot find data key in return quotes of ticker")
-	log.Print(err)
-	return nil, err
 }
 
 // func (self *CGFetcher) GetTypeMarket() string {
