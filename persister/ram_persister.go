@@ -1,4 +1,4 @@
-package Persister
+package persister
 
 import (
 	"errors"
@@ -479,12 +479,14 @@ func (self *RamPersister) GetLast7D(listTokens string) map[string][]float64 {
 	return result
 }
 
-func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, tokens map[string]ethereum.Token) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
+func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, mapTokenInfo map[string]*ethereum.TokenGeneralInfo, tokens map[string]ethereum.Token) {
 	lastSevenDays := map[string][]float64{}
 	newResult := map[string]*ethereum.RightMarketInfo{}
-
+	if len(mapTokenInfo) == 0 {
+		self.mu.RLock()
+		mapTokenInfo = self.tokenInfo
+		self.mu.RUnlock()
+	}
 	for symbol := range tokens {
 		dataSevenDays := []float64{}
 		rightMarketInfo := &ethereum.RightMarketInfo{}
@@ -493,7 +495,7 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 			dataSevenDays = rateInfo.P
 			rightMarketInfo.Rate = &rateInfo.R
 		}
-		if tokenInfo := self.tokenInfo[symbol]; tokenInfo != nil {
+		if tokenInfo := mapTokenInfo[symbol]; tokenInfo != nil {
 			rightMarketInfo.Quotes = tokenInfo.Quotes
 			rightMarketInfo.Change24H = tokenInfo.Change24H
 		}
@@ -506,6 +508,8 @@ func (self *RamPersister) SaveMarketData(marketRate map[string]*ethereum.Rates, 
 		lastSevenDays[symbol] = dataSevenDays
 	}
 
+	self.mu.Lock()
+	defer self.mu.Unlock()
 	self.last7D = lastSevenDays
 	self.rightMarketInfo = newResult
 }

@@ -1,4 +1,4 @@
-package Persister
+package persister
 
 import (
 	"github.com/KyberNetwork/server-go/ethereum"
@@ -71,7 +71,7 @@ type Persister interface {
 	GetGasPrice() *ethereum.GasPrice
 	GetNewGasPrice() bool
 
-	SaveMarketData(rates map[string]*ethereum.Rates, tokens map[string]ethereum.Token)
+	SaveMarketData(rates map[string]*ethereum.Rates, mapTokenInfo map[string]*ethereum.TokenGeneralInfo, tokens map[string]ethereum.Token)
 	GetRightMarketData() map[string]*ethereum.RightMarketInfo
 	// GetRightMarketDataCG() map[string]*ethereum.RightMarketInfo
 	GetLast7D(listTokens string) map[string][]float64
