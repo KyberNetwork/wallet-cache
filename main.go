@@ -296,6 +296,7 @@ func fetchStepRate(persister persister.Persister, boltIns persister.BoltInterfac
 	if err != nil {
 		log.Print(err)
 		// persister.SetIsNewRate(false)
+		persister.ResetStepRate()	
 		return
 	}
 	persister.SaveStepRate(rates)	

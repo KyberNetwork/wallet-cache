@@ -567,6 +567,12 @@ func (self *RamPersister) SaveStepRate(rates []ethereum.StepRate) {
 	self.stepRates = rates	
 }
 
+func (self *RamPersister) ResetStepRate(){
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.stepRates = []ethereum.StepRate{}	
+}
+
 func (self *RamPersister) GetStepRate() []ethereum.StepRate {
 	self.mu.RLock()
 	defer self.mu.RUnlock()

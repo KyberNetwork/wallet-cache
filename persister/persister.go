@@ -86,6 +86,7 @@ type Persister interface {
 
 
 	SaveStepRate([]ethereum.StepRate) 
+	ResetStepRate()
 	GetStepRate() []ethereum.StepRate
 }
 
