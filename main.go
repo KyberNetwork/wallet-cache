@@ -10,6 +10,7 @@ import (
 	"github.com/KyberNetwork/server-go/common"
 	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/KyberNetwork/server-go/fetcher"
+	core "github.com/KyberNetwork/server-go/core"
 	"github.com/KyberNetwork/server-go/http"
 	persister "github.com/KyberNetwork/server-go/persister"
 )
@@ -56,6 +57,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	
 
 	err = fertcherIns.TryUpdateListToken()
 	if err != nil {
@@ -107,6 +110,8 @@ func main() {
 	intervalFetchGeneralInfoTokens := time.Duration((tokenNum * 7) + bonusTimeWait)
 	//	initRateToken(persisterIns, fertcherIns)
 
+	
+
 	//run fetch data
 	runFetchData(persisterIns, boltIns, fetchKyberEnabled, fertcherIns, 10)
 	runFetchData(persisterIns, boltIns, fetchMaxGasPrice, fertcherIns, 60)
@@ -122,13 +127,18 @@ func main() {
 	runFetchData(persisterIns, boltIns, fetchBlockNumber, fertcherIns, 10)
 	runFetchData(persisterIns, boltIns, fetchRate, fertcherIns, 15)
 	runFetchData(persisterIns, boltIns, fetchRateWithFallback, fertcherIns, 300)
+
+	runFetchData(persisterIns, boltIns, fetchStepRate, fertcherIns, 10)
+
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
 	runFetchData(persisterIns, boltIns, fetchRate7dData, fertcherIns, 300)
 
 	//run server
-	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
+	coreIns, _ := core.NewCore(fertcherIns, persisterIns)
+
+	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns, coreIns)
 	server.Run(kyberENV)
 
 	//init fetch data
@@ -249,6 +259,7 @@ func makeMapRate(rates []ethereum.Rate) map[string]ethereum.Rate {
 	return mapRate
 }
 
+
 func fetchRate(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
 	var result []ethereum.Rate
 	currentRate := persister.GetRate()
@@ -278,6 +289,16 @@ func fetchRate(persister persister.Persister, boltIns persister.BoltInterface, f
 	timeNow := time.Now().UTC().Unix()
 	persister.SaveRate(result, timeNow)
 	persister.SetIsNewRate(true)
+}
+
+func fetchStepRate(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
+	rates, err := fetcher.GetStepRate()
+	if err != nil {
+		log.Print(err)
+		// persister.SetIsNewRate(false)
+		return
+	}
+	persister.SaveStepRate(rates)	
 }
 
 func fetchRateWithFallback(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {

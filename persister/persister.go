@@ -83,6 +83,10 @@ type Persister interface {
 	GetTimeVersion() string
 
 	IsFailedToFetchTracker() bool
+
+
+	SaveStepRate([]ethereum.StepRate) 
+	GetStepRate() []ethereum.StepRate
 }
 
 //var transactionPersistent = models.NewTransactionPersister()
