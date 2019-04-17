@@ -62,6 +62,11 @@ func (self *Core) amountFromStepAmount(src string, dest string, destAmount strin
 			}
 		}
 	}
+	// log.Println(higherDestAmount.String())
+	// log.Println(higherSourceAmount.String())
+	// log.Println(lowerDestAmount.String())
+	// log.Println(lowerSourceAmount.String())
+	// log.Println(amountBig.String())
 
 	if lowerDestAmount.Cmp(zeroAmount) == 0 && higherDestAmount.Cmp(zeroAmount) == 0{ 
 		// srcAmount := big.NewInt(0).Mul(higherSourceAmount, amountBig).Quo(higherDestAmount)
@@ -85,6 +90,8 @@ func (self *Core) amountFromStepAmount(src string, dest string, destAmount strin
 	if (lowerDestAmount.Cmp(higherDestAmount) == 0){
 		return lowerSourceAmount.String(), nil
 	}
+
+
 	factor1 := big.NewInt(0).Mul(higherSourceAmount, big.NewInt(0).Sub(amountBig, lowerDestAmount))
 	factor2 := big.NewInt(0).Mul(lowerSourceAmount, big.NewInt(0).Sub(higherDestAmount, amountBig))
 	factor3 := big.NewInt(0).Sub(higherDestAmount, lowerDestAmount)
