@@ -1,5 +1,9 @@
 package ethereum
 
+import (
+	"math/big"
+)
+
 // const (
 // 	TIME_TO_DELETE = 18000
 // )
@@ -189,3 +193,15 @@ type TokenConfig struct {
 	Success bool    `json:"success"`
 	Data    []Token `json:"data"`
 }
+
+
+
+type StepRate struct {
+	Source string  `json: "src"`
+	Dest string  `json: "dest"`
+	SrcDecimal int 
+	DestDecimal int 
+	SrcAmount *big.Int  `json: "src_amount"`
+	DestAmount *big.Int  `json: "dest_amount"`
+}
+
