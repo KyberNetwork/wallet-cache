@@ -4,6 +4,7 @@ import (
 	"math/big"
 	"errors"
 	"log"
+	"strconv"
 )
 
 func GetOrAmount(amount *big.Int) *big.Int {
@@ -12,6 +13,14 @@ func GetOrAmount(amount *big.Int) *big.Int {
 	return orAmount
 }
 
+func StringToWei(amount string, decimals int) (*big.Int, error) {
+	amountFloat, err := strconv.ParseFloat(amount, 64)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return ToWei(amountFloat, decimals), nil
+}
 
 func ToWei(amount float64, decimals int) *big.Int {
 	amountFloat := big.NewFloat(amount)

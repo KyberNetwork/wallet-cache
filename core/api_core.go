@@ -185,23 +185,30 @@ func (self *Core) fromEthToToken(src string, destAmount string)(string, error){
 
 }
 
-func (self *Core) GetSourceAmount(src string, dest string, destAmount string)( string, error){
+func (self *Core) GetSourceAmount(src string, dest string, destAmountStr string)( string, error){
 	if src == dest {
-		return destAmount, nil
+		return destAmountStr, nil
 	}
 	// log.Println(src)
 	// log.Println(dest)
 	// log.Println(destAmount)
-	_, err := self.fetcher.GetTokenBySymbol(src)
+	srcToken, err := self.fetcher.GetTokenBySymbol(src)
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
-	_, err = self.fetcher.GetTokenBySymbol(dest)
+	destToken, err := self.fetcher.GetTokenBySymbol(dest)
 	if err != nil {
 		log.Println(err)
 		return "", err
 	}
+	// dest amount to big number
+	destAmountBig, err := common.StringToWei(destAmountStr, destToken.Decimal)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	destAmount := destAmountBig.String()
 
 	// if dest != ETH get rate from token to ETH, calculate amount ETH
 	srcEth := destAmount
@@ -221,8 +228,12 @@ func (self *Core) GetSourceAmount(src string, dest string, destAmount string)( s
 			return "", err
 		}
 	}
-
-	return srcAmount, nil
+	srcAmountFloat, err := common.ToToken(srcAmount, srcToken.Decimal)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	return srcAmountFloat.String(), nil
 	
 }
 
