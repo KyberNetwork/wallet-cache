@@ -266,6 +266,17 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	}
 }
 
+func fetchStepRate(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
+	rates, err := fetcher.GetStepRate()
+	if err != nil {
+		log.Print(err)
+		// persister.SetIsNewRate(false)
+		persister.ResetStepRate()
+		return
+	}
+	persister.SaveStepRate(rates)
+}
+
 func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetcher) {
 	const timewait = 30 * time.Second
 	for {
@@ -341,7 +352,6 @@ func runUpdateTokenStatus(fetcher *fetcher.Fetcher) {
 	mapToken := fetcher.GetListToken()
 	for {
 		_, err := fetcher.GetRateBuy(mapToken)
-		log.Println("test status: ", err, len(mapToken), len(listToken))
 		if err != nil {
 			var (
 				mapGoodToken = make(map[string]ethereum.Token)
