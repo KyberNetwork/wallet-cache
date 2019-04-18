@@ -42,6 +42,8 @@ type InfoData struct {
 	BackupTokens map[string]ethereum.Token
 	arrToken     []ethereum.Token
 
+	RateCache []string `json:"rate_cache"`
+
 	mapGoodToken map[string]ethereum.Token
 	mapBadToken  map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
@@ -674,4 +676,81 @@ func (self *Fetcher) CheckStatus(listToken, listFailed []ethereum.Token) []ether
 		}
 	}
 	return listFailed
+}
+
+func (self *Fetcher) GetStepRate() ([]ethereum.StepRate, error) {
+	// combine data
+	sourceArr := make([]string, 0)
+	destArr := make([]string, 0)
+	sourceSymbolArr := make([]string, 0)
+	destSymbolArr := make([]string, 0)
+	amountArr := make([]*big.Int, 0)
+
+	rateArr := make([]ethereum.StepRate, 0)
+	stepAmount := map[string][]float64{
+		"ETH":  []float64{1, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000},
+		"TUSD": []float64{1, 20000, 40000, 60000, 90000, 120000, 160000, 200000, 250000, 300000, 350000, 450000, 550000},
+		"BAT":  []float64{1, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1500000},
+		"DAI":  []float64{1, 100000, 200000},
+	}
+
+	for _, symbol := range self.info.RateCache {
+		token, err := self.GetTokenBySymbol(symbol)
+		if err != nil {
+			continue
+		}
+
+		for _, amount := range stepAmount["ETH"] {
+			sourceArr = append(sourceArr, common.ETHAddr)
+			sourceSymbolArr = append(sourceSymbolArr, "ETH")
+			destArr = append(destArr, token.Address)
+			destSymbolArr = append(destSymbolArr, symbol)
+			amountArr = append(amountArr, common.GetAmountEnableFirstBit(amount, 18))
+
+			rateItem := ethereum.StepRate{"ETH", symbol, 18, token.Decimal, common.ToWei(amount, 18), big.NewInt(0)}
+			rateArr = append(rateArr, rateItem)
+		}
+		for _, amount := range stepAmount[symbol] {
+			sourceArr = append(sourceArr, token.Address)
+			sourceSymbolArr = append(sourceSymbolArr, symbol)
+			destArr = append(destArr, common.ETHAddr)
+			destSymbolArr = append(destSymbolArr, "ETH")
+			amountArr = append(amountArr, common.GetAmountEnableFirstBit(amount, token.Decimal))
+
+			rateItem := ethereum.StepRate{symbol, "ETH", token.Decimal, 18, common.ToWei(amount, 18), big.NewInt(0)}
+			rateArr = append(rateArr, rateItem)
+		}
+	}
+
+	// get rate
+	rates, err := self.runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbolArr, amountArr)
+	if err != nil {
+		log.Println("cannot get rate from wrapper, change to get from network")
+		return nil, err
+	}
+
+	for index, rate := range rates {
+		//src amount
+		destAmount, err := common.FromSrcToDest(rateArr[index].SrcAmount.String(), rate.Rate, rateArr[index].SrcDecimal, rateArr[index].DestDecimal)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		rateArr[index].DestAmount = destAmount
+	}
+
+	return rateArr, nil
+}
+
+func (self *Fetcher) GetTokenBySymbol(symbol string) (*ethereum.Token, error) {
+	self.info.mu.RLock()
+	defer self.info.mu.RUnlock()
+	for _, token := range self.info.Tokens {
+		if token.Symbol == symbol {
+			return &token, nil
+		}
+	}
+	err := errors.New("Token is not existed")
+	log.Println(err)
+	return nil, err
 }

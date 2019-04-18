@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/KyberNetwork/server-go/common"
+	core "github.com/KyberNetwork/server-go/core"
 	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/KyberNetwork/server-go/fetcher"
 	"github.com/KyberNetwork/server-go/http"
@@ -122,6 +123,7 @@ func main() {
 	runFetchData(persisterIns, boltIns, fetchBlockNumber, fertcherIns, 10)
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
+	runFetchData(persisterIns, boltIns, fetchStepRate, fertcherIns, 10)
 
 	runFetchData(persisterIns, boltIns, fetchRate7dData, fertcherIns, 300)
 
@@ -130,7 +132,9 @@ func main() {
 	go runUpdateTokenStatus(fertcherIns)
 
 	//run server
-	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
+	coreIns, _ := core.NewCore(fertcherIns, persisterIns)
+
+	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns, coreIns)
 	server.Run(kyberENV)
 
 	//init fetch data
@@ -258,7 +262,6 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		currentRate := persister.GetRate()
 		mapGoodToken := fetcher.GetMapGoodToken()
 		rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), mapGoodToken, false)
-		log.Println("test status: ", len(mapGoodToken), len(rates))
 		if err != nil {
 			log.Print(err)
 			persister.SetIsNewRate(false)
@@ -297,7 +300,6 @@ func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetch
 			return
 		}
 		rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), mapBadToken, true)
-		log.Println("test status: ", len(mapBadToken), len(rates))
 		if err != nil {
 			log.Print(err)
 			persister.SetIsNewRate(false)
