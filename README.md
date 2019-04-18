@@ -41,6 +41,7 @@ docker-compose -f docker-compose-staging.yml up --build
   param listToken is created by linking tokens (token's symbol in uppercase) with "-"
  - /rateETH: return USD price of ETH from Coingecko
  - /users: ```params: address=0x2262d4f6312805851e3b27c40db2c7282e6e4a42``` return user stats info
+ - /sourceAmount: ```params: ?source=TUSD&dest=ETH&destAmount=500``` calculate and return relative src amount when having dest amount
  
 ## Cache version
  - /cacheVersion: return current cache version
@@ -311,5 +312,18 @@ Response:
     "cap": 40304044000000000000,
     "kyced": true,
     "rich": false
+}
+```
+
+### 12. Get source amount from dest amount
+`/sourceAmount?source=TUSD&dest=ETH&destAmount=500`
+
+(GET) Return Source Amount
+
+Response:
+```javascript
+{
+  "success": true,
+  "value": "129808.7692"
 }
 ```
