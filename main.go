@@ -120,12 +120,14 @@ func main() {
 	runFetchData(persisterIns, boltIns, fetchGeneralInfoTokens, fertcherIns, intervalFetchGeneralInfoTokens)
 
 	runFetchData(persisterIns, boltIns, fetchBlockNumber, fertcherIns, 10)
-	runFetchData(persisterIns, boltIns, fetchRate, fertcherIns, 15)
-	runFetchData(persisterIns, boltIns, fetchRateWithFallback, fertcherIns, 300)
 	// runFetchData(persisterIns, fetchEvent, fertcherIns, 30)
 	//runFetchData(persisterIns, fetchKyberEnable, fertcherIns, 10)
 
 	runFetchData(persisterIns, boltIns, fetchRate7dData, fertcherIns, 300)
+
+	go fetchRate(persisterIns, fertcherIns)
+	go fetchRateWithFallback(persisterIns, fertcherIns)
+	go runUpdateTokenStatus(fertcherIns)
 
 	//run server
 	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
@@ -249,73 +251,80 @@ func makeMapRate(rates []ethereum.Rate) map[string]ethereum.Rate {
 	return mapRate
 }
 
-func fetchRate(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
-	var result []ethereum.Rate
-	currentRate := persister.GetRate()
-	tokenPriority := fetcher.GetListTokenPriority()
-	rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), tokenPriority, false)
-	if err != nil {
-		log.Print(err)
-		persister.SetIsNewRate(false)
-		return
-	}
-	mapRate := makeMapRate(rates)
-	for _, cr := range currentRate {
-		keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
-		if r, ok := mapRate[keyRate]; ok {
-			result = append(result, r)
-			delete(mapRate, keyRate)
-		} else {
-			result = append(result, cr)
+func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	const timewait = 3 * time.Second
+	for {
+		var result []ethereum.Rate
+		currentRate := persister.GetRate()
+		mapGoodToken := fetcher.GetMapGoodToken()
+		rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), mapGoodToken, false)
+		log.Println("test status: ", len(mapGoodToken), len(rates))
+		if err != nil {
+			log.Print(err)
+			persister.SetIsNewRate(false)
+			return
 		}
-	}
-	// add new token to current rate
-	if len(mapRate) > 0 {
-		for _, nr := range mapRate {
-			result = append(result, nr)
+		mapRate := makeMapRate(rates)
+		for _, cr := range currentRate {
+			keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
+			if r, ok := mapRate[keyRate]; ok {
+				result = append(result, r)
+				delete(mapRate, keyRate)
+			} else {
+				result = append(result, cr)
+			}
 		}
+		// add new token to current rate
+		if len(mapRate) > 0 {
+			for _, nr := range mapRate {
+				result = append(result, nr)
+			}
+		}
+		timeNow := time.Now().UTC().Unix()
+		persister.SaveRate(result, timeNow)
+		persister.SetIsNewRate(true)
+		time.Sleep(timewait)
 	}
-	timeNow := time.Now().UTC().Unix()
-	persister.SaveRate(result, timeNow)
-	persister.SetIsNewRate(true)
 }
 
-func fetchRateWithFallback(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
-	var result []ethereum.Rate
-	currentRate := persister.GetRate()
-	listToken := fetcher.GetListToken()
-	newList := make(map[string]ethereum.Token)
-	for _, t := range listToken {
-		if !t.Priority {
-			newList[t.Symbol] = t
+func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetcher) {
+	const timewait = 30 * time.Second
+	for {
+		var result []ethereum.Rate
+		currentRate := persister.GetRate()
+		mapBadToken := fetcher.GetMapBadToken()
+		if len(mapBadToken) == 0 {
+			return
 		}
-	}
-	rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), newList, true)
-	if err != nil {
-		log.Print(err)
-		persister.SetIsNewRate(false)
-		return
-	}
-	mapRate := makeMapRate(rates)
-	for _, cr := range currentRate {
-		keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
-		if r, ok := mapRate[keyRate]; ok {
-			result = append(result, r)
-			if keyRate != "ETH_ETH" {
-				delete(mapRate, keyRate)
+		rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), mapBadToken, true)
+		log.Println("test status: ", len(mapBadToken), len(rates))
+		if err != nil {
+			log.Print(err)
+			persister.SetIsNewRate(false)
+			return
+		}
+		mapRate := makeMapRate(rates)
+		for _, cr := range currentRate {
+			keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
+			if r, ok := mapRate[keyRate]; ok {
+				result = append(result, r)
+				if keyRate != "ETH_ETH" {
+					delete(mapRate, keyRate)
+				}
+			} else {
+				result = append(result, cr)
 			}
-		} else {
-			result = append(result, cr)
 		}
-	}
-	// add new token to current rate
-	if len(mapRate) > 1 {
-		for _, nr := range mapRate {
-			result = append(result, nr)
+		// add new token to current rate
+		if len(mapRate) > 1 {
+			for _, nr := range mapRate {
+				result = append(result, nr)
+			}
 		}
+		persister.SaveRate(result, 0)
+		// persister.SetIsNewRate(true)
+		time.Sleep(timewait)
 	}
-	persister.SaveRate(result, 0)
-	// persister.SetIsNewRate(true)
 }
 
 func fetchGeneralInfoTokens(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher) {
@@ -346,4 +355,30 @@ func fetchRate7dData(persister persister.Persister, boltIns persister.BoltInterf
 	}
 	persister.SaveMarketData(data, currentGeneral, mapToken)
 	// persister.SetIsNewMarketInfo(true)
+}
+
+func runUpdateTokenStatus(fetcher *fetcher.Fetcher) {
+	const timewait = 15 * time.Second
+	listToken := fetcher.GetArrToken()
+	mapToken := fetcher.GetListToken()
+	for {
+		_, err := fetcher.GetRateBuy(mapToken)
+		log.Println("test status: ", err, len(mapToken), len(listToken))
+		if err != nil {
+			var (
+				mapGoodToken = make(map[string]ethereum.Token)
+				mapBadToken  = make(map[string]ethereum.Token)
+				listBadToken []ethereum.Token
+			)
+			listBadToken = fetcher.CheckStatus(listToken, listBadToken)
+			mapBadToken = common.ArrTokenToMap(listBadToken)
+			for addr, token := range mapToken {
+				if _, ok := mapBadToken[addr]; !ok {
+					mapGoodToken[addr] = token
+				}
+			}
+			fetcher.UpdateListStatusToken(mapGoodToken, mapBadToken)
+		}
+		time.Sleep(timewait)
+	}
 }
