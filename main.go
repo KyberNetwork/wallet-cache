@@ -17,35 +17,11 @@ import (
 
 type fetcherFunc func(persister persister.Persister, boltIns persister.BoltInterface, fetcher *fetcher.Fetcher)
 
-func enableLogToFile() (*os.File, error) {
-	const logFileName = "error.log"
-	f, err := os.OpenFile(logFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	//clear error log file
-	if err = f.Truncate(0); err != nil {
-		log.Fatal(err)
-	}
-
-	log.SetOutput(f)
-	return f, nil
-}
-
 func main() {
 	numCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(numCPU)
 	//set log for server
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	if os.Getenv("LOG_TO_STDOUT") != "true" {
-		f, err := enableLogToFile()
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-	}
 
 	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
