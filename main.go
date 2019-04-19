@@ -248,13 +248,15 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 			keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
 			if r, ok := mapRate[keyRate]; ok {
 				result = append(result, r)
-				delete(mapRate, keyRate)
+				if keyRate != "ETH_ETH" {
+					delete(mapRate, keyRate)
+				}
 			} else {
 				result = append(result, cr)
 			}
 		}
 		// add new token to current rate
-		if len(mapRate) > 0 {
+		if len(mapRate) > 1 {
 			for _, nr := range mapRate {
 				result = append(result, nr)
 			}
