@@ -7,6 +7,7 @@ import (
 
 	"github.com/KyberNetwork/server-go/fetcher"
 	persister "github.com/KyberNetwork/server-go/persister"
+	core "github.com/KyberNetwork/server-go/core"
 	raven "github.com/getsentry/raven-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sentry"
@@ -21,6 +22,7 @@ const (
 type HTTPServer struct {
 	fetcher   *fetcher.Fetcher
 	persister persister.Persister
+	core *core.Core
 	host      string
 	r         *gin.Engine
 }
@@ -208,6 +210,26 @@ func (self *HTTPServer) GetUserInfo(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) GetSourceAmount(c *gin.Context){
+	src := c.Query("source")
+	dest := c.Query("dest")
+	destAmount := c.Query("destAmount")
+	srcAmount, err := self.core.GetSourceAmount(src, dest, destAmount)
+
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "value": srcAmount},
+	)
+}
+
 func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 	self.r.GET("/latestBlock", self.GetLatestBlock)
@@ -240,6 +262,8 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/users", self.GetUserInfo)
 
+	self.r.GET("/sourceAmount", self.GetSourceAmount)
+
 	if kyberENV != "production" {
 		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
 	}
@@ -247,12 +271,12 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.Run(self.host)
 }
 
-func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher) *HTTPServer {
+func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher, core *core.Core) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
 	r.Use(cors.Default())
 
 	return &HTTPServer{
-		fetcher, persister, host, r,
+		fetcher, persister, core , host, r,
 	}
 }

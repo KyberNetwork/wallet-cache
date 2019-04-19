@@ -1,5 +1,10 @@
 package ethereum
 
+import (
+	"fmt"
+	"math/big"
+)
+
 // const (
 // 	TIME_TO_DELETE = 18000
 // )
@@ -81,7 +86,7 @@ type TokenGeneralInfo struct {
 	TotalSupply       float64            `json:"total_supply"`
 	MaxSupply         float64            `json:"max_supply"`
 	MarketCap         float64            `json:"market_cap"`
-	Quotes            map[string]QuoInfo `json:"quotes`
+	Quotes            map[string]QuoInfo `json:"quotes"`
 	Change24H         string             `json:"change_24h"`
 }
 
@@ -94,7 +99,7 @@ type TokenInfoCoinGecko struct {
 	MarketData struct {
 		MarketCap CurrencyData `json:"market_cap"`
 		Volume24H CurrencyData `json:"total_volume"`
-		Change24H string       `json:"price_change_percentage_24h"`
+		Change24H float64      `json:"price_change_percentage_24h"`
 	} `json:"market_data"`
 }
 
@@ -108,9 +113,10 @@ func (tokenInfo TokenInfoCoinGecko) ToTokenInfoCMC() TokenGeneralInfo {
 		MarketCap: tokenInfo.MarketData.MarketCap.USD,
 		Volume24h: tokenInfo.MarketData.Volume24H.USD,
 	}
+	changeS := fmt.Sprintf("%.6f", tokenInfo.MarketData.Change24H)
 	return TokenGeneralInfo{
 		Quotes:    quotes,
-		Change24H: tokenInfo.MarketData.Change24H,
+		Change24H: changeS,
 	}
 }
 
@@ -188,4 +194,13 @@ func NewMarketInfo(quotes map[string]QuoInfo, rates *Rates) *MarketInfo {
 type TokenConfig struct {
 	Success bool    `json:"success"`
 	Data    []Token `json:"data"`
+}
+
+type StepRate struct {
+	Source      string `json: "src"`
+	Dest        string `json: "dest"`
+	SrcDecimal  int
+	DestDecimal int
+	SrcAmount   *big.Int `json: "src_amount"`
+	DestAmount  *big.Int `json: "dest_amount"`
 }

@@ -35,7 +35,7 @@ type RamPersister struct {
 
 	rates     []ethereum.Rate
 	isNewRate bool
-	updatedAt int64
+	updatedAt int64	
 
 	latestBlock      string
 	isNewLatestBlock bool
@@ -75,6 +75,8 @@ type RamPersister struct {
 
 	isNewMarketInfo bool
 	// isNewMarketInfoCG bool
+
+	stepRates []ethereum.StepRate
 }
 
 func NewRamPersister() (*RamPersister, error) {
@@ -87,7 +89,7 @@ func NewRamPersister() (*RamPersister, error) {
 	isNewKyberEnabled := true
 
 	rates := []ethereum.Rate{}
-	isNewRate := false
+	isNewRate := false	
 
 	latestBlock := "0"
 	isNewLatestBlock := true
@@ -125,6 +127,8 @@ func NewRamPersister() (*RamPersister, error) {
 	isNewMarketInfo := true
 	// isNewMarketInfoCG := true
 
+	stepRates := []ethereum.StepRate{}
+
 	persister := &RamPersister{
 		mu:                mu,
 		timeRun:           timeRun,
@@ -157,6 +161,8 @@ func NewRamPersister() (*RamPersister, error) {
 		// rightMarketInfoCG: rightMarketInfoCG,
 		isNewMarketInfo: isNewMarketInfo,
 		// isNewMarketInfoCG: isNewMarketInfoCG,
+
+		stepRates : stepRates, 
 	}
 	return persister, nil
 }
@@ -552,4 +558,23 @@ func (self *RamPersister) IsFailedToFetchTracker() bool {
 		return true
 	}
 	return false
+}
+
+
+func (self *RamPersister) SaveStepRate(rates []ethereum.StepRate) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.stepRates = rates	
+}
+
+func (self *RamPersister) ResetStepRate(){
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.stepRates = []ethereum.StepRate{}	
+}
+
+func (self *RamPersister) GetStepRate() []ethereum.StepRate {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.stepRates
 }
