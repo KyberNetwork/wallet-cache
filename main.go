@@ -241,7 +241,8 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		if err != nil {
 			log.Print(err)
 			persister.SetIsNewRate(false)
-			return
+			time.Sleep(timewait)
+			continue
 		}
 		mapRate := makeMapRate(rates)
 		for _, cr := range currentRate {
@@ -280,19 +281,21 @@ func fetchStepRate(persister persister.Persister, boltIns persister.BoltInterfac
 }
 
 func fetchRateWithFallback(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	const timewait = 30 * time.Second
+	const timewait = 60 * time.Second
 	for {
 		var result []ethereum.Rate
 		currentRate := persister.GetRate()
 		mapBadToken := fetcher.GetMapBadToken()
 		if len(mapBadToken) == 0 {
-			return
+			time.Sleep(timewait)
+			continue
 		}
 		rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), mapBadToken, true)
 		if err != nil {
 			log.Print(err)
 			persister.SetIsNewRate(false)
-			return
+			time.Sleep(timewait)
+			continue
 		}
 		mapRate := makeMapRate(rates)
 		for _, cr := range currentRate {
