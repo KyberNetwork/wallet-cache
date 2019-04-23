@@ -196,14 +196,6 @@
       "cg_id": "ripio-credit-network"
     },
     {
-      "name": "Zilliqa",
-      "address": "0x05f4a42e251f2d52b8ed15e9fedaacfcef1fad27",
-      "symbol": "ZIL",
-      "decimals": 12,
-      "cmc_id":"2469",
-      "cg_id": "zilliqa"
-    },
-    {
       "name": "Chain Link",
       "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
       "symbol": "LINK",
