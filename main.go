@@ -237,6 +237,7 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		var result []ethereum.Rate
 		currentRate := persister.GetRate()
 		mapGoodToken := fetcher.GetMapGoodToken()
+		mapBadToken := fetcher.GetMapBadToken()
 		rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), mapGoodToken, false)
 		if err != nil {
 			log.Print(err)
@@ -253,13 +254,24 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 					delete(mapRate, keyRate)
 				}
 			} else {
-				result = append(result, cr)
+				switch len(mapBadToken) == 0 {
+				case true:
+					continue
+				default:
+					tokenID := cr.Source
+					if cr.Dest != common.ETHSymbol {
+						tokenID = cr.Dest
+					}
+					if _, ok := mapBadToken[tokenID]; ok {
+						result = append(result, cr)
+					}
+				}
 			}
 		}
 		// add new token to current rate
 		if len(mapRate) > 1 {
-			for _, nr := range mapRate {
-				result = append(result, nr)
+			for _, r := range mapRate {
+				result = append(result, r)
 			}
 		}
 		timeNow := time.Now().UTC().Unix()
@@ -355,9 +367,15 @@ func runUpdateTokenStatus(fetcher *fetcher.Fetcher) {
 	const timewait = 15 * time.Second
 	listToken := fetcher.GetArrToken()
 	mapToken := fetcher.GetListToken()
+	currentBadToken := fetcher.GetMapBadToken()
 	for {
 		_, err := fetcher.GetRateBuy(mapToken)
-		if err != nil {
+		switch err {
+		case nil:
+			if len(currentBadToken) > 0 {
+				fetcher.UpdateListStatusToken(mapToken, nil)
+			}
+		default:
 			var (
 				mapGoodToken = make(map[string]ethereum.Token)
 				mapBadToken  = make(map[string]ethereum.Token)
