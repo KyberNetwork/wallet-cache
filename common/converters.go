@@ -1,10 +1,11 @@
-package common 
+package common
 
 import (
-	"math/big"
 	"errors"
 	"log"
+	"math/big"
 	"strconv"
+	"strings"
 )
 
 func GetOrAmount(amount *big.Int) *big.Int {
@@ -13,8 +14,30 @@ func GetOrAmount(amount *big.Int) *big.Int {
 	return orAmount
 }
 
+func validateStringAmount(amount string) error {
+	amountLower := strings.ToLower(amount)
+	if len(amountLower) == 0 {
+		return errors.New("amount is required")
+	}
+	switch amountLower {
+	case "nan", "inf", "-inf", "infinity", "-infinity":
+		return errors.New("amount is not a valid number")
+	default:
+		return nil
+	}
+	return nil
+}
+
 func StringToWei(amount string, decimals int) (*big.Int, error) {
-	amountFloat, err := strconv.ParseFloat(amount, 64)
+	var (
+		amountFloat float64
+		err         error
+	)
+	err = validateStringAmount(amount)
+	if err != nil {
+		return nil, err
+	}
+	amountFloat, err = strconv.ParseFloat(amount, 64)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -31,7 +54,7 @@ func ToWei(amount float64, decimals int) *big.Int {
 
 	result := new(big.Int)
 	amountBig.Int(result) // store converted number in result
-	
+
 	return result
 }
 
@@ -46,53 +69,48 @@ func ToToken(amount string, decimals int) (*big.Float, error) {
 	weight := big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(decimals)), nil)
 	weightBigFloat := new(big.Float).SetInt(weight)
 
-
 	token := new(big.Float).Quo(amountBigFloat, weightBigFloat)
 	return token, nil
 }
 
-
-func GetAmountEnableFirstBit(amount float64,  decimals int) *big.Int{
+func GetAmountEnableFirstBit(amount float64, decimals int) *big.Int {
 	amountBig := ToWei(amount, decimals)
 	return GetOrAmount(amountBig)
 }
 
-
-func FromSrcToDest(srcAmount string, rate string, srcDecimals int, destDecimal int ) (*big.Int, error){
+func FromSrcToDest(srcAmount string, rate string, srcDecimals int, destDecimal int) (*big.Int, error) {
 	srcBig, err := ToToken(srcAmount, srcDecimals)
 	if err != nil {
 		log.Println(err)
 		return nil, err
-	}	
+	}
 	rateBig, err := ToToken(rate, 18)
 	if err != nil {
 		log.Println(err)
 		return nil, err
-	}	
+	}
 
 	// calculate dest
 	destAmount := new(big.Float).Mul(srcBig, rateBig)
-	
+
 	destAmountFloat, _ := destAmount.Float64()
 
 	return ToWei(destAmountFloat, destDecimal), nil
 
 }
 
-
-
-func FromDestToSrc(destAmount string, rate string, srcDecimals int, destDecimal int ) (*big.Int, error){
+func FromDestToSrc(destAmount string, rate string, srcDecimals int, destDecimal int) (*big.Int, error) {
 	destBig, err := ToToken(destAmount, destDecimal)
 	if err != nil {
 		log.Println(err)
 		return nil, err
-	}	
+	}
 	rateBig, err := ToToken(rate, 18)
 	if err != nil {
 		log.Println(err)
 		return nil, err
-	}	
-	
+	}
+
 	if rateBig.Cmp(big.NewFloat(0)) == 0 {
 		err = errors.New("Cannot calculate src amount")
 		log.Println(err)
@@ -101,12 +119,9 @@ func FromDestToSrc(destAmount string, rate string, srcDecimals int, destDecimal 
 
 	// calculate dest
 	srcAmount := new(big.Float).Quo(destBig, rateBig)
-	
+
 	srcAmountFloat, _ := srcAmount.Float64()
 
 	return ToWei(srcAmountFloat, srcDecimals), nil
 
 }
-
-
-

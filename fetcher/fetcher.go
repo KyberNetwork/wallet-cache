@@ -283,12 +283,10 @@ func (self *Fetcher) UpdateListToken() error {
 			listToken[tokenID] = newToken
 		}
 	}
-	if len(self.GetMapGoodToken()) == 0 || len(result) != len(self.GetListToken()) {
-		for k, v := range listToken {
-			mapGoodTokens[k] = v
-		}
+	if common.IsDifferentMapToken(listToken, self.GetListToken()) {
+		common.CopyMapToken(mapGoodTokens, listToken)
+		self.info.UpdateListToken(listToken, mapGoodTokens, result)
 	}
-	self.info.UpdateListToken(listToken, mapGoodTokens, result)
 	return nil
 }
 
