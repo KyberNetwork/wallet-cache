@@ -29,8 +29,7 @@
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
   "api_endpoint":"https://api.kyber.network",
   "config_endpoint": "https://api.kyber.network/internal/currencies",
-  "user_stats_endpoint": "https://users-stats.knstats.com/",  
-  "rate_cache": ["TUSD", "DAI", "BAT"],
+  "user_stats_endpoint": "https://users-stats.knstats.com/",    
   "tokens": [
     {
       "name": "Ethereum",
@@ -63,7 +62,8 @@
       "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
       "decimals": 18,
       "cmc_id":"2308",
-      "cg_id": "dai"
+      "cg_id": "dai",
+      "cache_amount": [1, 100000, 200000]
     },
     {
       "name": "OmiseGO",
@@ -112,7 +112,8 @@
       "symbol": "BAT",
       "decimals": 18,
       "cmc_id":"1697",
-      "cg_id": "basic-attention-token"
+      "cg_id": "basic-attention-token",
+      "cache_amount": [1, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 150000]
     },
     {
       "name":"Request",
@@ -378,7 +379,8 @@
       "address": "0x8dd5fbce2f6a956c3022ba3663759011dd51e73e",
       "symbol":"TUSD", 
       "cmc_id":"2563",
-      "cg_id": "true-usd"
+      "cg_id": "true-usd",
+      "cache_amount": [1, 20000, 40000, 60000, 90000, 120000, 160000, 200000, 250000, 300000, 350000, 450000, 550000]
     },
     {
       "name": "Tomocoin",

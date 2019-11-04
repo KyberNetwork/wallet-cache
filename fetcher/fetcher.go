@@ -42,8 +42,6 @@ type InfoData struct {
 	BackupTokens map[string]ethereum.Token
 	arrToken     []ethereum.Token
 
-	RateCache []string `json:"rate_cache"`
-
 	mapGoodToken map[string]ethereum.Token
 	mapBadToken  map[string]ethereum.Token
 	//ServerLog ServerLog        `json:"server_logs"`
@@ -686,15 +684,12 @@ func (self *Fetcher) GetStepRate() ([]ethereum.StepRate, error) {
 
 	rateArr := make([]ethereum.StepRate, 0)
 	stepAmount := map[string][]float64{
-		"ETH":  []float64{1, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000},
-		"TUSD": []float64{1, 20000, 40000, 60000, 90000, 120000, 160000, 200000, 250000, 300000, 350000, 450000, 550000},
-		"BAT":  []float64{1, 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000, 1500000},
-		"DAI":  []float64{1, 100000, 200000},
+		"ETH": []float64{1, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000},
 	}
 
-	for _, symbol := range self.info.RateCache {
-		token, err := self.GetTokenBySymbol(symbol)
-		if err != nil {
+	tokens := self.GetListTokenAPI()
+	for _, token := range tokens {
+		if len(token.CacheAmount) == 0 {
 			continue
 		}
 
@@ -702,22 +697,25 @@ func (self *Fetcher) GetStepRate() ([]ethereum.StepRate, error) {
 			sourceArr = append(sourceArr, common.ETHAddr)
 			sourceSymbolArr = append(sourceSymbolArr, "ETH")
 			destArr = append(destArr, token.Address)
-			destSymbolArr = append(destSymbolArr, symbol)
+			destSymbolArr = append(destSymbolArr, token.Symbol)
 			amountArr = append(amountArr, common.GetAmountEnableFirstBit(amount, 18))
 
-			rateItem := ethereum.StepRate{"ETH", symbol, 18, token.Decimal, common.ToWei(amount, 18), big.NewInt(0)}
+			rateItem := ethereum.StepRate{"ETH", token.Symbol, 18, token.Decimals, common.ToWei(amount, 18), big.NewInt(0)}
 			rateArr = append(rateArr, rateItem)
 		}
-		for _, amount := range stepAmount[symbol] {
+
+		for _, amount := range token.CacheAmount {
 			sourceArr = append(sourceArr, token.Address)
-			sourceSymbolArr = append(sourceSymbolArr, symbol)
+			sourceSymbolArr = append(sourceSymbolArr, token.Symbol)
 			destArr = append(destArr, common.ETHAddr)
 			destSymbolArr = append(destSymbolArr, "ETH")
-			amountArr = append(amountArr, common.GetAmountEnableFirstBit(amount, token.Decimal))
+			amountArr = append(amountArr, common.GetAmountEnableFirstBit(amount, token.Decimals))
 
-			rateItem := ethereum.StepRate{symbol, "ETH", token.Decimal, 18, common.ToWei(amount, 18), big.NewInt(0)}
+			rateItem := ethereum.StepRate{token.Symbol, "ETH", token.Decimals, 18, common.ToWei(amount, 18), big.NewInt(0)}
+
 			rateArr = append(rateArr, rateItem)
 		}
+
 	}
 
 	// get rate
