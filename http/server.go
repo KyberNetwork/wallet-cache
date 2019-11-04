@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	core "github.com/KyberNetwork/server-go/core"
 	"github.com/KyberNetwork/server-go/fetcher"
 	persister "github.com/KyberNetwork/server-go/persister"
-	core "github.com/KyberNetwork/server-go/core"
 	raven "github.com/getsentry/raven-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sentry"
@@ -22,7 +22,7 @@ const (
 type HTTPServer struct {
 	fetcher   *fetcher.Fetcher
 	persister persister.Persister
-	core *core.Core
+	core      *core.Core
 	host      string
 	r         *gin.Engine
 }
@@ -210,7 +210,7 @@ func (self *HTTPServer) GetUserInfo(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetSourceAmount(c *gin.Context){
+func (self *HTTPServer) GetSourceAmount(c *gin.Context) {
 	src := c.Query("source")
 	dest := c.Query("dest")
 	destAmount := c.Query("destAmount")
@@ -277,6 +277,6 @@ func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.
 	r.Use(cors.Default())
 
 	return &HTTPServer{
-		fetcher, persister, core , host, r,
+		fetcher, persister, core, host, r,
 	}
 }

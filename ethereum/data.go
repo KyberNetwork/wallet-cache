@@ -52,13 +52,14 @@ type Token struct {
 }
 
 type TokenAPI struct {
-	Symbol      string `json:"symbol"`
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	Decimals    int    `json:"decimals"`
-	UsdID       string `json:"cmc_id"`
-	TimeListing uint64 `json:"listing_time,omitempty"`
-	CGId        string `json:"cg_id"`
+	Symbol      string    `json:"symbol"`
+	Name        string    `json:"name"`
+	Address     string    `json:"address"`
+	Decimals    int       `json:"decimals"`
+	UsdID       string    `json:"cmc_id"`
+	TimeListing uint64    `json:"listing_time,omitempty"`
+	CGId        string    `json:"cg_id"`
+	CacheAmount []float64 `json:"cache_amount"`
 	// DelistTime  uint64 `json:"delist_time,omitempty"`
 }
 
