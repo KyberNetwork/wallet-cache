@@ -570,11 +570,14 @@ func (self *Fetcher) makeDataGetRate(listTokens map[string]ethereum.Token, rates
 }
 
 func (self *Fetcher) runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbolArr []string, amountArr []*big.Int) ([]ethereum.Rate, error) {
-	dataAbi, err := self.ethereum.EncodeRateDataWrapper(sourceArr, destArr, amountArr)
-	if err != nil {
-		log.Print(err)
-		return nil, err
+	return self.getRecursiveRates(sourceArr, destArr, sourceSymbolArr, destSymbolArr, amountArr), nil
+}
+
+func (self *Fetcher) getRecursiveRates(sourceArr, destArr, sourceSymbolArr, destSymbolArr []string, amountArr []*big.Int) []ethereum.Rate {
+	if len(sourceArr) == 0 {
+		return []ethereum.Rate{}
 	}
+	dataAbi, _ := self.ethereum.EncodeRateDataWrapper(sourceArr, destArr, amountArr)
 
 	for _, fetIns := range self.fetIns {
 		result, err := fetIns.GetRate(self.info.Wapper, dataAbi)
@@ -587,9 +590,30 @@ func (self *Fetcher) runFetchRate(sourceArr, destArr, sourceSymbolArr, destSymbo
 			log.Print(err)
 			continue
 		}
-		return rates, nil
+		return rates
 	}
-	return nil, errors.New("Cannot get rate")
+	// divide rates
+	seperator := len(sourceArr) / 2
+
+	sourceArrLeft := sourceArr[seperator:]
+	destArrLeft := destArr[seperator:]
+	sourceSymbolArrLeft := sourceSymbolArr[seperator:]
+	destSymbolArrLeft := destSymbolArr[seperator:]
+	amountArrLeft := amountArr[seperator:]
+
+	ratesLeft := self.getRecursiveRates(sourceArrLeft, destArrLeft, sourceSymbolArrLeft, destSymbolArrLeft, amountArrLeft)
+
+	sourceArrRight := sourceArr[:seperator]
+	destArrRight := destArr[:seperator]
+	sourceSymbolArrRight := sourceSymbolArr[:seperator]
+	destSymbolArrRight := destSymbolArr[:seperator]
+	amountArrRight := amountArr[:seperator]
+
+	ratesRight := self.getRecursiveRates(sourceArrRight, destArrRight, sourceSymbolArrRight, destSymbolArrRight, amountArrRight)
+
+	rates := append(ratesLeft, ratesRight...)
+	return rates
+
 }
 
 func (self *Fetcher) GetLatestBlock() (string, error) {
