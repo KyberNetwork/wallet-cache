@@ -104,8 +104,10 @@ func main() {
 	runFetchData(persisterIns, boltIns, fetchRate7dData, fertcherIns, 300)
 
 	go fetchRate(persisterIns, fertcherIns)
-	go fetchRateWithFallback(persisterIns, fertcherIns)
-	go runUpdateTokenStatus(fertcherIns)
+
+	// go fetchRate(persisterIns, fertcherIns)
+	// go fetchRateWithFallback(persisterIns, fertcherIns)
+	// go runUpdateTokenStatus(fertcherIns)
 
 	//run server
 	coreIns, _ := core.NewCore(fertcherIns, persisterIns)
@@ -232,52 +234,22 @@ func makeMapRate(rates []ethereum.Rate) map[string]ethereum.Rate {
 }
 
 func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
-	const timewait = 3 * time.Second
+	ticker := time.NewTicker(15 * time.Second)
 	for {
 		var result []ethereum.Rate
-		currentRate := persister.GetRate()
-		mapGoodToken := fetcher.GetMapGoodToken()
-		mapBadToken := fetcher.GetMapBadToken()
-		rates, err := fetcher.GetRate(currentRate, persister.GetIsNewRate(), mapGoodToken, false)
+
+		result, err := fetcher.FetchRate()
 		if err != nil {
 			log.Print(err)
 			persister.SetIsNewRate(false)
-			time.Sleep(timewait)
+			<-ticker.C
 			continue
 		}
-		mapRate := makeMapRate(rates)
-		for _, cr := range currentRate {
-			keyRate := fmt.Sprintf("%s_%s", cr.Source, cr.Dest)
-			if r, ok := mapRate[keyRate]; ok {
-				result = append(result, r)
-				if keyRate != "ETH_ETH" {
-					delete(mapRate, keyRate)
-				}
-			} else {
-				switch len(mapBadToken) == 0 {
-				case true:
-					continue
-				default:
-					tokenID := cr.Source
-					if cr.Dest != common.ETHSymbol {
-						tokenID = cr.Dest
-					}
-					if _, ok := mapBadToken[tokenID]; ok {
-						result = append(result, cr)
-					}
-				}
-			}
-		}
-		// add new token to current rate
-		if len(mapRate) > 1 {
-			for _, r := range mapRate {
-				result = append(result, r)
-			}
-		}
+
 		timeNow := time.Now().UTC().Unix()
 		persister.SaveRate(result, timeNow)
 		persister.SetIsNewRate(true)
-		time.Sleep(timewait)
+		<-ticker.C
 	}
 }
 

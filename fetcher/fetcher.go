@@ -774,3 +774,7 @@ func (self *Fetcher) GetTokenBySymbol(symbol string) (*ethereum.Token, error) {
 	log.Println(err)
 	return nil, err
 }
+
+func (self *Fetcher) FetchRate() ([]ethereum.Rate, error) {
+	return self.httpFetcher.GetRate()
+}

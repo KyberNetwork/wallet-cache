@@ -152,3 +152,86 @@ func (self *HTTPFetcher) GetRateUsdEther() (string, error) {
 	}
 	return ethPrice, nil
 }
+
+type TokenRate struct {
+	Address string  `json:"token_address"`
+	Symbol  string  `json:"token_symbol"`
+	RateEth float64 `json:"rate_eth_now"`
+}
+
+// GetRateUsdEther get usd from api
+func (self *HTTPFetcher) GetRate() ([]ethereum.Rate, error) {
+
+	url := fmt.Sprintf("%s/change24h", self.apiEndpoint)
+	b, err := fCommon.HTTPCall(url)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	tokenRate := make(map[string]TokenRate)
+	err = json.Unmarshal(b, &tokenRate)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	rates := make([]ethereum.Rate, 0)
+
+	rates = append(rates, ethereum.Rate{
+		Source:  "ETH",
+		Dest:    "ETH",
+		Rate:    "0",
+		Minrate: "0",
+	})
+
+	for _, rate := range tokenRate {
+		rates = append(rates, getRateBuy(rate))
+		rates = append(rates, getRateSell(rate))
+	}
+
+	return rates, nil
+}
+
+func getRateBuy(rate TokenRate) ethereum.Rate {
+	if rate.RateEth == 0 {
+		return ethereum.Rate{
+			Source:  "ETH",
+			Dest:    rate.Symbol,
+			Rate:    "0",
+			Minrate: "0",
+		}
+	}
+	rateSell := 1 / rate.RateEth
+	minRate := rateSell * 0.97
+
+	rateBig := common.ToWei(rateSell, 18)
+	minRateBig := common.ToWei(minRate, 18)
+
+	return ethereum.Rate{
+		Source:  "ETH",
+		Dest:    rate.Symbol,
+		Rate:    rateBig.String(),
+		Minrate: minRateBig.String(),
+	}
+}
+
+func getRateSell(rate TokenRate) ethereum.Rate {
+	if rate.RateEth == 0 {
+		return ethereum.Rate{
+			Source:  rate.Symbol,
+			Dest:    "ETH",
+			Rate:    "0",
+			Minrate: "0",
+		}
+	}
+
+	rateBig := common.ToWei(rate.RateEth, 18)
+	minRateBig := common.ToWei(rate.RateEth*0.97, 18)
+
+	return ethereum.Rate{
+		Source:  rate.Symbol,
+		Dest:    "ETH",
+		Rate:    rateBig.String(),
+		Minrate: minRateBig.String(),
+	}
+}
