@@ -154,84 +154,105 @@ func (self *HTTPFetcher) GetRateUsdEther() (string, error) {
 }
 
 type TokenRate struct {
-	Address string  `json:"token_address"`
-	Symbol  string  `json:"token_symbol"`
-	RateEth float64 `json:"rate_eth_now"`
+	BaseSymbol  string  `json:"base_symbol"`
+	QuoteSymbol string  `json:"quote_symbol"`
+	RateSell    float64 `json:"current_bid"`
+	RateBuy     float64 `json:"current_ask"`
+}
+
+type MarketData struct {
+	Data []TokenRate `json:"data"`
+	Err  bool        `json:"error"`
 }
 
 // GetRateUsdEther get usd from api
 func (self *HTTPFetcher) GetRate() ([]ethereum.Rate, error) {
 
-	url := fmt.Sprintf("%s/change24h", self.apiEndpoint)
+	url := fmt.Sprintf("%s/market", self.apiEndpoint)
 	b, err := fCommon.HTTPCall(url)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
-	tokenRate := make(map[string]TokenRate)
+	tokenRate := MarketData{}
 	err = json.Unmarshal(b, &tokenRate)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	rates := make([]ethereum.Rate, 0)
+	if !tokenRate.Err {
+		rates := make([]ethereum.Rate, 0)
 
-	rates = append(rates, ethereum.Rate{
-		Source:  "ETH",
-		Dest:    "ETH",
-		Rate:    "0",
-		Minrate: "0",
-	})
+		for _, rate := range tokenRate.Data {
+			rates = append(rates, getRateBuy(rate))
+			rates = append(rates, getRateSell(rate))
+		}
 
-	for _, rate := range tokenRate {
-		rates = append(rates, getRateBuy(rate))
-		rates = append(rates, getRateSell(rate))
+		return rates, nil
 	}
 
-	return rates, nil
+	return nil, errors.New("Cannot get rate")
 }
 
 func getRateBuy(rate TokenRate) ethereum.Rate {
-	if rate.RateEth == 0 {
+	if rate.RateBuy == 0 {
 		return ethereum.Rate{
-			Source:  "ETH",
-			Dest:    rate.Symbol,
+			Source:  rate.QuoteSymbol,
+			Dest:    rate.BaseSymbol,
 			Rate:    "0",
 			Minrate: "0",
 		}
 	}
-	rateSell := 1 / rate.RateEth
-	minRate := rateSell * 0.97
+	rateBuy := 1 / rate.RateBuy
+	minRate := rateBuy * 0.97
 
-	rateBig := common.ToWei(rateSell, 18)
+	rateBig := common.ToWei(rateBuy, 18)
 	minRateBig := common.ToWei(minRate, 18)
 
 	return ethereum.Rate{
-		Source:  "ETH",
-		Dest:    rate.Symbol,
+		Source:  rate.QuoteSymbol,
+		Dest:    rate.BaseSymbol,
 		Rate:    rateBig.String(),
 		Minrate: minRateBig.String(),
 	}
 }
 
 func getRateSell(rate TokenRate) ethereum.Rate {
-	if rate.RateEth == 0 {
-		return ethereum.Rate{
-			Source:  rate.Symbol,
-			Dest:    "ETH",
-			Rate:    "0",
-			Minrate: "0",
-		}
-	}
-
-	rateBig := common.ToWei(rate.RateEth, 18)
-	minRateBig := common.ToWei(rate.RateEth*0.97, 18)
+	rateBig := common.ToWei(rate.RateSell, 18)
+	minRateBig := common.ToWei(rate.RateSell*0.97, 18)
 
 	return ethereum.Rate{
-		Source:  rate.Symbol,
-		Dest:    "ETH",
+		Source:  rate.BaseSymbol,
+		Dest:    rate.QuoteSymbol,
 		Rate:    rateBig.String(),
 		Minrate: minRateBig.String(),
 	}
+}
+
+type QuoteData struct {
+	Data string `json:"data"`
+	Err  bool   `json:"error"`
+}
+
+func (self *HTTPFetcher) GetQuoteAmount(quote string, base string, baseAmount string, typeQ string) (string, error) {
+	url := fmt.Sprintf("%s/quote_amount?base=%s&quote=%s&base_amount=%s&type=%s", self.apiEndpoint, base, quote, baseAmount, typeQ)
+	b, err := fCommon.HTTPCall(url)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+
+	quoteData := QuoteData{}
+	err = json.Unmarshal(b, &quoteData)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	if !quoteData.Err {
+		return quoteData.Data, nil
+	}
+
+	return "", errors.New("Cannot get quote data")
 }

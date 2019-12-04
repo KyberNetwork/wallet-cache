@@ -6,5 +6,3 @@ services:
       - env_ropsten.env
     ports:
       - "3001:3001"
-    volumes:
-      - "./db:/go/src/github.com/KyberNetwork/server-go/persister/db"
