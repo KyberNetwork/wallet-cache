@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	core "github.com/KyberNetwork/server-go/core"
 	"github.com/KyberNetwork/server-go/fetcher"
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
@@ -22,7 +21,6 @@ const (
 type HTTPServer struct {
 	fetcher   *fetcher.Fetcher
 	persister persister.Persister
-	core      *core.Core
 	host      string
 	r         *gin.Engine
 }
@@ -155,37 +153,6 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
-	data := self.persister.GetRightMarketData()
-	if self.persister.GetIsNewMarketInfo() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": true, "data": data, "status": "latest"},
-		)
-		return
-	}
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": data, "status": "old"},
-	)
-}
-
-func (self *HTTPServer) GetLast7D(c *gin.Context) {
-	listTokens := c.Query("listToken")
-	data := self.persister.GetLast7D(listTokens)
-	if self.persister.GetIsNewTrackerData() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": true, "data": data, "status": "latest"},
-		)
-		return
-	}
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": data, "status": "old"},
-	)
-}
-
 func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 	timeRun := self.persister.GetTimeVersion()
 	c.JSON(
@@ -214,7 +181,7 @@ func (self *HTTPServer) GetSourceAmount(c *gin.Context) {
 	src := c.Query("source")
 	dest := c.Query("dest")
 	destAmount := c.Query("destAmount")
-	srcAmount, err := self.core.GetSourceAmount(src, dest, destAmount)
+	srcAmount, err := self.fetcher.GetSourceAmount(src, dest, destAmount)
 
 	if err != nil {
 		c.JSON(
@@ -249,12 +216,6 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/getGasPrice", self.GetGasPrice)
 	self.r.GET("/gasPrice", self.GetGasPrice)
 
-	self.r.GET("/getRightMarketInfo", self.GetRightMarketInfo)
-	self.r.GET("/marketInfo", self.GetRightMarketInfo)
-
-	self.r.GET("/getLast7D", self.GetLast7D)
-	self.r.GET("/last7D", self.GetLast7D)
-
 	self.r.GET("/getRateETH", self.GetRateETH)
 	self.r.GET("/rateETH", self.GetRateETH)
 
@@ -271,12 +232,12 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.Run(self.host)
 }
 
-func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher, core *core.Core) *HTTPServer {
+func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
 	r.Use(cors.Default())
 
 	return &HTTPServer{
-		fetcher, persister, core, host, r,
+		fetcher, persister, host, r,
 	}
 }
