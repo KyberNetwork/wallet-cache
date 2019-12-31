@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/KyberNetwork/server-go/fetcher"
+	"github.com/KyberNetwork/server-go/node"
 	persister "github.com/KyberNetwork/server-go/persister"
 	raven "github.com/getsentry/raven-go"
 	"github.com/gin-contrib/cors"
@@ -19,6 +20,7 @@ const (
 )
 
 type HTTPServer struct {
+	node      *node.NodeMiddleware
 	fetcher   *fetcher.Fetcher
 	persister persister.Persister
 	host      string
@@ -197,6 +199,11 @@ func (self *HTTPServer) GetSourceAmount(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) PostNodeRequest(c *gin.Context) {
+
+	self.node.HandleNodeRequest(c)
+}
+
 func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/getLatestBlock", self.GetLatestBlock)
 	self.r.GET("/latestBlock", self.GetLatestBlock)
@@ -225,19 +232,21 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/sourceAmount", self.GetSourceAmount)
 
-	if kyberENV != "production" {
-		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
-	}
+	self.r.POST("/node", self.PostNodeRequest)
+
+	// if kyberENV != "production" {
+	// 	self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
+	// }
 
 	self.r.Run(self.host)
 }
 
-func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher) *HTTPServer {
+func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher, node *node.NodeMiddleware) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
 	r.Use(cors.Default())
 
 	return &HTTPServer{
-		fetcher, persister, host, r,
+		node, fetcher, persister, host, r,
 	}
 }
