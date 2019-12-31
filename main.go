@@ -9,6 +9,7 @@ import (
 	"github.com/KyberNetwork/server-go/ethereum"
 	"github.com/KyberNetwork/server-go/fetcher"
 	"github.com/KyberNetwork/server-go/http"
+	"github.com/KyberNetwork/server-go/node"
 	persister "github.com/KyberNetwork/server-go/persister"
 )
 
@@ -23,6 +24,10 @@ func main() {
 	kyberENV := os.Getenv("KYBER_ENV")
 	persisterIns, _ := persister.NewPersister("ram")
 	fertcherIns, err := fetcher.NewFetcher(kyberENV)
+	if err != nil {
+		log.Fatal(err)
+	}
+	nodeMiddleware, err := node.NewNodeMiddleware()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,7 +57,7 @@ func main() {
 
 	go fetchRate(persisterIns, fertcherIns)
 
-	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns)
+	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns, nodeMiddleware)
 	server.Run(kyberENV)
 }
 

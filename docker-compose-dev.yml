@@ -5,6 +5,6 @@ services:
     image: cached-production
     container_name: cached
     env_file:
-      - env_semi_production.env
+      - env_dev.env
     ports:
       - "3001:3001"

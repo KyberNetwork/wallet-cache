@@ -1,8 +1,0 @@
-version: "3"
-services:
-  cached:
-    build: ./
-    env_file:
-      - env_rinkeby.env
-    ports:
-      - "3001:3001"
