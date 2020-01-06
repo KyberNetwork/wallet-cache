@@ -116,7 +116,7 @@ func filterRequest(req *http.Request) error {
 	origin := req.Header.Get("Origin")
 
 	if !InListSubstring(origin, whiteListArr) {
-		return errors.New("Domain is not in the whitelist")
+		return errors.New("Domain is not in the whitelist: " + origin)
 	}
 
 	// check method
