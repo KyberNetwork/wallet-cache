@@ -202,11 +202,8 @@ func (self *HTTPServer) GetSourceAmount(c *gin.Context) {
 
 func (self *HTTPServer) PostNodeRequest(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	// c.Writer.Header().Set("Access-Control-Max-Age", "86400")
-	// c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS,")
-	c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
-	// c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
-	// c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+	c.Writer.Header().Set("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, PATCH, POST, PUT")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with, alchemy-web3-version")
 
 	self.node.HandleNodeRequest(c)
 }
@@ -254,7 +251,9 @@ func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.
 
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowAllOrigins = true
-	corsConfig.AllowHeaders = []string{"*"}
+	corsConfig.AllowMethods = []string{"DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"}
+	corsConfig.AllowHeaders = []string{"accept", "accept-encoding", "authorization", "content-type", "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with", "alchemy-web3-version"}
+	corsConfig.AllowCredentials = true
 
 	corsConfig.MaxAge = 5 * time.Minute
 
