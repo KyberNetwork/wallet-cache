@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/KyberNetwork/server-go/fetcher"
 	"github.com/KyberNetwork/server-go/node"
@@ -200,6 +201,12 @@ func (self *HTTPServer) GetSourceAmount(c *gin.Context) {
 }
 
 func (self *HTTPServer) PostNodeRequest(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	// c.Writer.Header().Set("Access-Control-Max-Age", "86400")
+	// c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS,")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
+	// c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+	// c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	self.node.HandleNodeRequest(c)
 }
@@ -244,7 +251,14 @@ func (self *HTTPServer) Run(kyberENV string) {
 func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher, node *node.NodeMiddleware) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
-	r.Use(cors.Default())
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true
+	corsConfig.AllowHeaders = []string{"*"}
+
+	corsConfig.MaxAge = 5 * time.Minute
+
+	r.Use(cors.New(corsConfig))
 
 	return &HTTPServer{
 		node, fetcher, persister, host, r,
