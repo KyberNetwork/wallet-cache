@@ -18,7 +18,9 @@ type NodeMiddleware struct {
 }
 
 var whiteListArr = []string{"kyberswap.com", "knstats.com"}
-var banMethod = []string{"eth_getBlockByNumber"}
+
+// var banMethod = []string{"eth_getBlockByNumber"}
+var banMethod = []string{}
 
 func NewNodeMiddleware() (*NodeMiddleware, error) {
 	nodeEnpoint := os.Getenv("NODE_ENDPOINT")
