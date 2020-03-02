@@ -13,8 +13,8 @@ import (
 )
 
 type NodeMiddleware struct {
-	client *http.Client
-	url    string
+	client    *http.Client
+	nodeCache *NodeCache
 }
 
 var whiteListArr = []string{"kyberswap.com", "knstats.com"}
@@ -23,10 +23,9 @@ var whiteListArr = []string{"kyberswap.com", "knstats.com"}
 var banMethod = []string{}
 
 func NewNodeMiddleware() (*NodeMiddleware, error) {
-	nodeEnpoint := os.Getenv("NODE_ENDPOINT")
 	return &NodeMiddleware{
-		client: &http.Client{},
-		url:    nodeEnpoint,
+		client:    &http.Client{},
+		nodeCache: NewNodeCache(),
 	}, nil
 }
 
@@ -42,7 +41,7 @@ func (n *NodeMiddleware) HandleNodeRequest(c *gin.Context) {
 		return
 	}
 
-	proxyReq, err := n.cloneRequest(req)
+	respBytes, err := n.nodeCache.HandleRequest(req)
 	if err != nil {
 		log.Print(err)
 		c.JSON(
@@ -52,59 +51,7 @@ func (n *NodeMiddleware) HandleNodeRequest(c *gin.Context) {
 		return
 	}
 
-	// We may want to filter some headers, otherwise we could just use a shallow copy
-	resp, err := n.client.Do(proxyReq)
-	if err != nil {
-		log.Print(err)
-		c.JSON(
-			http.StatusBadGateway,
-			gin.H{"err": err.Error()},
-		)
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Print(err)
-			c.JSON(
-				http.StatusBadGateway,
-				gin.H{"err": err.Error()},
-			)
-			return
-		}
-		c.Writer.Write(bodyBytes)
-		return
-	}
-	c.JSON(
-		resp.StatusCode,
-		gin.H{"err": "Status code is not 200"},
-	)
-
-}
-
-func (n *NodeMiddleware) cloneRequest(req *http.Request) (*http.Request, error) {
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	proxyReq, err := http.NewRequest(req.Method, n.url, bytes.NewReader(body))
-	if err != nil {
-		log.Print(err)
-		return nil, err
-	}
-
-	// proxyReq.Header = make(http.Header)
-	// for h, val := range req.Header {
-	// 	proxyReq.Header[h] = val
-	// }
-	// log.Print(req.Header)
-	proxyReq.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-
-	return proxyReq, nil
+	c.Writer.Write(respBytes)
 }
 
 func filterRequest(req *http.Request) error {
