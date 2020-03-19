@@ -4,10 +4,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/KyberNetwork/server-go/fetcher"
+	"github.com/KyberNetwork/server-go/node"
 	persister "github.com/KyberNetwork/server-go/persister"
-	core "github.com/KyberNetwork/server-go/core"
 	raven "github.com/getsentry/raven-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sentry"
@@ -20,9 +21,9 @@ const (
 )
 
 type HTTPServer struct {
+	node      *node.NodeMiddleware
 	fetcher   *fetcher.Fetcher
 	persister persister.Persister
-	core *core.Core
 	host      string
 	r         *gin.Engine
 }
@@ -155,37 +156,6 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetRightMarketInfo(c *gin.Context) {
-	data := self.persister.GetRightMarketData()
-	if self.persister.GetIsNewMarketInfo() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": true, "data": data, "status": "latest"},
-		)
-		return
-	}
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": data, "status": "old"},
-	)
-}
-
-func (self *HTTPServer) GetLast7D(c *gin.Context) {
-	listTokens := c.Query("listToken")
-	data := self.persister.GetLast7D(listTokens)
-	if self.persister.GetIsNewTrackerData() {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": true, "data": data, "status": "latest"},
-		)
-		return
-	}
-	c.JSON(
-		http.StatusOK,
-		gin.H{"success": true, "data": data, "status": "old"},
-	)
-}
-
 func (self *HTTPServer) getCacheVersion(c *gin.Context) {
 	timeRun := self.persister.GetTimeVersion()
 	c.JSON(
@@ -210,11 +180,11 @@ func (self *HTTPServer) GetUserInfo(c *gin.Context) {
 	)
 }
 
-func (self *HTTPServer) GetSourceAmount(c *gin.Context){
+func (self *HTTPServer) GetSourceAmount(c *gin.Context) {
 	src := c.Query("source")
 	dest := c.Query("dest")
 	destAmount := c.Query("destAmount")
-	srcAmount, err := self.core.GetSourceAmount(src, dest, destAmount)
+	srcAmount, err := self.fetcher.GetSourceAmount(src, dest, destAmount)
 
 	if err != nil {
 		c.JSON(
@@ -228,6 +198,14 @@ func (self *HTTPServer) GetSourceAmount(c *gin.Context){
 		http.StatusOK,
 		gin.H{"success": true, "value": srcAmount},
 	)
+}
+
+func (self *HTTPServer) PostNodeRequest(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Writer.Header().Set("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, PATCH, POST, PUT")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with, alchemy-web3-version")
+
+	self.node.HandleNodeRequest(c)
 }
 
 func (self *HTTPServer) Run(kyberENV string) {
@@ -249,12 +227,6 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.GET("/getGasPrice", self.GetGasPrice)
 	self.r.GET("/gasPrice", self.GetGasPrice)
 
-	self.r.GET("/getRightMarketInfo", self.GetRightMarketInfo)
-	self.r.GET("/marketInfo", self.GetRightMarketInfo)
-
-	self.r.GET("/getLast7D", self.GetLast7D)
-	self.r.GET("/last7D", self.GetLast7D)
-
 	self.r.GET("/getRateETH", self.GetRateETH)
 	self.r.GET("/rateETH", self.GetRateETH)
 
@@ -264,19 +236,30 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/sourceAmount", self.GetSourceAmount)
 
-	if kyberENV != "production" {
-		self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
-	}
+	self.r.POST("/node", self.PostNodeRequest)
+
+	// if kyberENV != "production" {
+	// 	self.r.GET("/9d74529bc6c25401a2f984ccc9b0b2b3", self.GetErrorLog)
+	// }
 
 	self.r.Run(self.host)
 }
 
-func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher, core *core.Core) *HTTPServer {
+func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher, node *node.NodeMiddleware) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
-	r.Use(cors.Default())
+
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowAllOrigins = true
+	corsConfig.AllowMethods = []string{"DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"}
+	corsConfig.AllowHeaders = []string{"accept", "accept-encoding", "authorization", "content-type", "dnt", "origin", "user-agent", "x-csrftoken", "x-requested-with", "alchemy-web3-version"}
+	corsConfig.AllowCredentials = true
+
+	corsConfig.MaxAge = 5 * time.Minute
+
+	r.Use(cors.New(corsConfig))
 
 	return &HTTPServer{
-		fetcher, persister, core , host, r,
+		node, fetcher, persister, host, r,
 	}
 }

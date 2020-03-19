@@ -37,9 +37,6 @@ type Persister interface {
 
 	SaveRate([]ethereum.Rate, int64)
 
-	SaveGeneralInfoTokens(map[string]*ethereum.TokenGeneralInfo)
-	GetTokenInfo() map[string]*ethereum.TokenGeneralInfo
-
 	GetLatestBlock() string
 	GetIsNewLatestBlock() bool
 	SaveLatestBlock(string) error
@@ -50,11 +47,6 @@ type Persister interface {
 	GetIsNewRateUSD() bool
 	SaveRateUSD(string) error
 	SetNewRateUSD(bool)
-
-	// GetRateUSDCG() []RateUSD
-	// GetRateETHCG() string
-	// SetNewRateUSDCG(bool)
-	// GetIsNewRateUSDCG() bool
 
 	SaveKyberEnabled(bool)
 	SetNewKyberEnabled(bool)
@@ -71,26 +63,8 @@ type Persister interface {
 	GetGasPrice() *ethereum.GasPrice
 	GetNewGasPrice() bool
 
-	SaveMarketData(rates map[string]*ethereum.Rates, mapTokenInfo map[string]*ethereum.TokenGeneralInfo, tokens map[string]ethereum.Token)
-	GetRightMarketData() map[string]*ethereum.RightMarketInfo
-	// GetRightMarketDataCG() map[string]*ethereum.RightMarketInfo
-	GetLast7D(listTokens string) map[string][]float64
-	GetIsNewTrackerData() bool
-	SetIsNewTrackerData(isNewTrackerData bool)
-	SetIsNewMarketInfo(isNewMarketInfo bool)
-	GetIsNewMarketInfo() bool
-	// GetIsNewMarketInfoCG() bool
 	GetTimeVersion() string
-
-	IsFailedToFetchTracker() bool
-
-
-	SaveStepRate([]ethereum.StepRate) 
-	ResetStepRate()
-	GetStepRate() []ethereum.StepRate
 }
-
-//var transactionPersistent = models.NewTransactionPersister()
 
 func NewPersister(name string) (Persister, error) {
 	Persister, err := NewRamPersister()

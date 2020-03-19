@@ -25,7 +25,7 @@
   "api_usd": "https://api.coinmarketcap.com",
   "coin_market": ["cmc", "coingecko"],
   "reserve": "0x2c5a182d280eeb5824377b98cd74871f78d6b8bc",
-  "network": "0xc14f34233071543e979f6a79aa272b0ab1b4947d",
+  "network": "0x6326dd73E368c036D4C4997053a021CBc52c7367",
   "wrapper": "0x6172AFC8c00c46E0D07ce3AF203828198194620a",
   "trade_topic": "0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
   "averageBlockTime": 15000,
@@ -64,12 +64,18 @@
       "cg_id": "kyber-network"
     },
     {
-      "name" : "DAI",
-      "symbol": "DAI",
+      "name" : "SAI",
+      "symbol": "SAI",
       "address": "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359",
       "decimals": 18,
-      "cmc_id":"2308",
-      "cg_id": "dai"
+      "cache_amount": [1, 100000, 200000]
+    },
+    {
+      "name" : "DAI",
+      "symbol": "DAI",
+      "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "decimals": 18,
+      "cache_amount": [1, 100000, 200000]
     },
     {
       "name": "OmiseGO",

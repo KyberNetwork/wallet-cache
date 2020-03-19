@@ -1,6 +1,10 @@
 package common
 
-import "github.com/KyberNetwork/server-go/ethereum"
+import (
+	"reflect"
+
+	"github.com/KyberNetwork/server-go/ethereum"
+)
 
 // IsDifferentMapToken compare two map tokens
 func IsDifferentMapToken(mapTokenA, mapTokenB map[string]ethereum.Token) bool {
@@ -9,6 +13,9 @@ func IsDifferentMapToken(mapTokenA, mapTokenB map[string]ethereum.Token) bool {
 	}
 	for t := range mapTokenA {
 		if _, ok := mapTokenB[t]; !ok {
+			return true
+		}
+		if !reflect.DeepEqual(mapTokenA[t], mapTokenB[t]) {
 			return true
 		}
 	}
