@@ -1,17 +1,13 @@
 {
   "connections":[
     {
-      "endPoint": "https://eth-mainnet.alchemyapi.io/jsonrpc/hYvhNnvmAnUIkI7z1r2yTbvXPbMftTli",
+      "endPoint": "https://eth-mainnet.alchemyapi.io/v2/SzkoydhV1A0B-0s73tAANYoU71jriFkE",
       "type": "node"
     },
     {
       "endPoint" : "https://semi-node.kyber.network",
       "type": "node"
-    }, 
-    {
-      "endPoint": "https://mainnet.infura.io/v3/c1d32946e55e45b78c330954cf543fc7",
-      "type": "node"
-    },
+    },     
     {
       "endPoint": "https://api.etherscan.io",
       "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",
