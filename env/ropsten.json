@@ -1,7 +1,7 @@
 {
   "connections":[
     {
-      "endPoint" : "https://ropsten.infura.io/v3/c1d32946e55e45b78c330954cf543fc7",
+      "endPoint" : "https://eth-ropsten.alchemyapi.io/v2/VcqgVMpl-Wr2bYQLOS5uXkZOve81k_Jy",
       "type": "node"
     },
     {
