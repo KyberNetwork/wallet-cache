@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var cacheMethods = []string{"net_listening"}
+var cacheMethods = []string{}
 
 var nodeEndpoint = os.Getenv("NODE_ENDPOINT")
 
