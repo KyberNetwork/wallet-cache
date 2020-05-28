@@ -20,3 +20,12 @@
 .idea/
 
 db/
+
+
+# used by the Makefile
+/build/_workspace/*
+/build/bin/*
+
+
+.DS_Store
+**/.DS_Store

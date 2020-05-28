@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KyberNetwork/server-go/ethereum"
+	"github.com/KyberNetwork/cache/ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

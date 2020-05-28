@@ -5,8 +5,8 @@ import (
 	"errors"
 	"log"
 
-	"github.com/KyberNetwork/server-go/ethereum"
-	fCommon "github.com/KyberNetwork/server-go/fetcher/fetcher-common"
+	"github.com/KyberNetwork/cache/ethereum"
+	fCommon "github.com/KyberNetwork/cache/fetcher/fetcher-common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 )
 

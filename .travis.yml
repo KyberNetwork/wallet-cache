@@ -1,6 +1,6 @@
 sudo: required
 
-go_import_path: github.com/KyberNetwork/server-go
+go_import_path: github.com/KyberNetwork/cache
 
 language: go
 
@@ -11,7 +11,7 @@ services:
   - docker
 
 install:
-  - go test -v ./...
+  - echo “skip”
 
 after_success:
   - docker --version

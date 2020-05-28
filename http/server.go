@@ -4,11 +4,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
-	"github.com/KyberNetwork/server-go/fetcher"
-	"github.com/KyberNetwork/server-go/node"
-	persister "github.com/KyberNetwork/server-go/persister"
+	"github.com/KyberNetwork/cache/fetcher"
+	"github.com/KyberNetwork/cache/node"
+	persister "github.com/KyberNetwork/cache/persister"
+	"github.com/KyberNetwork/cache/refprice"
 	raven "github.com/getsentry/raven-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sentry"
@@ -26,6 +28,7 @@ type HTTPServer struct {
 	persister persister.Persister
 	host      string
 	r         *gin.Engine
+	refPrice  *refprice.RefPrice
 }
 
 func (self *HTTPServer) GetRate(c *gin.Context) {
@@ -200,6 +203,24 @@ func (self *HTTPServer) GetSourceAmount(c *gin.Context) {
 	)
 }
 
+func (self *HTTPServer) GetRefprice(c *gin.Context) {
+	base := c.Query("base")
+	quote := c.Query("quote")
+
+	price, err := self.refPrice.GetRefPrice(strings.ToUpper(base), strings.ToUpper(quote))
+	if err != nil {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"error": err.Error()},
+		)
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"success": true, "value": price},
+	)
+}
+
 func (self *HTTPServer) PostNodeRequest(c *gin.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	c.Writer.Header().Set("Access-Control-Allow-Methods", "DELETE, GET, OPTIONS, PATCH, POST, PUT")
@@ -236,6 +257,8 @@ func (self *HTTPServer) Run(kyberENV string) {
 
 	self.r.GET("/sourceAmount", self.GetSourceAmount)
 
+	self.r.GET("/refprice", self.GetRefprice)
+
 	self.r.POST("/node", self.PostNodeRequest)
 
 	// if kyberENV != "production" {
@@ -259,7 +282,9 @@ func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.
 
 	r.Use(cors.New(corsConfig))
 
+	refPrice := refprice.NewRefPrice()
+
 	return &HTTPServer{
-		node, fetcher, persister, host, r,
+		node, fetcher, persister, host, r, refPrice,
 	}
 }

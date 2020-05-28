@@ -1,7 +1,7 @@
 package persister
 
 import (
-	"github.com/KyberNetwork/server-go/ethereum"
+	"github.com/KyberNetwork/cache/ethereum"
 )
 
 // type Rate struct {

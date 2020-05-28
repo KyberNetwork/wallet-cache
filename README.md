@@ -193,3 +193,16 @@ Response:
   "value": "129808.7692"
 }
 ```
+
+### 13. Get reference price
+`/refprice?base=KNC&quote=ETH`
+
+(GET) Return reference price 
+
+Response:
+```javascript
+{
+  "success": true,
+  "value": "0.0032"
+}
+```

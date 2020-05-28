@@ -1,7 +1,7 @@
 package fetcher
 
 import (
-	bFetcher "github.com/KyberNetwork/server-go/fetcher/blockchain-fetcher"
+	bFetcher "github.com/KyberNetwork/cache/fetcher/blockchain-fetcher"
 )
 
 type RateUSD struct {
