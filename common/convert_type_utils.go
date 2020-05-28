@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/KyberNetwork/server-go/ethereum"
+	"github.com/KyberNetwork/cache/ethereum"
 )
 
 // ArrTokenToMap convert array token to map with key is address

@@ -24,16 +24,22 @@ type JSONRPCMessage struct {
 	Params  []string `json:"params,omitempty"`
 }
 
+type JSONRPCResponse struct {
+	Version string      `json:"jsonrpc,omitempty"`
+	ID      int         `json:"id,omitempty"`
+	Result  interface{} `json:"result,omitempty"`
+}
+
 type NodeCache struct {
 	client        *http.Client
-	cacheResponse map[string][]byte // cache map with key is method name and value is byte response
+	cacheResponse map[string]JSONRPCResponse // cache map with key is method name and value is byte response
 	mu            sync.RWMutex
 }
 
 func NewNodeCache() *NodeCache {
 	nc := &NodeCache{
 		client:        &http.Client{},
-		cacheResponse: make(map[string][]byte),
+		cacheResponse: make(map[string]JSONRPCResponse),
 		mu:            sync.RWMutex{},
 	}
 	go nc.run()
@@ -71,7 +77,14 @@ func (nc *NodeCache) cacheWorker(method string) {
 			continue
 		}
 
-		nc.SetCacheResponse(method, resp)
+		jsonRPCResponse := JSONRPCResponse{}
+		if err := json.Unmarshal(resp, &jsonRPCResponse); err != nil {
+			log.Println(err)
+			<-ticker.C
+			continue
+		}
+
+		nc.SetCacheResponse(method, jsonRPCResponse)
 		<-ticker.C
 	}
 }
@@ -121,20 +134,27 @@ func (nc *NodeCache) makeRequest(method string) (*http.Request, error) {
 }
 
 // SetCacheResponse Save method response to cache
-func (nc *NodeCache) SetCacheResponse(method string, resp []byte) {
+func (nc *NodeCache) SetCacheResponse(method string, message JSONRPCResponse) {
 	nc.mu.Lock()
 	defer nc.mu.Unlock()
-	nc.cacheResponse[method] = resp
+	nc.cacheResponse[method] = message
 }
 
-// GetCacheResponse Get response from cache
-func (nc *NodeCache) GetCacheResponse(method string) []byte {
+// GetCacheResponse Get response from cache, return []byte
+func (nc *NodeCache) GetCacheResponse(message JSONRPCMessage) ([]byte, error) {
 	nc.mu.RLock()
 	defer nc.mu.RUnlock()
-	if v, ok := nc.cacheResponse[method]; ok {
-		return v
+
+	if jsonRPCResponse, ok := nc.cacheResponse[message.Method]; ok {
+		// clone user request ID
+		jsonRPCResponse.ID = message.ID
+		result, err := json.Marshal(jsonRPCResponse)
+		if err != nil {
+			return []byte{}, err
+		}
+		return result, nil
 	}
-	return nil
+	return []byte{}, errors.New(fmt.Sprintf("Method %s is not supported caching", message.Method))
 }
 
 // HandleRequest Handle client request, if method is in cache list then get from cache
@@ -148,7 +168,8 @@ func (nc *NodeCache) HandleRequest(req *http.Request) ([]byte, error) {
 	//get message from request body
 	message := JSONRPCMessage{}
 	if err := json.Unmarshal(body, &message); err == nil {
-		if cacheResp := nc.GetCacheResponse(message.Method); cacheResp != nil {
+		cacheResp, respErr := nc.GetCacheResponse(message)
+		if respErr == nil {
 			return cacheResp, nil
 		}
 	}

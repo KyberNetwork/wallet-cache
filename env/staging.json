@@ -1,13 +1,9 @@
 {
   "connections": [
     {
-      "endPoint" : "https://semi-node.kyber.network",
+      "endPoint" : "https://geth.knstats.com",
       "type": "node"
-    }, 
-    {
-      "endPoint": "https://mainnet.infura.io/v3/c1d32946e55e45b78c330954cf543fc7",
-      "type": "node"
-    },
+    },     
     {
       "endPoint": "https://api.etherscan.io",
       "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",

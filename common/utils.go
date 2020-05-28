@@ -3,7 +3,7 @@ package common
 import (
 	"reflect"
 
-	"github.com/KyberNetwork/server-go/ethereum"
+	"github.com/KyberNetwork/cache/ethereum"
 )
 
 // IsDifferentMapToken compare two map tokens

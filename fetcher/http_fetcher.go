@@ -7,9 +7,9 @@ import (
 	"log"
 	"math/big"
 
-	"github.com/KyberNetwork/server-go/common"
-	"github.com/KyberNetwork/server-go/ethereum"
-	fCommon "github.com/KyberNetwork/server-go/fetcher/fetcher-common"
+	"github.com/KyberNetwork/cache/common"
+	"github.com/KyberNetwork/cache/ethereum"
+	fCommon "github.com/KyberNetwork/cache/fetcher/fetcher-common"
 )
 
 const (
