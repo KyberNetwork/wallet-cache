@@ -1,7 +1,7 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
 FROM golang:1.13 as build-env
-EXPOSE 3001
+
 ENV GO111MODULE=on
 
 RUN  mkdir -p /go/src \
@@ -14,8 +14,21 @@ ENV PATH=$GOPATH/bin:$PATH
 RUN mkdir -p $GOPATH/src/github.com/KyberNetwork/cache 
 ADD . $GOPATH/src/github.com/KyberNetwork/cache
 
-# should be able to build now
+
 WORKDIR $GOPATH/src/github.com/KyberNetwork/cache 
+
+FROM debian:stretch
+RUN apt-get update && \
+    apt install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+COPY --from=build-env /go/bin/cache /wallet-cache
+COPY --from=build-env /go/src/github.com/KyberNetwork/cache/env/ /env/
+
+EXPOSE 3001
+ENV GIN_MODE release
+ENV KYBER_ENV production
+ENV LOG_TO_STDOUT true
+
 # RUN go mod vendor
 RUN make cache
 CMD ["/go/src/github.com/KyberNetwork/cache/build/bin/cache"]

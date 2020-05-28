@@ -5,7 +5,7 @@ go_import_path: github.com/KyberNetwork/cache
 language: go
 
 go:
-  - "1.10.x"
+  - "1.13.6"
 
 services:
   - docker
@@ -15,7 +15,7 @@ install:
 
 after_success:
   - docker --version
-  - docker build -f Dockerfile.next -t kybernetwork/wallet-cache:$TRAVIS_COMMIT .
+  - docker build -f Dockerfile -t kybernetwork/wallet-cache:$TRAVIS_COMMIT .
 
 deploy:
   - provider: script
