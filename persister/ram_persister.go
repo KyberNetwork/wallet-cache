@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/KyberNetwork/server-go/ethereum"
+	"github.com/KyberNetwork/cache/ethereum"
 )
 
 const (

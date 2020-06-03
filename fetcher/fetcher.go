@@ -9,8 +9,8 @@ import (
 
 	"time"
 
-	"github.com/KyberNetwork/server-go/common"
-	"github.com/KyberNetwork/server-go/ethereum"
+	"github.com/KyberNetwork/cache/common"
+	"github.com/KyberNetwork/cache/ethereum"
 )
 
 const (
