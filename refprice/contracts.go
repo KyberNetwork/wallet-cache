@@ -9,10 +9,11 @@ import (
 )
 
 type Contract struct {
-	Base     string
-	Quote    string
-	Multiply *big.Int
-	Address  string
+	Base      string
+	Quote     string
+	ThresHold float64
+	Multiply  *big.Int
+	Address   string
 }
 
 type ContractStorage struct {
@@ -64,9 +65,10 @@ func (s *ContractStorage) GetContract(base string, quote string) Contract {
 }
 
 type ContractRes struct {
-	Address  string    `json:"contractAddress"`
-	Multiply string    `json:"multiply"`
-	Pair     [2]string `json:"pair"`
+	Address   string    `json:"contractAddress"`
+	Multiply  string    `json:"multiply"`
+	ThresHold float64   `json:"threshold"`
+	Pair      [2]string `json:"pair"`
 }
 
 func fetchContractList() ([]Contract, error) {
@@ -86,10 +88,11 @@ func fetchContractList() ([]Contract, error) {
 
 		if n, ok := new(big.Int).SetString(c.Multiply, 10); ok {
 			contracts = append(contracts, Contract{
-				Base:     c.Pair[0],
-				Quote:    c.Pair[1],
-				Multiply: n,
-				Address:  c.Address,
+				Base:      c.Pair[0],
+				Quote:     c.Pair[1],
+				Multiply:  n,
+				ThresHold: c.ThresHold,
+				Address:   c.Address,
 			})
 		}
 	}

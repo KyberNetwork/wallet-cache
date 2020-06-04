@@ -217,7 +217,7 @@ func (self *HTTPServer) GetRefprice(c *gin.Context) {
 	}
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": true, "value": price},
+		gin.H{"success": true, "data": price},
 	)
 }
 
