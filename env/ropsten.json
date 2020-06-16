@@ -11,20 +11,14 @@
     }
   ],
   "api_usd":"https://api.coinmarketcap.com",
-  "coin_market": ["cmc", "coingecko"],
-  "reserve": "0x0fc1cf3e7dd049f7b42e6823164a64f76fc06be0",
-  "network": "0x818E6FECD516Ecc3849DAf6845e3EC868087B755",
-  "wrapper": "0x665d34f192f4940da4e859ff7768c0a80ed3ae10",
-  "trade_topic":"0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
-  "endpoint": "wss://ropsten.infura.io/ws",
+  "coin_market": ["cmc", "coingecko"],  
+  "network": "0xa16fc6e9b5d359797999ada576f7f4a4d57e8f75",
+  "wrapper": "0x665d34f192f4940da4e859ff7768c0a80ed3ae10",  
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
   "api_endpoint":"https://ropsten-api.kyber.network",
   "config_endpoint": "https://ropsten-api.kyber.network/internal/currencies",
   "user_stats_endpoint": "https://dev-users-stats.knstats.com/",
-
-  "can_delete": ["BBO", "COFI", "BITX", "MOC", "MAS"],
-  "rate_cache": [],
 
   "tokens": [
     {

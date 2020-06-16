@@ -27,13 +27,12 @@ type RateWrapper struct {
 type Ethereum struct {
 	network          string
 	networkAbi       abi.ABI
-	tradeTopic       string
 	wrapper          string
 	wrapperAbi       abi.ABI
 	averageBlockTime int64
 }
 
-func NewEthereum(network string, networkAbiStr string, tradeTopic string, wrapper string, wrapperAbiStr string, averageBlockTime int64) (*Ethereum, error) {
+func NewEthereum(network string, networkAbiStr string, wrapper string, wrapperAbiStr string, averageBlockTime int64) (*Ethereum, error) {
 
 	networkAbi, err := abi.JSON(strings.NewReader(networkAbiStr))
 	if err != nil {
@@ -48,7 +47,7 @@ func NewEthereum(network string, networkAbiStr string, tradeTopic string, wrappe
 	}
 
 	ethereum := &Ethereum{
-		network, networkAbi, tradeTopic, wrapper, wrapperAbi, averageBlockTime,
+		network, networkAbi, wrapper, wrapperAbi, averageBlockTime,
 	}
 
 	return ethereum, nil
