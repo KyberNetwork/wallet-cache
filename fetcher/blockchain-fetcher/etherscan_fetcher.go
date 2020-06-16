@@ -74,49 +74,6 @@ func (self *Etherscan) GetLatestBlock() (string, error) {
 	return num.String(), nil
 }
 
-// func (self *Etherscan) GetEvents(fromBlock string, toBlock string, network string, tradeTopic string) (*[]ethereum.EventRaw, error) {
-// 	url := self.url + "/api?module=logs&action=getLogs&fromBlock=" +
-// 		fromBlock + "&toBlock=" + toBlock + "&address=" + network + "&topic0=" +
-// 		tradeTopic + "&apikey=" + self.apiKey
-// 	response, err := http.Get(url)
-// 	if err != nil {
-// 		log.Print(err)
-// 		return nil, err
-// 	}
-// 	if response.StatusCode != 200 {
-// 		return nil, errors.New("Status code is 200")
-// 	}
-
-// 	defer (response.Body).Close()
-// 	b, err := ioutil.ReadAll(response.Body)
-// 	if err != nil {
-// 		log.Print(err)
-// 		return nil, err
-// 	}
-// 	result := ResultEvent{}
-// 	err = json.Unmarshal(b, &result)
-// 	if err != nil {
-// 		log.Print(err)
-// 		return nil, err
-// 	}
-
-// 	return &result.Result, nil
-// }
-
-// func (self *Etherscan) GetRateUsd(tickers []string) ([]io.ReadCloser, error) {
-// 	outPut := make([]io.ReadCloser, 0)
-// 	for _, ticker := range tickers {
-// 		response, err := http.Get("https://api.coinmarketcap.com/v1/ticker/" + ticker)
-// 		if err != nil {
-// 			log.Print(err)
-// 			return nil, err
-// 		}
-// 		outPut = append(outPut, response.Body)
-// 	}
-
-// 	return outPut, nil
-// }
-
 func (self *Etherscan) GetTypeName() string {
 	return self.TypeName
 }
