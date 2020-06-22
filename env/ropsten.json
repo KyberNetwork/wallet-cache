@@ -16,8 +16,8 @@
   "wrapper": "0x665d34f192f4940da4e859ff7768c0a80ed3ae10",  
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
-  "api_endpoint":"https://ropsten-api.kyber.network",
-  "config_endpoint": "https://ropsten-api.kyber.network/internal/currencies",
+  "api_endpoint":"https://dev-api.knstats.com",
+  "config_endpoint": "https://dev-api.knstats.com/internal/currencies",
   "user_stats_endpoint": "https://dev-users-stats.knstats.com/",
 
   "tokens": [
