@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"os"
 
 	"github.com/KyberNetwork/cache/common"
 	"github.com/KyberNetwork/cache/ethereum"
@@ -62,7 +63,7 @@ type GasStation struct {
 }
 
 func (self *HTTPFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	b, err := fCommon.HTTPCall(self.gasStationEndPoint)
+	b, err := fCommon.HTTPCall(self.gasStationEndPoint + "?api-key=" + os.Getenv("GAS_STATION_KEY"))
 	if err != nil {
 		log.Print(err)
 		return nil, err
