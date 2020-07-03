@@ -27,7 +27,7 @@
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
   "api_endpoint":"https://staging-api.knstats.com",
   "config_endpoint": "https://staging-api.knstats.com/internal/currencies",
-  "user_stats_endpoint": "https://staging-users-stats.knstats.com/",  
+  "user_stats_endpoint": "https://users-stats.knstats.com/",  
 
   "tokens": [
     {
