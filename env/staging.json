@@ -22,7 +22,6 @@
   "coin_market": ["cmc", "coingecko"],
   "network": "0xc153eeAD19e0DBbDb3462Dcc2B703cC6D738A37c",
   "wrapper": "0x6172AFC8c00c46E0D07ce3AF203828198194620a",
-  "trade_topic": "0x1849bd6a030a1bca28b83437fd3de96f3d27a5d172fa7e9c78e7b61468928a39",
   "averageBlockTime": 15000,
   "gasstation_endpoint": "https://ethgasstation.info/json/ethgasAPI.json",
   "api_endpoint":"https://staging-api.knstats.com",
