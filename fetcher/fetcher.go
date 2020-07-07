@@ -43,7 +43,6 @@ type InfoData struct {
 
 	Network    string `json:"network"`
 	NetworkAbi string
-	TradeTopic string `json:"trade_topic"`
 
 	Wapper     string `json:"wrapper"`
 	WrapperAbi string
@@ -189,7 +188,7 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 
 	httpFetcher := NewHTTPFetcher(infoData.ConfigEndpoint, infoData.GasStationEndpoint, infoData.APIEndpoint)
 
-	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi, infoData.TradeTopic,
+	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi,
 		infoData.Wapper, infoData.WrapperAbi, infoData.AverageBlockTime)
 	if err != nil {
 		log.Print(err)

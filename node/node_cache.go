@@ -15,8 +15,6 @@ import (
 
 var cacheMethods = []string{"net_listening"}
 
-var nodeEndpoint = os.Getenv("NODE_ENDPOINT")
-
 type JSONRPCMessage struct {
 	Version string   `json:"jsonrpc,omitempty"`
 	ID      int      `json:"id,omitempty"`
@@ -124,7 +122,7 @@ func (nc *NodeCache) makeRequest(method string) (*http.Request, error) {
 	}
 	rbody := bytes.NewReader(paramBytes)
 
-	req, err := http.NewRequest("POST", nodeEndpoint, rbody)
+	req, err := http.NewRequest("POST", os.Getenv("NODE_ENDPOINT"), rbody)
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -194,7 +192,7 @@ func (nc *NodeCache) cloneRequest(req *http.Request) (*http.Request, error) {
 		return nil, err
 	}
 
-	proxyReq, err := http.NewRequest(req.Method, nodeEndpoint, bytes.NewReader(body))
+	proxyReq, err := http.NewRequest(req.Method, os.Getenv("NODE_ENDPOINT"), bytes.NewReader(body))
 	if err != nil {
 		log.Print(err)
 		return nil, err
