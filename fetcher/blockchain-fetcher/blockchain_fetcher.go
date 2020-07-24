@@ -3,10 +3,11 @@ package bfetcher
 import (
 	"context"
 	"log"
+	"math/big"
 	"time"
 
 	// "strconv"
-
+	"github.com/KyberNetwork/cache/ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -67,7 +68,42 @@ func (self *BlockchainFetcher) GetRate(to string, data string) (string, error) {
 	}
 
 	return result, nil
+}
 
+func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), self.timeout)
+	defer cancel()
+	var gasPrice *hexutil.Big
+	err := self.client.CallContext(ctx, &gasPrice, "eth_gasPrice")
+
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
+	gasPriceInt := new(big.Float).SetInt(gasPrice.ToInt())
+	gasPriceWeight := new(big.Int).Exp(big.NewInt(10), big.NewInt(9), nil)
+	gasPriceWeightF := new(big.Float).SetInt(gasPriceWeight)
+
+	gasPriceGwei := new(big.Float).Quo(gasPriceInt, gasPriceWeightF)
+
+	if gasPriceGwei.Cmp(big.NewFloat(1)) < 1 {
+		return &ethereum.GasPrice{
+			Fast:     "1",
+			Standard: "1",
+			Low:      "1",
+			Default:  "1",
+		}, nil
+	}
+
+	gasPriceFast := new(big.Float).Mul(gasPriceGwei, big.NewFloat(1.2))
+
+	return &ethereum.GasPrice{
+		Fast:     gasPriceFast.String(),
+		Standard: gasPriceGwei.String(),
+		Low:      gasPriceGwei.String(),
+		Default:  gasPriceGwei.String(),
+	}, nil
 }
 
 func (self *BlockchainFetcher) GetLatestBlock() (string, error) {

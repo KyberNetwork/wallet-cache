@@ -273,10 +273,21 @@ func (self *Fetcher) GetRateUsdEther() (string, error) {
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	result, err := self.httpFetcher.GetGasPrice()
+	var result *ethereum.GasPrice
+	var err error
+
+	result, err = self.httpFetcher.GetGasPrice()
 	if err != nil {
 		log.Print(err)
-		return nil, errors.New("Cannot get gas price")
+		log.Print("fall back to node")
+
+		for _, fetcherIns := range self.fetIns {
+			result, err = fetcherIns.GetGasPrice()
+			if err == nil {
+				return result, nil
+			}
+		}
+		return nil, errors.New("Cannot get gas price from all node")
 	}
 	return result, nil
 }

@@ -77,3 +77,7 @@ func (self *Etherscan) GetLatestBlock() (string, error) {
 func (self *Etherscan) GetTypeName() string {
 	return self.TypeName
 }
+
+func (self *Etherscan) GetGasPrice() (*ethereum.GasPrice, error) {
+	return nil, errors.New("Cannot get gas price")
+}

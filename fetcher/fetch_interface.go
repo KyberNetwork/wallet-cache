@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"github.com/KyberNetwork/cache/ethereum"
 	bFetcher "github.com/KyberNetwork/cache/fetcher/blockchain-fetcher"
 )
 
@@ -15,7 +16,7 @@ type FetcherInterface interface {
 	// GetEvents(string, string, string, string) (*[]ethereum.EventRaw, error)
 
 	// GetRateUsd([]string) ([]io.ReadCloser, error)
-	// GetGasPrice() (*ethereum.GasPrice, error)
+	GetGasPrice() (*ethereum.GasPrice, error)
 
 	GetTypeName() string
 
