@@ -113,6 +113,7 @@ func (nc *NodeCache) makeRequest(method string) (*http.Request, error) {
 		Version: "2.0",
 		Method:  method,
 		Params:  []string{},
+		ID: 0,
 	}
 
 	paramBytes, err := json.Marshal(params)
