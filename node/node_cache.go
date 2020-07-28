@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var cacheMethods = []string{"net_listening"}
+var cacheMethods = []string{}
 
 type JSONRPCMessage struct {
 	Version string   `json:"jsonrpc,omitempty"`
