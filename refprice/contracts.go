@@ -64,7 +64,7 @@ func (s *ContractStorage) GetContract(base string, quote string) Contract {
 }
 
 type ContractRes struct {
-	Address  string    `json:"contractAddress"`
+	Address  string    `json:"proxyAddress"`
 	Multiply string    `json:"multiply"`
 	Pair     [2]string `json:"pair"`
 }
