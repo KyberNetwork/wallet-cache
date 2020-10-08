@@ -3,6 +3,7 @@ package refprice
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/KyberNetwork/cache/libs/contracts"
 	etherCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -32,7 +33,7 @@ func NewChainlinkFetcher() *ChainlinkFetcher {
 func (f *ChainlinkFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
 	contract := f.storage.GetContract(base, quote)
 	if contract.Address == "" {
-		return nil, errors.New("cannot get chainlink contract")
+		return nil, errors.New(fmt.Sprintf("cannot get chainlink contract for %v_%v", base, quote))
 	}
 
 	price, err := f.fetchPrice(contract.Address)
