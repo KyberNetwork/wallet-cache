@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -37,7 +38,12 @@ func (f *BandchainFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
 	var errMsg = fmt.Sprintf("cannot get price of %v_%v from bandchain", base, quote)
 
 	reqBodyBytes := new(bytes.Buffer)
-	symbols := []string{base, quote}
+	symbols := []string{base}
+
+	if strings.ToUpper(quote) != "USD" {
+		symbols = append(symbols, quote)
+	}
+
 	if err := json.NewEncoder(reqBodyBytes).Encode(bandchainRequestPrices{
 		Symbols: symbols,
 		MinCount: 3,
@@ -72,8 +78,10 @@ func (f *BandchainFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
 	} else {
 		return nil, errors.New(errMsg)
 	}
-	if len(prices) > 1 {
+	if strings.ToUpper(quote) != "USD" && len(prices) > 1 {
 		return new(big.Float).Quo(prices[base], prices[quote]), nil
+	} else {
+		return prices[base], nil
 	}
 	return nil, errors.New(errMsg)
 }

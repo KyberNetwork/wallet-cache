@@ -13,4 +13,14 @@ func TestBandchainFetcher(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, price)
 	log.Println(price)
+
+	price, err = fetcher.GetRefPrice("ETH", "USD")
+	assert.NoError(t, err)
+	assert.NotNil(t, price)
+	log.Println(price)
+
+	price, err = fetcher.GetRefPrice("USD", "ETH")
+	assert.Error(t, err)
+	assert.Nil(t, price)
+	log.Println(price)
 }
