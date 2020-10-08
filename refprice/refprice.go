@@ -15,6 +15,7 @@ type CachePrice struct {
 }
 
 type RefPrice struct {
+	kyberFetcher *KyberFetcher
 	chainlinkFetcher *ChainlinkFetcher
 	bandchainFetcher *BandchainFetcher
 	cache   map[string]CachePrice
@@ -23,6 +24,7 @@ type RefPrice struct {
 
 func NewRefPrice() *RefPrice {
 	return &RefPrice{
+		kyberFetcher: NewKyberFetcher(),
 		chainlinkFetcher: NewChainlinkFetcher(),
 		bandchainFetcher: NewBandchainFetcher(),
 		cache:   make(map[string]CachePrice),
@@ -30,7 +32,7 @@ func NewRefPrice() *RefPrice {
 	}
 }
 
-// GetRefPrice get reference price from multiple sources data (ex: Chainlink, Bandchain)
+// GetRefPrice get reference price from multiple sources data (ex: Kyber, Chainlink, Bandchain)
 func (r *RefPrice) GetRefPrice(base string, quote string) (string, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -44,23 +46,16 @@ func (r *RefPrice) GetRefPrice(base string, quote string) (string, error) {
 	if err != nil {
 		log.Println(err)
 	}
-
 	bandchainPrice, err := r.bandchainFetcher.GetRefPrice(base, quote)
 	if err != nil {
 		log.Println(err)
 	}
-
-	var result = big.NewFloat(0)
-	switch {
-	case chainlinkPrice != nil && bandchainPrice != nil:
-		avgPrice := getAvgPrice([]*big.Float{chainlinkPrice, bandchainPrice})
-		result = avgPrice
-	case chainlinkPrice != nil:
-		result = chainlinkPrice
-	case bandchainPrice != nil:
-		result = bandchainPrice
+	kyberPrice, err := r.kyberFetcher.GetRefPrice(base, quote)
+	if err != nil {
+		log.Println(err)
 	}
 
+	result := getAvgPrice([]*big.Float{chainlinkPrice, bandchainPrice, kyberPrice})
 	r.cache[getKey(base, quote)] = CachePrice{
 		Base: base, Quote: quote, Price: result, Timestamp: time.Now().Unix(),
 	}
@@ -69,15 +64,25 @@ func (r *RefPrice) GetRefPrice(base string, quote string) (string, error) {
 }
 
 func getAvgPrice(prices []*big.Float) *big.Float {
-	var avgPrice = big.NewFloat(0)
+	var (
+		avgPrice = big.NewFloat(0)
+		zero = big.NewFloat(0)
+		counter float64
+	)
 	if len(prices) == 0 {
 		return avgPrice
 	}
 	for _, p := range prices {
-		avgPrice = avgPrice.Add(avgPrice, p)
+		if p != nil && p != zero {
+			avgPrice = avgPrice.Add(avgPrice, p)
+			counter += 1
+		}
 	}
-	lenPrices := big.NewFloat(float64(len(prices)))
-	return new(big.Float).Quo(avgPrice, lenPrices)
+
+	if counter == 0 {
+		return avgPrice
+	}
+	return new(big.Float).Quo(avgPrice, big.NewFloat(counter))
 }
 
 func getKey(base string, quote string) string {
