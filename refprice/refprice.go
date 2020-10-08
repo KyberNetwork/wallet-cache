@@ -73,7 +73,7 @@ func getAvgPrice(prices []*big.Float) *big.Float {
 		return avgPrice
 	}
 	for _, p := range prices {
-		if p != nil && p != zero {
+		if p != nil && p.Cmp(zero) != 0 {
 			avgPrice = avgPrice.Add(avgPrice, p)
 			counter += 1
 		}
