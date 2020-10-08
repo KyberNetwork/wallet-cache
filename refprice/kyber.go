@@ -49,12 +49,23 @@ func (f *KyberFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
 		priceBase, priceQuote *big.Float
 	)
 	if v, ok := mapPrices[strings.ToUpper(base)]; ok {
-		priceBase = big.NewFloat(v.PriceETH)
+		if v.PriceUSD == 0 {
+			return big.NewFloat(0), nil
+		}
+		priceBase = big.NewFloat(v.PriceUSD)
 	} else {
 		return nil, errors.New(errmsg)
 	}
+
+	if strings.ToUpper(quote) == "USD" {
+		return priceBase, nil
+	}
+
 	if v, ok := mapPrices[strings.ToUpper(quote)]; ok {
-		priceQuote = big.NewFloat(v.PriceETH)
+		if v.PriceUSD == 0 {
+			return big.NewFloat(0), nil
+		}
+		priceQuote = big.NewFloat(v.PriceUSD)
 	} else {
 		return nil, errors.New(errmsg)
 	}
