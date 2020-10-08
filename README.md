@@ -198,7 +198,9 @@ Response:
 `/refprice?base=KNC&quote=ETH`
 
 (GET) Return reference price 
-
+Price is the average price from multiple source data (Chainlink, Bandchain, Kyber).
+If Chainlink doesn't have price for requested pair, then final price will be average of Bandchain and Kyber prices.
+If both Chainlink and Bandchain don't have price for requested pair, then final price will be Kyber price.
 Response:
 ```javascript
 {
