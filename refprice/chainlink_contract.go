@@ -8,22 +8,21 @@ import (
 	"time"
 )
 
-type Contract struct {
+type ChainlinkContract struct {
 	Base     string
 	Quote    string
 	Multiply *big.Int
 	Address  string
 }
 
-type ContractStorage struct {
-	contracts []Contract
-
+type ChainlinkContractStorage struct {
+	contracts []ChainlinkContract
 	mu sync.RWMutex
 }
 
-func NewContractStorage() *ContractStorage {
-	s := &ContractStorage{
-		contracts: make([]Contract, 0),
+func NewChainlinkContractStorage() *ChainlinkContractStorage {
+	s := &ChainlinkContractStorage{
+		contracts: make([]ChainlinkContract, 0),
 		mu:        sync.RWMutex{},
 	}
 	go func() {
@@ -42,17 +41,17 @@ func NewContractStorage() *ContractStorage {
 	return s
 }
 
-func (s *ContractStorage) saveContracts(contracts []Contract) {
+func (s *ChainlinkContractStorage) saveContracts(contracts []ChainlinkContract) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	newContracts := make([]Contract, 0)
+	newContracts := make([]ChainlinkContract, 0)
 	for _, c := range contracts {
 		newContracts = append(newContracts, c)
 	}
 	s.contracts = newContracts
 }
 
-func (s *ContractStorage) GetContract(base string, quote string) Contract {
+func (s *ChainlinkContractStorage) GetContract(base string, quote string) ChainlinkContract {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	for _, c := range s.contracts {
@@ -60,7 +59,7 @@ func (s *ContractStorage) GetContract(base string, quote string) Contract {
 			return c
 		}
 	}
-	return Contract{}
+	return ChainlinkContract{}
 }
 
 type ContractRes struct {
@@ -69,7 +68,7 @@ type ContractRes struct {
 	Pair     [2]string `json:"pair"`
 }
 
-func fetchContractList() ([]Contract, error) {
+func fetchContractList() ([]ChainlinkContract, error) {
 	b, err := HTTPCall("https://weiwatchers.com/feeds.json")
 	if err != nil {
 		log.Print(err)
@@ -81,11 +80,11 @@ func fetchContractList() ([]Contract, error) {
 		log.Print(err)
 		return nil, err
 	}
-	contracts := make([]Contract, 0)
+	contracts := make([]ChainlinkContract, 0)
 	for _, c := range result {
 
 		if n, ok := new(big.Int).SetString(c.Multiply, 10); ok {
-			contracts = append(contracts, Contract{
+			contracts = append(contracts, ChainlinkContract{
 				Base:     c.Pair[0],
 				Quote:    c.Pair[1],
 				Multiply: n,
@@ -95,3 +94,4 @@ func fetchContractList() ([]Contract, error) {
 	}
 	return contracts, nil
 }
+

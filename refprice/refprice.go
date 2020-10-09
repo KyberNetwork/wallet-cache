@@ -1,7 +1,7 @@
 package refprice
 
 import (
-	"errors"
+	"log"
 	"math/big"
 	"sync"
 	"time"
@@ -15,21 +15,24 @@ type CachePrice struct {
 }
 
 type RefPrice struct {
-	storage *ContractStorage
+	kyberFetcher *KyberFetcher
+	chainlinkFetcher *ChainlinkFetcher
+	bandchainFetcher *BandchainFetcher
 	cache   map[string]CachePrice
-	fetcher *RefFetcher
 	mu      sync.RWMutex
 }
 
 func NewRefPrice() *RefPrice {
 	return &RefPrice{
-		storage: NewContractStorage(),
+		kyberFetcher: NewKyberFetcher(),
+		chainlinkFetcher: NewChainlinkFetcher(),
+		bandchainFetcher: NewBandchainFetcher(),
 		cache:   make(map[string]CachePrice),
-		fetcher: NewRefFetcher(),
 		mu:      sync.RWMutex{},
 	}
 }
 
+// GetRefPrice get reference price from multiple sources data (ex: Kyber, Chainlink, Bandchain)
 func (r *RefPrice) GetRefPrice(base string, quote string) (string, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -39,33 +42,47 @@ func (r *RefPrice) GetRefPrice(base string, quote string) (string, error) {
 		}
 	}
 
-	// fetch from chain link
-	contract := r.storage.GetContract(base, quote)
-	if contract.Address == "" {
-		return "", errors.New("Cannot get chainlink contract")
-	}
-
-	// get refprice from blockchain
-	price, err := r.fetcher.GetRefPrice(contract.Address)
+	chainlinkPrice, err := r.chainlinkFetcher.GetRefPrice(base, quote)
 	if err != nil {
-		return "", err
+		log.Println(err)
+	}
+	bandchainPrice, err := r.bandchainFetcher.GetRefPrice(base, quote)
+	if err != nil {
+		log.Println(err)
+	}
+	kyberPrice, err := r.kyberFetcher.GetRefPrice(base, quote)
+	if err != nil {
+		log.Println(err)
 	}
 
-	tokenPrice := getTokenPrice(price, contract.Multiply)
-
+	result := getAvgPrice([]*big.Float{chainlinkPrice, bandchainPrice, kyberPrice})
 	r.cache[getKey(base, quote)] = CachePrice{
-		Base: base, Quote: quote, Price: tokenPrice, Timestamp: time.Now().Unix(),
+		Base: base, Quote: quote, Price: result, Timestamp: time.Now().Unix(),
 	}
 
-	return tokenPrice.String(), nil
+	return result.String(), nil
 }
 
-func getTokenPrice(price *big.Int, multiplier *big.Int) *big.Float {
-	priceF := new(big.Float).SetInt(price)
-	mulF := new(big.Float).SetInt(multiplier)
+func getAvgPrice(prices []*big.Float) *big.Float {
+	var (
+		avgPrice = big.NewFloat(0)
+		zero = big.NewFloat(0)
+		counter float64
+	)
+	if len(prices) == 0 {
+		return avgPrice
+	}
+	for _, p := range prices {
+		if p != nil && p.Cmp(zero) != 0 {
+			avgPrice = avgPrice.Add(avgPrice, p)
+			counter += 1
+		}
+	}
 
-	result := new(big.Float).Quo(priceF, mulF)
-	return result
+	if counter == 0 {
+		return avgPrice
+	}
+	return new(big.Float).Quo(avgPrice, big.NewFloat(counter))
 }
 
 func getKey(base string, quote string) string {

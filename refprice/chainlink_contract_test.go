@@ -1,10 +1,9 @@
 package refprice
 
 import (
+	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestFetContractChainLink(t *testing.T) {
@@ -12,3 +11,4 @@ func TestFetContractChainLink(t *testing.T) {
 	assert.Equal(t, nil, err)
 	log.Print(contracts)
 }
+
