@@ -207,7 +207,7 @@ func (self *HTTPServer) GetRefprice(c *gin.Context) {
 	base := c.Query("base")
 	quote := c.Query("quote")
 
-	price, err := self.refPrice.GetRefPrice(strings.ToUpper(base), strings.ToUpper(quote))
+	price, sourceData, err := self.refPrice.GetRefPrice(strings.ToUpper(base), strings.ToUpper(quote))
 	if err != nil {
 		c.JSON(
 			http.StatusOK,
@@ -217,7 +217,7 @@ func (self *HTTPServer) GetRefprice(c *gin.Context) {
 	}
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": true, "value": price},
+		gin.H{"success": true, "value": price, "source_data": sourceData},
 	)
 }
 
