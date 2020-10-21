@@ -1,7 +1,6 @@
 package refprice
 
 import (
-	"log"
 	"math/big"
 	"sync"
 	"time"
@@ -12,6 +11,7 @@ type CachePrice struct {
 	Quote     string
 	Price     *big.Float
 	Timestamp int64
+	SourceData []string
 }
 
 type RefPrice struct {
@@ -33,34 +33,37 @@ func NewRefPrice() *RefPrice {
 }
 
 // GetRefPrice get reference price from multiple sources data (ex: Kyber, Chainlink, Bandchain)
-func (r *RefPrice) GetRefPrice(base string, quote string) (string, error) {
+func (r *RefPrice) GetRefPrice(base string, quote string) (price string, sourceData []string, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if c, ok := r.cache[getKey(base, quote)]; ok {
 		if time.Now().Unix()-c.Timestamp < 120 { //cache 2 minutes
-			return c.Price.String(), nil
+			return c.Price.String(), c.SourceData, nil
 		}
 	}
+	sourceData = make([]string, 0)
 
 	chainlinkPrice, err := r.chainlinkFetcher.GetRefPrice(base, quote)
-	if err != nil {
-		log.Println(err)
+	if err == nil {
+		sourceData = append(sourceData, "ChainLink")
 	}
+
 	bandchainPrice, err := r.bandchainFetcher.GetRefPrice(base, quote)
-	if err != nil {
-		log.Println(err)
+	if err == nil {
+		sourceData = append(sourceData, "BandChain")
 	}
+
 	kyberPrice, err := r.kyberFetcher.GetRefPrice(base, quote)
-	if err != nil {
-		log.Println(err)
+	if err == nil {
+		sourceData = append(sourceData, "KyberNetwork")
 	}
 
 	result := getAvgPrice([]*big.Float{chainlinkPrice, bandchainPrice, kyberPrice})
 	r.cache[getKey(base, quote)] = CachePrice{
-		Base: base, Quote: quote, Price: result, Timestamp: time.Now().Unix(),
+		Base: base, Quote: quote, Price: result, Timestamp: time.Now().Unix(), SourceData: sourceData,
 	}
 
-	return result.String(), nil
+	return result.String(), sourceData, nil
 }
 
 func getAvgPrice(prices []*big.Float) *big.Float {
