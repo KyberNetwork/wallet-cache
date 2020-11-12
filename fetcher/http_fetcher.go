@@ -56,7 +56,7 @@ func (self *HTTPFetcher) GetListToken() ([]ethereum.Token, error) {
 	return data, nil
 }
 
-type GasStation struct {
+type GasOracle struct {
 	Fast     float64 `json:"fast"`
 	Standard float64 `json:"average"`
 	Low      float64 `json:"safeLow"`
@@ -68,7 +68,7 @@ func (self *HTTPFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
 		log.Print(err)
 		return nil, err
 	}
-	var gasPrice GasStation
+	var gasPrice GasOracle
 	err = json.Unmarshal(b, &gasPrice)
 	if err != nil {
 		log.Print(err)

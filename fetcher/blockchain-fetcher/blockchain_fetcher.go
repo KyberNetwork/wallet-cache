@@ -2,6 +2,8 @@ package bfetcher
 
 import (
 	"context"
+	"errors"
+	"github.com/KyberNetwork/cache/ethereum"
 	"log"
 	"time"
 
@@ -90,4 +92,8 @@ type TopicParam struct {
 
 func (self *BlockchainFetcher) GetTypeName() string {
 	return self.TypeName
+}
+
+func (self *BlockchainFetcher) GetGasPrice() (*ethereum.GasPrice, error) {
+	return nil, errors.New("not implemented")
 }
