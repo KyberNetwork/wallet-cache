@@ -3,6 +3,7 @@ package fetcher
 import (
 	"encoding/json"
 	"errors"
+	"github.com/KyberNetwork/cache/fetcher/gas"
 	"io/ioutil"
 	"log"
 	"sync"
@@ -97,6 +98,8 @@ type Fetcher struct {
 	ethereum    *Ethereum
 	fetIns      []FetcherInterface
 	httpFetcher *HTTPFetcher
+
+	gasFetcher []gas.GasFetcher
 }
 
 func (self *Fetcher) GetNumTokens() int {
@@ -186,7 +189,15 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		}
 	}
 
+	// init gas fetchers, orders: etherscan, gasstation, node
+	var gasFetchers = make([]gas.GasFetcher, 0)
+	for i := range fetIns {
+		if fetIns[i].GetTypeName() == "etherscan" {
+			gasFetchers = append(gasFetchers, fetIns[i])
+		}
+	}
 	httpFetcher := NewHTTPFetcher(infoData.ConfigEndpoint, infoData.GasStationEndpoint, infoData.APIEndpoint)
+	gasFetchers = append(gasFetchers, httpFetcher)
 
 	ethereum, err := NewEthereum(infoData.Network, infoData.NetworkAbi,
 		infoData.Wapper, infoData.WrapperAbi, infoData.AverageBlockTime)
@@ -200,6 +211,7 @@ func NewFetcher(kyberENV string) (*Fetcher, error) {
 		ethereum:    ethereum,
 		fetIns:      fetIns,
 		httpFetcher: httpFetcher,
+		gasFetcher: gasFetchers,
 	}
 
 	return fetcher, nil
@@ -273,12 +285,14 @@ func (self *Fetcher) GetRateUsdEther() (string, error) {
 }
 
 func (self *Fetcher) GetGasPrice() (*ethereum.GasPrice, error) {
-	result, err := self.httpFetcher.GetGasPrice()
-	if err != nil {
-		log.Print(err)
-		return nil, errors.New("Cannot get gas price")
+	for _, fetIns := range self.gasFetcher {
+		gasPrice, err := fetIns.GetGasPrice()
+		if err != nil {
+			continue
+		}
+		return gasPrice, nil
 	}
-	return result, nil
+	return nil, nil
 }
 
 func (self *Fetcher) GetMaxGasPrice() (string, error) {
