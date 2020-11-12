@@ -5,7 +5,7 @@
       "type": "node"
     },
     {
-      "endPoint": "https://ropsten.etherscan.io",
+      "endPoint": "https://api-ropsten.etherscan.io",
       "api_key": "D8YAEQ3V4THAPDA9YSB1YGA1QY9KAMHY6M",
       "type": "etherscan"
     }
