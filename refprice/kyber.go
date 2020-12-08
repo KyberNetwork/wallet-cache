@@ -5,11 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"os"
 	"strings"
-)
-
-const (
-	KyberAPIEndpoint = "https://api.kyber.network"
 )
 
 type KyberFetcher struct {}
@@ -32,7 +29,8 @@ type kyberPricesResponse struct {
 }
 
 func (f *KyberFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
-	endpoint := fmt.Sprintf("%v/prices", KyberAPIEndpoint)
+	kyberAPIEndpoint := os.Getenv("KYBER_API_ENDPOINT")
+	endpoint := fmt.Sprintf("%v/prices", kyberAPIEndpoint)
 	errmsg := fmt.Sprintf("cannot get kyber rate for %v_%v", base, quote)
 	b, err := HTTPCall(endpoint)
 	if err != nil {
