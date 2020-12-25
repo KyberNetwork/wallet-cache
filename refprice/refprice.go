@@ -36,6 +36,9 @@ func NewRefPrice() *RefPrice {
 func (r *RefPrice) GetRefPrice(base string, quote string) (price string, sourceData []string, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if base == quote {
+		return "1", []string{"KyberNetwork", "ChainLink", "BandChain"}, nil
+	}
 	if c, ok := r.cache[getKey(base, quote)]; ok {
 		if time.Now().Unix()-c.Timestamp < 120 { //cache 2 minutes
 			return c.Price.String(), c.SourceData, nil
