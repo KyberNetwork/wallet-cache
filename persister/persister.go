@@ -29,7 +29,7 @@ type RateUSD struct {
 	PriceUsd string `json:"price_usd"`
 }
 
-type Persister interface {
+type MemoryPersister interface {
 	GetRate() []ethereum.Rate
 	GetIsNewRate() bool
 	SetIsNewRate(bool)
@@ -66,7 +66,20 @@ type Persister interface {
 	GetTimeVersion() string
 }
 
-func NewPersister(name string) (Persister, error) {
-	Persister, err := NewRamPersister()
-	return Persister, err
+func NewMemoryPersister(name string) (MemoryPersister, error) {
+	return NewRamPersister()
+}
+
+type DiskPersister interface {
+	SaveGasPrice(gasOracle ethereum.GasPrice) error
+	GetWeeklyAverageGasPrice() (float64, error)
+}
+
+func NewDiskPersister(name string) (DiskPersister, error) {
+	switch name {
+	case "leveldb":
+		return NewLeveldbPersister()
+	default:
+		return NewLeveldbPersister()
+	}
 }
