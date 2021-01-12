@@ -32,3 +32,5 @@ db/
 
 /vendor
 /vendor/*
+
+.leveldb-storage
