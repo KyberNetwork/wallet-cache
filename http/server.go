@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,16 +24,17 @@ const (
 )
 
 type HTTPServer struct {
-	node      *node.NodeMiddleware
-	fetcher   *fetcher.Fetcher
-	persister persister.Persister
-	host      string
-	r         *gin.Engine
-	refPrice  *refprice.RefPrice
+	node            *node.NodeMiddleware
+	fetcher         *fetcher.Fetcher
+	memoryPersister persister.MemoryPersister
+	diskPersister   persister.DiskPersister
+	host            string
+	r               *gin.Engine
+	refPrice        *refprice.RefPrice
 }
 
 func (self *HTTPServer) GetRate(c *gin.Context) {
-	isNewRate := self.persister.GetIsNewRate()
+	isNewRate := self.memoryPersister.GetIsNewRate()
 	if isNewRate != true {
 		c.JSON(
 			http.StatusOK,
@@ -41,8 +43,8 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 		return
 	}
 
-	rates := self.persister.GetRate()
-	updateAt := self.persister.GetTimeUpdateRate()
+	rates := self.memoryPersister.GetRate()
+	updateAt := self.memoryPersister.GetTimeUpdateRate()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "updateAt": updateAt, "data": rates},
@@ -50,14 +52,14 @@ func (self *HTTPServer) GetRate(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
-	if !self.persister.GetIsNewLatestBlock() {
+	if !self.memoryPersister.GetIsNewLatestBlock() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
 		)
 		return
 	}
-	blockNum := self.persister.GetLatestBlock()
+	blockNum := self.memoryPersister.GetLatestBlock()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": blockNum},
@@ -65,7 +67,7 @@ func (self *HTTPServer) GetLatestBlock(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetRateUSD(c *gin.Context) {
-	if !self.persister.GetIsNewRateUSD() {
+	if !self.memoryPersister.GetIsNewRateUSD() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -73,7 +75,7 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 		return
 	}
 
-	rates := self.persister.GetRateUSD()
+	rates := self.memoryPersister.GetRateUSD()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": rates},
@@ -81,7 +83,7 @@ func (self *HTTPServer) GetRateUSD(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetRateETH(c *gin.Context) {
-	if !self.persister.GetIsNewRateUSD() {
+	if !self.memoryPersister.GetIsNewRateUSD() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -89,7 +91,7 @@ func (self *HTTPServer) GetRateETH(c *gin.Context) {
 		return
 	}
 
-	ethRate := self.persister.GetRateETH()
+	ethRate := self.memoryPersister.GetRateETH()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": ethRate},
@@ -97,7 +99,7 @@ func (self *HTTPServer) GetRateETH(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetKyberEnabled(c *gin.Context) {
-	if !self.persister.GetNewKyberEnabled() {
+	if !self.memoryPersister.GetNewKyberEnabled() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -105,7 +107,7 @@ func (self *HTTPServer) GetKyberEnabled(c *gin.Context) {
 		return
 	}
 
-	enabled := self.persister.GetKyberEnabled()
+	enabled := self.memoryPersister.GetKyberEnabled()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": enabled},
@@ -113,7 +115,7 @@ func (self *HTTPServer) GetKyberEnabled(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetMaxGasPrice(c *gin.Context) {
-	if !self.persister.GetNewMaxGasPrice() {
+	if !self.memoryPersister.GetNewMaxGasPrice() {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -121,7 +123,7 @@ func (self *HTTPServer) GetMaxGasPrice(c *gin.Context) {
 		return
 	}
 
-	gasPrice := self.persister.GetMaxGasPrice()
+	gasPrice := self.memoryPersister.GetMaxGasPrice()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": gasPrice},
@@ -129,7 +131,15 @@ func (self *HTTPServer) GetMaxGasPrice(c *gin.Context) {
 }
 
 func (self *HTTPServer) GetGasPrice(c *gin.Context) {
-	if !self.persister.GetNewGasPrice() {
+	if !self.memoryPersister.GetNewGasPrice() {
+		c.JSON(
+			http.StatusOK,
+			gin.H{"success": false},
+		)
+		return
+	}
+	weeklyAverage, err := self.diskPersister.GetWeeklyAverageGasPrice()
+	if err != nil {
 		c.JSON(
 			http.StatusOK,
 			gin.H{"success": false},
@@ -137,10 +147,22 @@ func (self *HTTPServer) GetGasPrice(c *gin.Context) {
 		return
 	}
 
-	gasPrice := self.persister.GetGasPrice()
+	gasPrice := self.memoryPersister.GetGasPrice()
+	var response struct {
+		Fast          string `json:"fast"`
+		Standard      string `json:"standard"`
+		Low           string `json:"low"`
+		Default       string `json:"default"`
+		WeeklyAverage string `json:"weekly_average"`
+	}
+	response.Fast = gasPrice.Fast
+	response.Standard = gasPrice.Standard
+	response.Low = gasPrice.Low
+	response.Default = gasPrice.Default
+	response.WeeklyAverage = strconv.FormatFloat(weeklyAverage, 'f', -1, 64)
 	c.JSON(
 		http.StatusOK,
-		gin.H{"success": true, "data": gasPrice},
+		gin.H{"success": true, "data": response},
 	)
 }
 
@@ -160,7 +182,7 @@ func (self *HTTPServer) GetErrorLog(c *gin.Context) {
 }
 
 func (self *HTTPServer) getCacheVersion(c *gin.Context) {
-	timeRun := self.persister.GetTimeVersion()
+	timeRun := self.memoryPersister.GetTimeVersion()
 	c.JSON(
 		http.StatusOK,
 		gin.H{"success": true, "data": timeRun},
@@ -268,7 +290,7 @@ func (self *HTTPServer) Run(kyberENV string) {
 	self.r.Run(self.host)
 }
 
-func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.Fetcher, node *node.NodeMiddleware) *HTTPServer {
+func NewHTTPServer(host string, memoryPersister persister.MemoryPersister, diskPersister persister.DiskPersister, fetcher *fetcher.Fetcher, node *node.NodeMiddleware) *HTTPServer {
 	r := gin.Default()
 	r.Use(sentry.Recovery(raven.DefaultClient, false))
 
@@ -285,6 +307,12 @@ func NewHTTPServer(host string, persister persister.Persister, fetcher *fetcher.
 	refPrice := refprice.NewRefPrice()
 
 	return &HTTPServer{
-		node, fetcher, persister, host, r, refPrice,
+		node:            node,
+		fetcher:         fetcher,
+		memoryPersister: memoryPersister,
+		diskPersister:   diskPersister,
+		host:            host,
+		r:               r,
+		refPrice:        refPrice,
 	}
 }

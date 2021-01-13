@@ -17,7 +17,7 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 )
 
-type fetcherFunc func(persister persister.Persister, fetcher *fetcher.Fetcher)
+type fetcherFunc func(memPersister persister.MemoryPersister, fetcher *fetcher.Fetcher)
 
 func main() {
 	numCPU := runtime.NumCPU()
@@ -47,8 +47,16 @@ func main() {
 
 func cmdMain(ctx *cli.Context) error {
 	kyberENV := os.Getenv("KYBER_ENV")
-	persisterIns, _ := persister.NewPersister("ram")
-	fertcherIns, err := fetcher.NewFetcher(kyberENV)
+	memPersister, err := persister.NewMemoryPersister("ram")
+	if err != nil {
+		log.Fatal(err)
+	}
+	diskPersister, err := persister.NewDiskPersister("leveldb")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fetcherIns, err := fetcher.NewFetcher(kyberENV)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,7 +65,7 @@ func cmdMain(ctx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	err = fertcherIns.TryUpdateListToken()
+	err = fetcherIns.TryUpdateListToken()
 	if err != nil {
 		log.Println(err)
 	}
@@ -66,104 +74,145 @@ func cmdMain(ctx *cli.Context) error {
 	go func() {
 		for {
 			<-tickerUpdateToken.C
-			fertcherIns.TryUpdateListToken()
+			fetcherIns.TryUpdateListToken()
 		}
 	}()
 
 	//run fetch data
-	runFetchData(persisterIns, fetchKyberEnabled, fertcherIns, 10)
-	runFetchData(persisterIns, fetchMaxGasPrice, fertcherIns, 60)
+	runFetchData(memPersister, fetchKyberEnabled, fetcherIns, 10)
+	runFetchData(memPersister, fetchMaxGasPrice, fetcherIns, 60)
+	runFetchData(memPersister, fetchRateUSD, fetcherIns, 300)
+	runFetchData(memPersister, fetchBlockNumber, fetcherIns, 10)
 
-	runFetchData(persisterIns, fetchGasPrice, fertcherIns, 30)
+	go runFetchGasPrice(memPersister, diskPersister, fetcherIns)
+	go fetchRate(memPersister, fetcherIns)
 
-	runFetchData(persisterIns, fetchRateUSD, fertcherIns, 300)
-
-	runFetchData(persisterIns, fetchBlockNumber, fertcherIns, 10)
-
-	go fetchRate(persisterIns, fertcherIns)
-
-	server := http.NewHTTPServer(":3001", persisterIns, fertcherIns, nodeMiddleware)
+	server := http.NewHTTPServer(":3001", memPersister, diskPersister, fetcherIns, nodeMiddleware)
 	server.Run(kyberENV)
 	return nil
 }
 
-func runFetchData(persister persister.Persister, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
+func runFetchData(memPersister persister.MemoryPersister, fn fetcherFunc, fertcherIns *fetcher.Fetcher, interval time.Duration) {
 	ticker := time.NewTicker(interval * time.Second)
 	go func() {
 		for {
-			fn(persister, fertcherIns)
+			fn(memPersister, fertcherIns)
 			<-ticker.C
 		}
 	}()
 }
 
-func fetchGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
+// runFetchGasPrice save to memory each 30 seconds, save to disk each 1 hour
+func runFetchGasPrice(memPersister persister.MemoryPersister, diskPersister persister.DiskPersister, fetcherIns *fetcher.Fetcher) {
+	fastTicker := time.NewTicker(30 * time.Second)
+	defer fastTicker.Stop()
+	slowTicker := time.NewTicker(1 * time.Hour)
+	defer slowTicker.Stop()
+
+	var isNotFirstTime bool
+	for {
+		if !isNotFirstTime {
+			gasPrice, err := fetcherIns.GetGasPrice()
+			if err != nil {
+				log.Println(err)
+				memPersister.SetNewGasPrice(false)
+				continue
+			}
+			memPersister.SaveGasPrice(gasPrice)
+
+			if err := diskPersister.SaveGasPrice(*gasPrice); err != nil {
+				log.Println(err)
+				continue
+			}
+			isNotFirstTime = true
+		}
+		select {
+		case <-fastTicker.C:
+			gasPrice, err := fetcherIns.GetGasPrice()
+			if err != nil {
+				log.Println(err)
+				memPersister.SetNewGasPrice(false)
+				continue
+			}
+
+			memPersister.SaveGasPrice(gasPrice)
+		case <-slowTicker.C:
+			gasPrice := memPersister.GetGasPrice()
+			if err := diskPersister.SaveGasPrice(*gasPrice); err != nil {
+				log.Println(err)
+				continue
+			}
+		}
+	}
+}
+
+func fetchGasPrice(memPersister persister.MemoryPersister, fetcher *fetcher.Fetcher) {
 	gasPrice, err := fetcher.GetGasPrice()
 	if err != nil {
 		log.Print(err)
-		persister.SetNewGasPrice(false)
+		memPersister.SetNewGasPrice(false)
 		return
 	}
-	persister.SaveGasPrice(gasPrice)
+	memPersister.SaveGasPrice(gasPrice)
 }
 
-func fetchMaxGasPrice(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchMaxGasPrice(memPersister persister.MemoryPersister, fetcher *fetcher.Fetcher) {
 	gasPrice, err := fetcher.GetMaxGasPrice()
 	if err != nil {
 		log.Print(err)
-		persister.SetNewMaxGasPrice(false)
+		memPersister.SetNewMaxGasPrice(false)
 		return
 	}
-	persister.SaveMaxGasPrice(gasPrice)
+	memPersister.SaveMaxGasPrice(gasPrice)
 }
 
-func fetchKyberEnabled(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchKyberEnabled(memPersister persister.MemoryPersister, fetcher *fetcher.Fetcher) {
 	enabled, err := fetcher.CheckKyberEnable()
 	if err != nil {
 		log.Print(err)
-		persister.SetNewKyberEnabled(false)
+		memPersister.SetNewKyberEnabled(false)
 		return
 	}
-	persister.SaveKyberEnabled(enabled)
+	memPersister.SaveKyberEnabled(enabled)
 }
 
-func fetchRateUSD(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchRateUSD(memPersister persister.MemoryPersister, fetcher *fetcher.Fetcher) {
 	rateUSD, err := fetcher.GetRateUsdEther()
 	if err != nil {
 		log.Print(err)
-		persister.SetNewRateUSD(false)
+		memPersister.SetNewRateUSD(false)
 		return
 	}
 
 	if rateUSD == "" {
-		persister.SetNewRateUSD(false)
+		memPersister.SetNewRateUSD(false)
 		return
 	}
 
-	err = persister.SaveRateUSD(rateUSD)
+	err = memPersister.SaveRateUSD(rateUSD)
 	if err != nil {
 		log.Print(err)
-		persister.SetNewRateUSD(false)
+		memPersister.SetNewRateUSD(false)
 		return
 	}
 }
 
-func fetchBlockNumber(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchBlockNumber(memPersister persister.MemoryPersister, fetcher *fetcher.Fetcher) {
 	blockNum, err := fetcher.GetLatestBlock()
 	if err != nil {
 		log.Print(err)
-		persister.SetNewLatestBlock(false)
+		memPersister.SetNewLatestBlock(false)
 		return
 	}
-	err = persister.SaveLatestBlock(blockNum)
+	err = memPersister.SaveLatestBlock(blockNum)
 	if err != nil {
-		persister.SetNewLatestBlock(false)
+		memPersister.SetNewLatestBlock(false)
 		log.Print(err)
 		return
 	}
 }
 
-func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
+func fetchRate(memPersister persister.MemoryPersister, fetcher *fetcher.Fetcher) {
 	ticker := time.NewTicker(15 * time.Second)
 	for {
 		var result []ethereum.Rate
@@ -171,14 +220,14 @@ func fetchRate(persister persister.Persister, fetcher *fetcher.Fetcher) {
 		result, err := fetcher.FetchRate()
 		if err != nil {
 			log.Print(err)
-			persister.SetIsNewRate(false)
+			memPersister.SetIsNewRate(false)
 			<-ticker.C
 			continue
 		}
 
 		timeNow := time.Now().UTC().Unix()
-		persister.SaveRate(result, timeNow)
-		persister.SetIsNewRate(true)
+		memPersister.SaveRate(result, timeNow)
+		memPersister.SetIsNewRate(true)
 		<-ticker.C
 	}
 }
