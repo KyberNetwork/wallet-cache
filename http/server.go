@@ -138,15 +138,7 @@ func (self *HTTPServer) GetGasPrice(c *gin.Context) {
 		)
 		return
 	}
-	weeklyAverage, err := self.diskPersister.GetWeeklyAverageGasPrice()
-	if err != nil {
-		c.JSON(
-			http.StatusOK,
-			gin.H{"success": false},
-		)
-		return
-	}
-
+	weeklyAverage := self.memoryPersister.GetWeeklyAverageGasPrice()
 	gasPrice := self.memoryPersister.GetGasPrice()
 	var response struct {
 		Fast          string `json:"fast"`

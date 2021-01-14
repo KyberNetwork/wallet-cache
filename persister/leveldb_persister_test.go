@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 )
 
 type LeveldbPersisterTestSuite struct {
@@ -43,48 +44,42 @@ func (ts *LeveldbPersisterTestSuite) TearDownSuite() {
 	}
 }
 
-func (ts *LeveldbPersisterTestSuite) TestSaveGasPrice() {
+func (ts *LeveldbPersisterTestSuite) TestSaveWeeklyGasPrice() {
 	assert := ts.Assert()
-	gasOracle := ethereum.GasPrice{
+	var (
+		gasPrices = make(map[int64]ethereum.GasPrice)
+	)
+	gasPrices[time.Now().UnixNano()/1000] = ethereum.GasPrice{
 		Fast:     "100",
 		Standard: "80",
 		Low:      "30",
 		Default:  "80",
 	}
+	gasPrices[time.Now().UnixNano()/1000+1] = ethereum.GasPrice{
+		Fast:     "60",
+		Standard: "40",
+		Low:      "20",
+		Default:  "40",
+	}
 
-	err := ts.persister.SaveGasPrice(&gasOracle)
+	err := ts.persister.SaveWeeklyGasPrice(gasPrices)
 	assert.NoError(err)
 
-	gasPrices, err := ts.persister.GetPassWeekGasPrice()
+	result, err := ts.persister.GetWeeklyGasPrice()
 	assert.NoError(err)
-	assert.NotNil(gasPrices)
-	assert.Equal(1, len(gasPrices))
+	assert.NotNil(result)
+	assert.Equal(2, len(result))
 
-	log.Println(gasPrices)
+	// test save again, value with existed key will be updated
+	err = ts.persister.SaveWeeklyGasPrice(gasPrices)
+	assert.NoError(err)
+
+	result, err = ts.persister.GetWeeklyGasPrice()
+	assert.NoError(err)
+	assert.NotNil(result)
+	assert.Equal(2, len(result))
+
 	// teardown
 	err = ts.persister.cleanGasPriceStorage()
 	assert.NoError(err)
-}
-
-func (ts *LeveldbPersisterTestSuite) TestGetWeeklyAverageGasPrice() {
-	assert := ts.Assert()
-	var err error
-	err = ts.persister.SaveGasPrice(&ethereum.GasPrice{
-		Fast:     "30",
-		Standard: "20",
-		Low:      "10",
-		Default:  "20",
-	})
-	assert.NoError(err)
-	err = ts.persister.SaveGasPrice(&ethereum.GasPrice{
-		Fast:     "100",
-		Standard: "80",
-		Low:      "60",
-		Default:  "80",
-	})
-	assert.NoError(err)
-
-	averageGas, err := ts.persister.GetWeeklyAverageGasPrice()
-	assert.NoError(err)
-	assert.Equal(float64(50), averageGas)
 }
