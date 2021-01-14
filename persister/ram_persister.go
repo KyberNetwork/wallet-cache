@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"math/big"
 	"sync"
 	"time"
@@ -51,6 +52,8 @@ type RamPersister struct {
 
 	gasPrice      *ethereum.GasPrice
 	isNewGasPrice bool
+
+	weeklyGasPrices map[int64]ethereum.GasPrice
 }
 
 func NewRamPersister() (*RamPersister, error) {
@@ -100,6 +103,7 @@ func NewRamPersister() (*RamPersister, error) {
 		isNewMaxGasPrice:  isNewMaxGasPrice,
 		gasPrice:          &gasPrice,
 		isNewGasPrice:     isNewGasPrice,
+		weeklyGasPrices:   make(map[int64]ethereum.GasPrice),
 	}
 	return persister, nil
 }
@@ -326,8 +330,63 @@ func (self *RamPersister) SetNewLatestBlock(isNew bool) {
 	self.isNewLatestBlock = isNew
 }
 
+func (self *RamPersister) SaveWeeklyGasPrice(gasPrices map[int64]ethereum.GasPrice) {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	self.weeklyGasPrices = gasPrices
+}
+
+func (self *RamPersister) GetWeeklyGasPrice() map[int64]ethereum.GasPrice {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	return self.weeklyGasPrices
+}
+
+func (self *RamPersister) SnapshotWeeklyGasPrice() {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+	now := time.Now()
+	timestamp := now.UnixNano() / 1000
+	self.weeklyGasPrices[timestamp] = *self.gasPrice
+
+	start := now.Add(-168 * time.Hour)
+	for t := range self.weeklyGasPrices {
+		if t < start.UnixNano()/1000 {
+			delete(self.weeklyGasPrices, t)
+		}
+	}
+}
+
+func (self *RamPersister) GetWeeklyAverageGasPrice() float64 {
+	self.mu.RLock()
+	defer self.mu.RUnlock()
+	var (
+		sum, average float64
+	)
+
+	if len(self.weeklyGasPrices) == 0 {
+		return 0
+	}
+	for _, g := range self.weeklyGasPrices {
+		gasModel, err := toGasOracleModel(g)
+		if err != nil {
+			log.Printf("parse gas error: %v", err.Error())
+			return 0
+		}
+		sum += (gasModel.Fast + gasModel.Standard + gasModel.Low) / 3
+	}
+	average = sum / float64(len(self.weeklyGasPrices))
+	return math.Floor(average)
+}
+
 func (self *RamPersister) GetTimeVersion() string {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 	return self.timeRun
+}
+
+func (self *RamPersister) CleanOldGasPrices() {
+	self.mu.Lock()
+	defer self.mu.Unlock()
+
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	leveldbUtil "github.com/syndtr/goleveldb/leveldb/util"
 	"log"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -48,33 +47,6 @@ func (p *LeveldbPersister) intervalCleanGasPriceStorage() {
 	}
 }
 
-func (p *LeveldbPersister) SaveGasPrice(gasOracle ethereum.GasPrice) error {
-	key := fmt.Sprintf("gas_oracle_%v", time.Now().UnixNano()/1000)
-
-	encodedKey, err := Encode(key)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	record, err := toGasOracleModel(gasOracle)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
-	encodedValue, err := Encode(record)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	if err := p.db.Put(encodedKey, encodedValue, nil); err != nil {
-		log.Println(err)
-		return err
-	}
-	return nil
-}
-
 func (p *LeveldbPersister) cleanGasPriceStorage() error {
 	now := time.Now()
 	end := now.Add(-168 * time.Hour) // pass 1 week
@@ -108,7 +80,7 @@ func (p *LeveldbPersister) cleanGasPriceStorage() error {
 	return nil
 }
 
-func (p *LeveldbPersister) GetPassWeekGasPrice() ([]GasOracleModel, error) {
+func (p *LeveldbPersister) GetWeeklyGasPrice() (map[int64]ethereum.GasPrice, error) {
 	now := time.Now()
 	start := now.Add(-168 * time.Hour) // pass 1 week
 
@@ -129,7 +101,7 @@ func (p *LeveldbPersister) GetPassWeekGasPrice() ([]GasOracleModel, error) {
 		}
 	}()
 
-	var result = make([]GasOracleModel, 0)
+	var result = make(map[int64]ethereum.GasPrice, 0)
 	for iterator.Next() {
 		var decodedKey string
 		if err := Decode(iterator.Key(), &decodedKey); err != nil {
@@ -146,35 +118,35 @@ func (p *LeveldbPersister) GetPassWeekGasPrice() ([]GasOracleModel, error) {
 			continue
 		}
 
-		var gasOracle GasOracleModel
+		var gasOracle ethereum.GasPrice
 		if err := Decode(iterator.Value(), &gasOracle); err != nil {
 			log.Println(err)
 			return nil, err
 		}
 
-		result = append(result, gasOracle)
+		result[timestamp.UnixNano()/1000] = gasOracle
 	}
 	return result, nil
 }
 
-func (p *LeveldbPersister) GetWeeklyAverageGasPrice() (float64, error) {
-	gasPrices, err := p.GetPassWeekGasPrice()
-	if err != nil {
-		log.Println(err)
-		return 0, err
+func (p *LeveldbPersister) SaveWeeklyGasPrice(gasPrices map[int64]ethereum.GasPrice) error {
+	batch := new(leveldb.Batch)
+	for timestamp, g := range gasPrices {
+		key := fmt.Sprintf("gas_oracle_%v", timestamp)
+		encodedKey, err := Encode(key)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		encodedValue, err := Encode(g)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		batch.Put(encodedKey, encodedValue)
 	}
 
-	var (
-		sum float64
-	)
-	if len(gasPrices) == 0 {
-		return 0, nil
-	}
-	for _, gasPrice := range gasPrices {
-		sum += (gasPrice.Fast + gasPrice.Standard + gasPrice.Low) / float64(3)
-	}
-	average := sum / float64(len(gasPrices))
-	return math.Floor(average), nil
+	return p.db.Write(batch, nil)
 }
 
 func Encode(data interface{}) ([]byte, error) {

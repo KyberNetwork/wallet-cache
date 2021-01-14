@@ -63,6 +63,11 @@ type MemoryPersister interface {
 	GetGasPrice() *ethereum.GasPrice
 	GetNewGasPrice() bool
 
+	SaveWeeklyGasPrice(gasPrices map[int64]ethereum.GasPrice)
+	GetWeeklyGasPrice() map[int64]ethereum.GasPrice
+	GetWeeklyAverageGasPrice() float64
+	SnapshotWeeklyGasPrice()
+
 	GetTimeVersion() string
 }
 
@@ -71,8 +76,8 @@ func NewMemoryPersister(name string) (MemoryPersister, error) {
 }
 
 type DiskPersister interface {
-	SaveGasPrice(gasOracle ethereum.GasPrice) error
-	GetWeeklyAverageGasPrice() (float64, error)
+	GetWeeklyGasPrice() (map[int64]ethereum.GasPrice, error)
+	SaveWeeklyGasPrice(gasPrices map[int64]ethereum.GasPrice) error
 }
 
 func NewDiskPersister(name string) (DiskPersister, error) {
