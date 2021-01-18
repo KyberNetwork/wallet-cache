@@ -8,13 +8,16 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
 const (
-	ENDPOINT = "https://poa-api.bandchain.org/oracle/request_prices"
+	ENDPOINT = "http://kyber-rpc.bandchain.org/oracle/request_prices"
+	BandchainMinCount = 10
+	BandchainAskCount = 16
 )
 
 type BandchainFetcher struct {
@@ -32,6 +35,10 @@ type bandchainRequestPrices struct {
 }
 
 func (f *BandchainFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
+	kyberEnv := os.Getenv("KYBER_ENV")
+	if kyberEnv != "production" {
+		return nil, errors.New(fmt.Sprintf("cannot get price from bandchain for env %v", kyberEnv))
+	}
 	client := http.Client{
 		Timeout: 5 * time.Second,
 	}
@@ -46,8 +53,8 @@ func (f *BandchainFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
 
 	if err := json.NewEncoder(reqBodyBytes).Encode(bandchainRequestPrices{
 		Symbols: symbols,
-		MinCount: 3,
-		AskCount: 4},
+		MinCount: BandchainMinCount,
+		AskCount: BandchainAskCount},
 	); err != nil {
 		return nil, err
 	}
