@@ -31,6 +31,10 @@ func NewChainlinkFetcher() *ChainlinkFetcher {
 }
 
 func (f *ChainlinkFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
+	kyberEnv := os.Getenv("KYBER_ENV")
+	if kyberEnv != "production" {
+		return nil, errors.New(fmt.Sprintf("cannot get price from chainlink for env %v", kyberEnv))
+	}
 	contract := f.storage.GetContract(base, quote)
 	if contract.Address == "" {
 		return nil, errors.New(fmt.Sprintf("cannot get chainlink contract for %v_%v", base, quote))

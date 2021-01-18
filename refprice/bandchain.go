@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -32,6 +33,10 @@ type bandchainRequestPrices struct {
 }
 
 func (f *BandchainFetcher) GetRefPrice(base, quote string) (*big.Float, error) {
+	kyberEnv := os.Getenv("KYBER_ENV")
+	if kyberEnv != "production" {
+		return nil, errors.New(fmt.Sprintf("cannot get price from bandchain for env %v", kyberEnv))
+	}
 	client := http.Client{
 		Timeout: 5 * time.Second,
 	}
