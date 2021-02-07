@@ -21,7 +21,7 @@ require (
 	github.com/rs/cors v1.3.0 // indirect
 	github.com/spf13/viper v1.7.1 // indirect
 	github.com/stretchr/testify v1.5.1
-	github.com/syndtr/goleveldb v1.0.0 // indirect
+	github.com/syndtr/goleveldb v1.0.0
 	github.com/ugorji/go v0.0.0-20180112141927-9831f2c3ac10 // indirect
 	go.uber.org/zap v1.16.0 // indirect
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
